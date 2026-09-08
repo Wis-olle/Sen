@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>So sánh font display cho headline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700&family=Handjet:wght,ELGR,ELSH@100..900,1..2,0..16&family=VT323&family=Space+Grotesk:wght@500;700&family=Unbounded:wght@500;700&family=Space+Mono:wght@700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#000;color:#fff;font-family:Inter,system-ui,sans-serif;padding:32px 40px;-webkit-font-smoothing:antialiased}
+  h1{font-size:14px;color:#8e8e8e;font-weight:500;letter-spacing:.02em;text-transform:uppercase;margin-bottom:24px}
+  .row{display:grid;grid-template-columns:220px 1fr;align-items:center;gap:24px;padding:22px 0;border-top:1px solid rgba(255,255,255,.10)}
+  .meta b{display:block;font-size:15px;font-weight:600}
+  .meta span{display:block;font-size:12px;color:#8e8e8e;margin-top:4px;line-height:1.5}
+  .h{font-size:64px;line-height:1.1;letter-spacing:-.04em;white-space:nowrap}
+  .h small{display:block;font-size:34px;letter-spacing:-.02em;margin-top:6px;opacity:.85}
+  .ok{color:#fff}.bad{color:#f87171}
+  .dots{-webkit-mask-image:radial-gradient(circle,#000 0 38%,transparent 42%);mask-image:radial-gradient(circle,#000 0 38%,transparent 42%);-webkit-mask-size:7px 7px;mask-size:7px 7px}
+  .dots.fine{-webkit-mask-size:5px 5px;mask-size:5px 5px}
+</style>
+</head>
+<body>
+<h1>Headline "Đúng tài liệu. Đúng người học." · số "0–100 · 1.900+"</h1>
+
+<div class="row"><div class="meta"><b>Doto 700 (hiện tại)</b><span class="bad">Không có tiếng Việt: ư, ơ, ệ… rơi về Inter</span></div>
+  <div class="h" style="font-family:'Doto';font-weight:700">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Handjet 700 · ELSH 0</b><span class="ok">Có tiếng Việt. Phần tử vuông</span></div>
+  <div class="h" style="font-family:'Handjet';font-weight:700;font-variation-settings:'ELGR' 1,'ELSH' 0">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Handjet 700 · ELSH 2</b><span class="ok">Có tiếng Việt. Phần tử tròn (gần Doto nhất)</span></div>
+  <div class="h" style="font-family:'Handjet';font-weight:700;font-variation-settings:'ELGR' 1,'ELSH' 2">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Handjet 600 · ELSH 2 · ELGR 2</b><span class="ok">Lưới thưa hơn, chấm rời như ma trận</span></div>
+  <div class="h" style="font-family:'Handjet';font-weight:600;font-variation-settings:'ELGR' 2,'ELSH' 2">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Handjet 800 · ELSH 4</b><span class="ok">Có tiếng Việt. Thử phần tử khác</span></div>
+  <div class="h" style="font-family:'Handjet';font-weight:800;font-variation-settings:'ELGR' 1,'ELSH' 4">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>VT323</b><span class="ok">Có tiếng Việt. Pixel terminal, monospace</span></div>
+  <div class="h" style="font-family:'VT323';letter-spacing:0">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Space Grotesk 600</b><span class="ok">Có tiếng Việt. Sans hình học, không pixel</span></div>
+  <div class="h" style="font-family:'Space Grotesk';font-weight:600">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Unbounded 500</b><span class="ok">Có tiếng Việt. Rộng, đậm chất display</span></div>
+  <div class="h" style="font-family:'Unbounded';font-weight:500;letter-spacing:-.02em">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Space Mono 700</b><span class="ok">Có tiếng Việt. Mono kỹ thuật</span></div>
+  <div class="h" style="font-family:'Space Mono';font-weight:700;letter-spacing:-.03em">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Unbounded 700 + mask chấm 7px</b><span class="ok">Có tiếng Việt. Chấm rời bằng CSS mask, không cần font pixel</span></div>
+  <div class="h dots" style="font-family:'Unbounded';font-weight:700;letter-spacing:-.01em">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+
+<div class="row"><div class="meta"><b>Space Grotesk 700 + mask chấm 5px</b><span class="ok">Có tiếng Việt. Lưới mịn hơn, gần Doto</span></div>
+  <div class="h dots fine" style="font-family:'Space Grotesk';font-weight:700">Đúng tài liệu. Đúng người học.<small>0–100 · 1.900+ · 12 ngày</small></div></div>
+</body>
+</html>

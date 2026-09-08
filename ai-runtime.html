@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Intelligence Designed To Evolve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#000; --text:#fff; --muted:#8e8e8e; --nav-text:#2e2e2e; --pill-dark:#28282a;
+    --sign-in-text:#c8c8c8; --nav-shadow:0 4px 14px rgba(0,0,0,.16);
+    --trust-bg:#28282a; --trust-border:rgba(255,255,255,.4); --trust-text:#c4c2c3;
+    --font-sans:"Inter","Segoe UI",system-ui,sans-serif;
+    --font-display:"BubbledotICG-FinePos","Geist Pixel Circle",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-sans);
+    height:100vh;height:100dvh;overflow:hidden;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  .bg{position:absolute;inset:0;overflow:hidden;background:#000;z-index:0}
+  .bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;
+    transition:opacity .7s linear}
+  .bg-video.hidden{opacity:0}
+
+  .page{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;
+    height:100vh;height:100dvh;overflow:hidden;
+    padding:clamp(16px,2.4vh,28px) clamp(14px,3vw,32px)}
+
+  /* ---------- Header ---------- */
+  header{width:100%;max-width:720px;flex-shrink:0;display:flex;align-items:center;
+    justify-content:center;gap:clamp(18px,2.8vw,28px);animation:slideDown .7s cubic-bezier(.22,1,.36,1) both}
+  .logo{width:clamp(40px,4.4vw,46px);aspect-ratio:1;border-radius:50%;background:#fff;
+    box-shadow:var(--nav-shadow);display:grid;place-items:center;cursor:pointer;
+    transition:transform .25s;flex-shrink:0}
+  .logo:hover{transform:scale(1.04)}
+  .logo svg{width:72%;height:72%;object-fit:contain}
+
+  .nav{flex:1;max-width:430px;height:clamp(44px,5.2vw,48px);background:#fff;border-radius:999px;
+    box-shadow:var(--nav-shadow);display:flex;align-items:center;justify-content:center;
+    gap:clamp(14px,1.8vw,24px);padding:4px 8px}
+  .nav a{position:relative;font-weight:500;font-size:clamp(13px,1.4vw,15px);letter-spacing:-.01em;
+    color:#2e2e2e;opacity:.5;text-decoration:none;padding:6px 4px;transition:opacity .2s}
+  .nav a:hover{opacity:.75}
+  .nav a.active{opacity:1}
+  .nav a.active::after{content:"";position:absolute;left:50%;bottom:5px;width:3px;height:3px;
+    border-radius:50%;background:#000;transform:translateX(-50%);
+    box-shadow:-5px 0 0 #000,5px 0 0 #000}
+
+  .signin{height:clamp(44px,5.2vw,48px);background:var(--pill-dark);color:var(--sign-in-text);
+    border:none;border-radius:999px;box-shadow:var(--nav-shadow);padding:0 clamp(16px,2vw,22px);
+    font-family:var(--font-sans);font-weight:500;font-size:clamp(13px,1.4vw,15px);cursor:pointer;
+    transition:.2s;flex-shrink:0}
+  .signin:hover{background:#323234;color:#fff;transform:translateY(-1px)}
+
+  .burger{display:none}
+
+  /* ---------- Hero ---------- */
+  .hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;max-width:900px}
+
+  .trust{--trust-size:clamp(36px,4.5vw,42px);display:inline-flex;align-items:center;
+    margin-bottom:clamp(16px,2.5vh,26px)}
+  .avatar{width:var(--trust-size);aspect-ratio:1;border-radius:50%;background:var(--trust-bg);
+    border:1px solid var(--trust-border);padding:5px;display:grid;place-items:center;
+    transition:transform .35s;position:relative}
+  .avatar .inner{width:100%;height:100%;border-radius:50%;background:#fff;display:grid;place-items:center}
+  .avatar i{color:#111;font-size:calc(var(--trust-size)*.34)}
+  .avatar:nth-child(1){z-index:1}
+  .avatar:nth-child(2){margin-left:calc(var(--trust-size)*-.42);z-index:2}
+  .avatar:nth-child(3){margin-left:calc(var(--trust-size)*-.42);z-index:4}
+  .trust:hover .avatar:nth-child(1){transform:translateY(-2px)}
+  .trust:hover .avatar:nth-child(2){transform:translateY(-4px)}
+  .trust:hover .avatar:nth-child(3){transform:translateY(-2px)}
+  .trust-pill{height:var(--trust-size);display:flex;align-items:center;background:var(--trust-bg);
+    border:1px solid var(--trust-border);border-radius:999px;
+    margin-left:calc(var(--trust-size)*-.42);
+    padding:0 calc(var(--trust-size)*.5) 0 calc(var(--trust-size)*.58);
+    font-weight:500;color:var(--trust-text);font-size:clamp(12px,1.4vw,13.5px);white-space:nowrap}
+
+  .headline{margin:clamp(6px,1.2vh,14px) 0}
+  .headline span{display:block;font-family:var(--font-display);color:#fff;
+    font-size:clamp(28px,6.2vw,80px);letter-spacing:-.04em;line-height:1.12;
+    white-space:nowrap;overflow:hidden}
+  .headline.anim span{opacity:0;transform:translateY(14px);
+    animation:headlineFade .85s cubic-bezier(.22,1,.36,1) forwards}
+  .headline.anim span:nth-child(1){animation-delay:.12s}
+  .headline.anim span:nth-child(2){animation-delay:.3s}
+
+  .subhead{max-width:min(500px,92%);color:#d0d0d0;opacity:.8;line-height:1.55;font-weight:400;
+    font-size:clamp(calc(13.5px + 2pt),calc(1.55vw + 2pt),calc(16.5px + 2pt));
+    margin:clamp(12px,2vh,20px) 0 clamp(18px,3vh,28px)}
+
+  .cta{background:#fff;color:#000;border:none;font-family:var(--font-sans);font-weight:600;
+    font-size:clamp(13.5px,1.5vw,14.5px);padding:clamp(11px,1.6vh,13px) clamp(22px,3vw,28px);
+    border-radius:999px;cursor:pointer;transition:.25s;
+    box-shadow:0 0 0 1px rgba(255,255,255,.15),0 0 22px rgba(255,255,255,.32),0 0 44px rgba(255,255,255,.12)}
+  .cta:hover{transform:translateY(-2px) scale(1.02);
+    box-shadow:0 0 0 1px rgba(255,255,255,.25),0 0 30px rgba(255,255,255,.45),0 0 60px rgba(255,255,255,.2)}
+
+  /* ---------- Stats ---------- */
+  .stats{width:100%;max-width:920px;flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);
+    gap:clamp(12px,2vw,24px)}
+  .stat{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+  .stat .icon{font-family:var(--font-display);color:#fff;font-size:clamp(22px,3vw,33px);line-height:1}
+  .stat .val{font-family:var(--font-sans);color:#fff;font-weight:500;
+    font-size:clamp(18px,2.2vw,26px);letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+  .stat .label{color:var(--muted);font-size:clamp(11px,1.2vw,12.5px)}
+
+  /* ---------- Shared entrance ---------- */
+  .anim{opacity:0;transform:translateY(22px) scale(.98);filter:blur(6px);
+    animation:reveal .85s cubic-bezier(.22,1,.36,1) forwards;animation-delay:var(--d,0s)}
+  .anim.pulse{animation-name:revealPulse}
+
+  @keyframes slideDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+  @keyframes reveal{to{opacity:1;transform:none;filter:blur(0)}}
+  @keyframes revealPulse{60%{opacity:1;transform:translateY(-2px) scale(1.01);filter:blur(0)}to{opacity:1;transform:none;filter:blur(0)}}
+  @keyframes headlineFade{to{opacity:1;transform:none}}
+  @keyframes overlayIn{from{opacity:0}to{opacity:1}}
+  @keyframes menuIn{from{opacity:0;transform:translateY(-12px) scale(.98)}to{opacity:1;transform:none}}
+  @keyframes linkIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ---------- Mobile ---------- */
+  .menu-overlay{display:none}
+  @media (max-width:720px){
+    header{justify-content:space-between;max-width:none}
+    .nav,.signin{display:none}
+    .burger{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;
+      background:var(--pill-dark);border:none;cursor:pointer;gap:4px}
+    .burger span{display:block;width:18px;height:1.5px;background:#fff;transition:.3s}
+    .burger.open{background:#fff}
+    .burger.open span{background:#000}
+    .burger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+    .burger.open span:nth-child(2){opacity:0}
+    .burger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+
+    .menu-overlay{display:block;position:fixed;inset:0;z-index:5;background:rgba(0,0,0,.62);
+      backdrop-filter:blur(6px);animation:overlayIn .28s ease}
+    .menu-overlay[hidden]{display:none}
+    .sheet{position:absolute;top:88px;left:50%;transform:translateX(-50%);width:min(360px,88%);
+      background:#fff;border-radius:28px;padding:22px 18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.45);
+      animation:menuIn .38s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;gap:6px}
+    .sheet a{position:relative;color:#2e2e2e;font-weight:500;text-decoration:none;text-align:center;
+      padding:12px;border-radius:14px;opacity:0;animation:linkIn .3s ease forwards}
+    .sheet a.active::after{content:"";position:absolute;left:50%;bottom:8px;width:3px;height:3px;
+      border-radius:50%;background:#000;transform:translateX(-50%);box-shadow:-5px 0 0 #000,5px 0 0 #000}
+    .sheet .signin-m{margin-top:8px;background:var(--pill-dark);color:#fff;border-radius:999px;
+      padding:14px;text-align:center;font-weight:500;opacity:0;animation:linkIn .3s ease forwards}
+    .stats{grid-template-columns:repeat(2,1fr);gap:clamp(14px,4vw,22px) 8px}
+    .headline span{letter-spacing:-.08em;line-height:1.05}
+  }
+  @media (max-width:420px){
+    .trust{--trust-size:34px}
+    .trust-pill{font-size:12px}
+    .headline span{letter-spacing:-.09em;line-height:1.04}
+  }
+  @media (max-height:700px){.hero{gap:2px}.subhead{margin:8px 0 14px}}
+
+  @media (prefers-reduced-motion:reduce){
+    *,.anim,.headline.anim span,header{animation:none!important}
+    .anim{opacity:1;transform:none;filter:none}
+    .headline.anim span{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+  <div class="bg">
+    <video id="vidA" class="bg-video" autoplay muted loop playsinline preload="auto"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
+    <video id="vidB" class="bg-video hidden" muted playsinline preload="auto"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
+  </div>
+
+  <div class="page">
+    <!-- Header -->
+    <header>
+      <div class="logo" aria-label="Velorah">
+        <svg viewBox="0 0 24 24" fill="#000" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/>
+        </svg>
+      </div>
+      <nav class="nav">
+        <a href="#" class="active">Home</a>
+        <a href="#">Product</a>
+        <a href="#">Case Studies</a>
+        <a href="#">Contact</a>
+      </nav>
+      <button class="signin">Sign in</button>
+      <button class="burger" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="trust anim" style="--d:.05s">
+        <div class="avatar"><div class="inner"><i class="fa-brands fa-microsoft"></i></div></div>
+        <div class="avatar"><div class="inner"><i class="fa-brands fa-amazon"></i></div></div>
+        <div class="avatar"><div class="inner"><i class="fa-brands fa-google"></i></div></div>
+        <div class="trust-pill">Trusted by 2000+ Enterprises</div>
+      </div>
+
+      <h1 class="headline anim" style="--d:0s">
+        <span>Intelligence</span>
+        <span>Designed To Evolve</span>
+      </h1>
+
+      <p class="subhead anim" style="--d:.28s">
+        Build applications that reason, adapt and collaborate using a modular
+        AI platform designed for production.
+      </p>
+
+      <button class="cta anim pulse" style="--d:.4s">Get Started</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat anim" style="--d:.5s">
+        <span class="icon">&lt;</span>
+        <span class="val" data-target="120" data-suffix="ms" data-decimals="0">0ms</span>
+        <span class="label">Inference Time</span>
+      </div>
+      <div class="stat anim" style="--d:.58s">
+        <span class="icon">%</span>
+        <span class="val" data-target="99.99" data-suffix="%" data-decimals="2">0%</span>
+        <span class="label">Platform Uptime</span>
+      </div>
+      <div class="stat anim" style="--d:.66s">
+        <span class="icon">*</span>
+        <span class="val" data-target="24" data-suffix="/7" data-decimals="0">0/7</span>
+        <span class="label">Autonomous Runtime</span>
+      </div>
+      <div class="stat anim" style="--d:.74s">
+        <span class="icon">#</span>
+        <span class="val" data-target="2.4" data-suffix="M" data-decimals="1">0M</span>
+        <span class="label">Context Windows</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="menu-overlay" id="mobileMenu" hidden>
+    <div class="sheet">
+      <a href="#" class="active" style="animation-delay:.05s">Home</a>
+      <a href="#" style="animation-delay:.1s">Product</a>
+      <a href="#" style="animation-delay:.15s">Case Studies</a>
+      <a href="#" style="animation-delay:.2s">Contact</a>
+      <div class="signin-m" style="animation-delay:.25s">Sign in</div>
+    </div>
+  </div>
+
+<script>
+  // ---- Seamless crossfade loop (both copies forward = smooth, no restart cut) ----
+  const FADE = 0.7;
+  let active = document.getElementById('vidA');
+  let standby = document.getElementById('vidB');
+  let swapping = false;
+  active.play().catch(() => {});
+  (function loopTick(){
+    const a = active;
+    if (!swapping && a.duration && a.currentTime >= a.duration - FADE){
+      swapping = true;
+      standby.currentTime = 0;
+      standby.play().catch(() => {});
+      standby.classList.remove('hidden');
+      a.classList.add('hidden');
+      const finished = a;
+      setTimeout(() => finished.pause(), FADE * 1000);
+      [active, standby] = [standby, active];
+      swapping = false;
+    }
+    requestAnimationFrame(loopTick);
+  })();
+
+  // ---- Count-up stats (once, via IntersectionObserver) ----
+  const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+  document.querySelectorAll('.val').forEach((el, i) => {
+    const target = parseFloat(el.dataset.target);
+    const decimals = parseInt(el.dataset.decimals, 10);
+    const suffix = el.dataset.suffix || '';
+    const dur = 1500 + i * 80;
+    const startOffset = 480 + i * 90;
+    let started = false;
+    const run = () => {
+      const t0 = performance.now();
+      const step = now => {
+        const p = Math.min((now - t0) / dur, 1);
+        el.textContent = (target * easeOutCubic(p)).toFixed(decimals) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target.toFixed(decimals) + suffix;
+      };
+      requestAnimationFrame(step);
+    };
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting && !started){ started = true; setTimeout(run, startOffset); io.disconnect(); }
+      });
+    }, { threshold: 0.25 });
+    io.observe(el);
+  });
+
+  // ---- Mobile menu ----
+  const burger = document.querySelector('.burger');
+  const menu = document.getElementById('mobileMenu');
+  const setMenu = open => {
+    burger.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', open);
+    menu.hidden = !open;
+    document.body.classList.toggle('menu-open', open);
+  };
+  burger.addEventListener('click', () => setMenu(menu.hidden));
+  menu.addEventListener('click', e => { if (e.target === menu || e.target.closest('a, .signin-m')) setMenu(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+  window.addEventListener('resize', () => { if (window.innerWidth > 720) setMenu(false); });
+</script>
+</body>
+</html>

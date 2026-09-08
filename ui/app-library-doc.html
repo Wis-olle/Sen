@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chi tiết tài liệu · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ riêng trang Chi tiết tài liệu (S05b) ============ */
+
+  /* DocBreadcrumb */
+  .crumb{display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--muted);margin-bottom:10px}
+  .crumb a{color:var(--muted);transition:color var(--dur-1)}
+  .crumb a:hover{color:var(--text)}
+  .crumb i{font-size:9px}
+  .crumb .cur{color:var(--text-2)}
+  .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+
+  /* full stepper trong thẻ trạng thái — có nhãn (không dùng .mini) */
+  .status-card .stepper{margin-top:6px;max-width:560px}
+
+  /* DocView — 2 cột PageViewer + ChunkList */
+  .doc-view{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+
+  /* --- PageViewer --- */
+  .viewer{display:flex;flex-direction:column;min-width:0}
+  .viewer-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .viewer-bar .pg-num{font-family:var(--font-display);font-weight:700;font-size:13px;
+    letter-spacing:.02em;color:var(--text);min-width:96px;text-align:center;font-variant-numeric:tabular-nums}
+  .viewer-bar .pg-num small{color:var(--muted);font-weight:400}
+  .pgbtn{width:38px;height:38px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);
+    transition:background var(--dur-1),color var(--dur-1),transform var(--dur-1)}
+  .pgbtn:hover{background:var(--surface-3);color:var(--text);transform:translateY(-1px)}
+  .pgbtn:disabled{opacity:.35;pointer-events:none}
+  .viewer-bar .vb-spacer{flex:1}
+  .page{position:relative;border:1px solid var(--border);border-radius:var(--r-md);
+    background:var(--surface-1);padding:30px 30px 34px;max-height:560px;overflow-y:auto;
+    box-shadow:var(--glass-inset)}
+  .page::-webkit-scrollbar{width:9px}
+  .page::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:999px}
+  .page .p-run{font-family:var(--font-display);font-size:10.5px;letter-spacing:.06em;
+    color:var(--muted);text-transform:uppercase;padding-bottom:14px;margin-bottom:20px;
+    border-bottom:1px solid var(--border-faint);display:flex;justify-content:space-between}
+  .p-block{padding:14px 16px;margin:0 -16px 6px;border-radius:12px;
+    border:1px solid transparent;transition:background var(--dur-2),border var(--dur-2)}
+  .p-block h4{font-size:var(--fs-md);font-weight:600;letter-spacing:-.01em;margin-bottom:8px;display:flex;align-items:center;gap:9px}
+  .p-block h4 .dcode{margin-left:auto}
+  .p-block p{font-size:var(--fs-sm);line-height:1.72;color:var(--text-2)}
+  .p-block p + p{margin-top:9px}
+  .p-block .ex{margin-top:10px;padding:11px 13px;border-radius:10px;background:var(--surface-2);
+    border:1px solid var(--border-faint);font-size:12.5px;color:var(--muted-strong);line-height:1.6}
+  .p-block .ex b{color:var(--text-2);font-weight:600}
+  .p-block.hl{background:var(--surface-2);border-color:var(--border-strong)}
+
+  /* --- ChunkList --- */
+  .chunks{display:flex;flex-direction:column;min-width:0}
+  .chunks-head{display:flex;align-items:center;gap:9px;font-size:var(--fs-md);font-weight:600;
+    margin-bottom:14px;height:38px}
+  .chunks-head i{color:var(--text);font-size:14px}
+  .chunks-head .ct{margin-left:auto;font-size:var(--fs-xs);color:var(--muted);font-weight:400}
+  .chunk-list{display:flex;flex-direction:column;gap:8px;max-height:560px;overflow-y:auto;
+    padding-right:4px;margin-right:-4px}
+  .chunk-list::-webkit-scrollbar{width:9px}
+  .chunk-list::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:999px}
+  .chunk{display:block;width:100%;text-align:left;padding:13px 15px;border-radius:var(--r-md);
+    background:var(--surface-1);border:1px solid var(--border);color:inherit;
+    transition:border var(--dur-1),background var(--dur-1),transform var(--dur-1)}
+  .chunk:hover{border-color:var(--border-strong);background:var(--surface-2);transform:translateY(-1px)}
+  .chunk.active{border-color:var(--accent-border);background:var(--surface-2)}
+  .chunk-top{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .chunk-ord{font-family:var(--font-display);font-weight:700;font-size:12px;color:var(--muted-strong);
+    font-variant-numeric:tabular-nums}
+  .chunk-pg{font-size:11px;color:var(--muted)}
+  .chunk-top .dcode{margin-left:auto}
+  .chunk-title{font-size:var(--fs-sm);font-weight:600;margin-bottom:4px;letter-spacing:-.01em}
+  .chunk-text{font-size:12.5px;color:var(--muted-strong);line-height:1.6;
+    display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* mã đoạn [D1]…[D8] — glyph ASCII an toàn nên dùng Doto (motif dữ liệu) */
+  .dcode{display:inline-flex;align-items:center;height:19px;padding:0 7px;border-radius:6px;
+    background:var(--cite-bg);border:1px solid var(--cite-border);color:var(--cite-text);
+    font-family:var(--font-display);font-weight:700;font-size:11px;letter-spacing:.02em;line-height:1;
+    font-variant-numeric:tabular-nums;flex-shrink:0}
+
+  /* tab chuyển 2 cột trên mobile */
+  .view-tabs{display:none;gap:6px;margin-bottom:16px;padding:4px;background:var(--surface-2);
+    border:1px solid var(--border);border-radius:var(--r-pill)}
+  .view-tabs button{flex:1;height:40px;border:none;background:none;color:var(--muted);
+    font-size:var(--fs-sm);font-weight:600;border-radius:var(--r-pill);transition:background var(--dur-1),color var(--dur-1)}
+  .view-tabs button.on{background:#fff;color:#000}
+
+
+  @media (max-width:880px){
+    .doc-view{grid-template-columns:1fr}
+    .view-tabs{display:flex}
+    .doc-view[data-tab="page"] .chunks{display:none}
+    .doc-view[data-tab="chunks"] .viewer{display:none}
+    .page,.chunk-list{max-height:none}
+  }
+  @media (max-width:760px){
+    .head-row .btn{min-height:44px}
+    .pgbtn{width:44px;height:44px}
+    .chunk{padding:15px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item active" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Chi tiết tài liệu <small>Cơ sở dữ liệu · INT1234</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm trong tài liệu…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Header tài liệu -->
+      <div class="page-head reveal" style="--d:0s">
+        <div class="crumb">
+          <a href="app-library.html">Kho học liệu</a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <span class="cur">Chương 4 — Chuẩn hóa cơ sở dữ liệu</span>
+        </div>
+        <div class="head-row">
+          <div>
+            <h1>Chương 4 — Chuẩn hóa cơ sở dữ liệu.pdf</h1>
+            <p>8 khái niệm · 8 đoạn đã cắt · 24 trang</p>
+          </div>
+          <a class="btn btn-primary" href="app-map.html"><i class="fa-solid fa-diagram-project"></i> Xem bản đồ kiến thức</a>
+        </div>
+      </div>
+
+      <!-- Trạng thái xử lý -->
+      <section class="card status-card reveal" style="--d:.06s">
+        <div class="card-title"><i class="fa-solid fa-circle-check"></i> Trạng thái xử lý
+          <span class="tag tag-human" style="margin-left:auto">Hoàn tất</span>
+        </div>
+        <div class="doc-meta" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+          <span class="chip"><i class="fa-solid fa-file-lines"></i> PDF</span>
+          <span class="chip"><i class="fa-solid fa-building-columns"></i> Thư viện số</span>
+          <span class="chip"><i class="fa-solid fa-hashtag"></i> INT1234 · Cơ sở dữ liệu</span>
+        </div>
+        <ol class="stepper" aria-label="4 bước xử lý — đã hoàn tất">
+          <li class="step done"><span class="node"><i class="fa-solid fa-check"></i></span><span class="slabel">Đã tải lên</span></li>
+          <li class="step done"><span class="node"><i class="fa-solid fa-check"></i></span><span class="slabel">Đã trích xuất</span></li>
+          <li class="step done"><span class="node"><i class="fa-solid fa-check"></i></span><span class="slabel">Đã lập chỉ mục</span></li>
+          <li class="step done"><span class="node"><i class="fa-solid fa-check"></i></span><span class="slabel">Đã có bản đồ</span></li>
+        </ol>
+      </section>
+
+      <!-- Xem trang + Đoạn đã cắt -->
+      <section class="card reveal" style="--d:.12s">
+        <div class="view-tabs" role="tablist">
+          <button type="button" class="on" data-tab="page" aria-selected="true"><i class="fa-regular fa-file"></i> Trang</button>
+          <button type="button" data-tab="chunks" aria-selected="false"><i class="fa-solid fa-scissors"></i> Đoạn đã cắt</button>
+        </div>
+
+        <div class="doc-view" data-tab="page">
+          <!-- PageViewer -->
+          <div class="viewer">
+            <div class="viewer-bar">
+              <button class="pgbtn" id="prevPg" aria-label="Trang trước"><i class="fa-solid fa-chevron-left"></i></button>
+              <span class="pg-num" id="pgNum">Trang 12 <small>/ 24</small></span>
+              <button class="pgbtn" id="nextPg" aria-label="Trang sau"><i class="fa-solid fa-chevron-right"></i></button>
+              <span class="vb-spacer"></span>
+              <span class="meta"><i class="fa-regular fa-file-lines"></i> Bản mô phỏng trang</span>
+            </div>
+            <div class="page" id="pageBox"><!-- render bằng JS --></div>
+          </div>
+
+          <!-- ChunkList -->
+          <div class="chunks">
+            <div class="chunks-head"><i class="fa-solid fa-scissors"></i> Đoạn đã cắt <span class="ct">8 đoạn</span></div>
+            <div class="chunk-list" id="chunkList"><!-- render bằng JS --></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // ===== Dữ liệu demo: 8 đoạn (D1..D8) của "Chương 4 — Chuẩn hóa CSDL" =====
+  // ord, trang (12–18), khái niệm, trích đoạn ngắn (chunk) + nội dung trang đầy đủ.
+  const CHUNKS = [
+    {code:'D1', ord:1, page:12, title:'Phụ thuộc hàm (FD)',
+     excerpt:'Y phụ thuộc hàm vào X (X → Y) nếu mọi cặp bộ cùng giá trị X thì cùng giá trị Y.',
+     body:['Cho quan hệ R với hai tập thuộc tính X và Y. Ta nói Y <b>phụ thuộc hàm</b> vào X, ký hiệu X → Y, nếu với mọi cặp bộ t₁, t₂ của R mà t₁[X] = t₂[X] thì luôn có t₁[Y] = t₂[Y].',
+           'Phụ thuộc hàm phản ánh ràng buộc ngữ nghĩa của dữ liệu, là cơ sở để phân tích và chuẩn hóa lược đồ quan hệ.'],
+     ex:'Ví dụ: <b>MaSV → HoTen</b> — mỗi mã sinh viên xác định duy nhất một họ tên.'},
+    {code:'D2', ord:2, page:12, title:'Khóa & khóa dự tuyển',
+     excerpt:'Khóa dự tuyển là siêu khóa tối thiểu — bỏ bất kỳ thuộc tính nào cũng mất tính xác định.',
+     body:['<b>Siêu khóa</b> là tập thuộc tính xác định hàm toàn bộ các thuộc tính còn lại của quan hệ. <b>Khóa dự tuyển</b> (candidate key) là siêu khóa tối thiểu: loại bỏ bất kỳ thuộc tính nào khỏi nó thì không còn xác định được toàn quan hệ.',
+           'Một quan hệ có thể có nhiều khóa dự tuyển; một trong số đó được chọn làm khóa chính.'],
+     ex:'Ví dụ: trong bảng điểm, <b>(MaSV, MaMon)</b> là khóa dự tuyển vì cùng lúc cần cả hai để xác định điểm.'},
+    {code:'D3', ord:3, page:13, title:'Phụ thuộc hàm đầy đủ',
+     excerpt:'Y phụ thuộc đầy đủ vào X nếu không tồn tại tập con thực sự của X vẫn xác định được Y.',
+     body:['Y <b>phụ thuộc hàm đầy đủ</b> vào X nếu X → Y và không tồn tại tập con thực sự X′ ⊂ X sao cho X′ → Y. Nếu có một phần của X đã đủ xác định Y thì đó là <b>phụ thuộc bộ phận</b>.',
+           'Khái niệm này là điều kiện then chốt phân biệt dạng chuẩn 2 với dạng chuẩn 1.'],
+     ex:'Ví dụ: <b>(MaSV, MaMon) → Diem</b> là đầy đủ; nhưng <b>(MaSV, MaMon) → HoTen</b> chỉ là bộ phận vì MaSV đã đủ xác định HoTen.'},
+    {code:'D4', ord:4, page:14, title:'Phụ thuộc bắc cầu',
+     excerpt:'Nếu X → Y và Y → Z (Y không là khóa) thì Z phụ thuộc bắc cầu vào X qua trung gian Y.',
+     body:['Cho X → Y và Y → Z, trong đó Y không phải là khóa và Z không thuộc khóa. Khi đó Z <b>phụ thuộc bắc cầu</b> vào X qua trung gian Y.',
+           'Phụ thuộc bắc cầu là nguồn gốc của dư thừa dữ liệu và bất thường khi cập nhật — dạng chuẩn 3 sinh ra để loại bỏ nó.'],
+     ex:'Ví dụ: <b>MaSV → MaKhoa</b> và <b>MaKhoa → TenKhoa</b> ⇒ TenKhoa phụ thuộc bắc cầu vào MaSV.'},
+    {code:'D5', ord:5, page:15, title:'Dạng chuẩn 1 (1NF)',
+     excerpt:'Quan hệ ở 1NF nếu mọi giá trị thuộc tính đều nguyên tố — không đa trị, không nhóm lặp.',
+     body:['Một quan hệ ở <b>dạng chuẩn 1 (1NF)</b> nếu miền giá trị của mọi thuộc tính đều là nguyên tố: mỗi ô chứa đúng một giá trị, không có thuộc tính đa trị hay nhóm lặp.',
+           '1NF là điều kiện tối thiểu để một bảng hợp lệ trong mô hình quan hệ.'],
+     ex:'Ví dụ: tách cột <b>SoDienThoai = "0901; 0902"</b> thành các dòng riêng để mỗi ô chỉ còn một số.'},
+    {code:'D6', ord:6, page:16, title:'Dạng chuẩn 2 (2NF)',
+     excerpt:'Ở 1NF và mọi thuộc tính không khóa phụ thuộc hàm đầy đủ vào khóa (loại phụ thuộc bộ phận).',
+     body:['Một quan hệ ở <b>dạng chuẩn 2 (2NF)</b> nếu nó ở 1NF và mọi thuộc tính không khóa đều phụ thuộc hàm <i>đầy đủ</i> vào khóa. Nói cách khác, không còn phụ thuộc bộ phận vào một phần của khóa gồm nhiều thuộc tính.',
+           '2NF chỉ có ý nghĩa khi khóa gồm từ hai thuộc tính trở lên.'],
+     ex:'Ví dụ: tách <b>HoTen</b> (chỉ phụ thuộc MaSV) khỏi bảng khóa (MaSV, MaMon) sang bảng Sinh viên riêng.'},
+    {code:'D7', ord:7, page:17, title:'Dạng chuẩn 3 (3NF)',
+     excerpt:'Ở 2NF và không thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa.',
+     body:['Một quan hệ ở <b>dạng chuẩn 3 (3NF)</b> nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Tương đương: với mọi phụ thuộc X → A, hoặc X là siêu khóa, hoặc A là thuộc tính khóa.',
+           '3NF loại bỏ dư thừa do phụ thuộc bắc cầu, giữ cân bằng giữa tính toàn vẹn và hiệu năng.'],
+     ex:'Ví dụ: tách <b>TenKhoa</b> ra bảng Khoa, chỉ giữ <b>MaKhoa</b> trong bảng Sinh viên.'},
+    {code:'D8', ord:8, page:18, title:'Dạng chuẩn Boyce–Codd (BCNF)',
+     excerpt:'Với mọi phụ thuộc hàm không tầm thường X → Y thì X phải là siêu khóa.',
+     body:['Một quan hệ ở <b>dạng chuẩn Boyce–Codd (BCNF)</b> nếu với mọi phụ thuộc hàm không tầm thường X → Y thì X là siêu khóa. BCNF chặt hơn 3NF.',
+           'BCNF xử lý các trường hợp có nhiều khóa dự tuyển chồng lấn mà 3NF vẫn để lọt dư thừa.'],
+     ex:'Ví dụ: khi cả (MaGV, Buoi) và (Phong, Buoi) đều là khóa, chỉ BCNF mới đảm bảo không dư thừa lịch phòng.'},
+  ];
+
+  const PAGES = [...new Set(CHUNKS.map(c=>c.page))].sort((a,b)=>a-b); // [12..18]
+  const TOTAL = 24;
+  let curPage = PAGES[0], curCode = null;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const pageBox = document.getElementById('pageBox');
+  const chunkList = document.getElementById('chunkList');
+  const pgNum = document.getElementById('pgNum');
+  const prevBtn = document.getElementById('prevPg');
+  const nextBtn = document.getElementById('nextPg');
+
+  // render danh sách đoạn
+  chunkList.innerHTML = CHUNKS.map(c=>`
+    <button class="chunk" data-code="${c.code}" data-page="${c.page}">
+      <span class="chunk-top">
+        <span class="chunk-ord">#${c.ord}</span>
+        <span class="chunk-pg">trang ${c.page}</span>
+        <span class="dcode">${c.code}</span>
+      </span>
+      <span class="chunk-title">${c.title}</span>
+      <span class="chunk-text">${c.excerpt}</span>
+    </button>`).join('');
+
+  function renderPage(){
+    const onPage = CHUNKS.filter(c=>c.page===curPage);
+    pageBox.innerHTML = `<div class="p-run"><span>Chương 4 · Chuẩn hóa cơ sở dữ liệu</span><span>Trang ${curPage}</span></div>`
+      + onPage.map(c=>`
+        <div class="p-block ${c.code===curCode?'hl':''}" data-code="${c.code}">
+          <h4>${c.title}<span class="dcode">${c.code}</span></h4>
+          ${c.body.map(p=>`<p>${p}</p>`).join('')}
+          <div class="ex">${c.ex}</div>
+        </div>`).join('');
+    pgNum.innerHTML = `Trang ${curPage} <small>/ ${TOTAL}</small>`;
+    const i = PAGES.indexOf(curPage);
+    prevBtn.disabled = i<=0;
+    nextBtn.disabled = i>=PAGES.length-1;
+    // đánh dấu đoạn đang chọn trong danh sách
+    chunkList.querySelectorAll('.chunk').forEach(el=>
+      el.classList.toggle('active', el.dataset.code===curCode));
+  }
+
+  function goChunk(code){
+    const c = CHUNKS.find(x=>x.code===code);
+    curPage = c.page; curCode = code;
+    renderPage();
+    // cuộn trang tới đầu và làm nổi khối tương ứng
+    pageBox.scrollTop = 0;
+    const blk = pageBox.querySelector(`.p-block[data-code="${code}"]`);
+    if(blk && !reduce) blk.scrollIntoView({block:'nearest',behavior:'smooth'});
+    // mobile: chuyển sang tab Trang để thấy nội dung
+    if(window.matchMedia('(max-width:880px)').matches) setTab('page');
+  }
+
+  chunkList.addEventListener('click',e=>{
+    const b=e.target.closest('.chunk'); if(b) goChunk(b.dataset.code);
+  });
+  prevBtn.addEventListener('click',()=>{const i=PAGES.indexOf(curPage);if(i>0){curPage=PAGES[i-1];curCode=null;renderPage();pageBox.scrollTop=0;}});
+  nextBtn.addEventListener('click',()=>{const i=PAGES.indexOf(curPage);if(i<PAGES.length-1){curPage=PAGES[i+1];curCode=null;renderPage();pageBox.scrollTop=0;}});
+
+  // tab mobile
+  const docView=document.querySelector('.doc-view');
+  const tabBtns=document.querySelectorAll('.view-tabs button');
+  function setTab(t){docView.dataset.tab=t;tabBtns.forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});}
+  tabBtns.forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+
+  renderPage();
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kiểm thử prompt · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng màn Kiểm thử prompt ---- */
+
+  /* khối điều khiển: so phiên bản + nút chạy lại */
+  .runbar{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+  .verpair{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .vchip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:var(--r-pill);
+    background:var(--surface-2);border:1px solid var(--border);font-size:var(--fs-sm);font-weight:600}
+  .vchip .pv{font-family:var(--font-display);font-size:12.5px;color:var(--text)}
+  .vchip small{font-size:11px;color:var(--muted);font-weight:500}
+  .vchip.next{background:var(--accent-dim);border-color:var(--accent-border)}
+  .verpair .arw{color:var(--muted);font-size:12px}
+  .run-side{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .run-note{font-size:11.5px;color:var(--muted);text-align:right}
+  .run-note b{color:var(--text-2)}
+  .sumline{display:flex;align-items:center;gap:16px;margin-top:22px;padding-top:20px;
+    border-top:1px solid var(--border);font-size:var(--fs-sm);flex-wrap:wrap}
+  .sumline .s{display:flex;align-items:center;gap:8px;color:var(--muted)}
+  .sumline .s b{font-family:var(--font-display);font-size:16px;color:var(--text);font-variant-numeric:tabular-nums}
+  .sumline .s.good b{color:#fff}
+
+  /* hồ sơ mẫu */
+  .profgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+  .prof{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-md);padding:16px 16px 15px}
+  .prof .ph{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+  .prof .pfp2{width:32px;height:32px;border-radius:50%;background:#fff;color:#000;font-weight:700;font-size:13px;
+    display:grid;place-items:center;flex-shrink:0}
+  .prof .pfp2.ghost{background:var(--surface-3);color:var(--muted);border:1px dashed var(--border-strong)}
+  .prof .pn{font-size:var(--fs-sm);font-weight:600;line-height:1.25}
+  .prof .pt{font-size:11px;color:var(--muted);margin-top:1px}
+  .prof .pm{display:flex;flex-wrap:wrap;gap:6px}
+  .pmeta{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;
+    background:var(--surface-2);border:1px solid var(--border);font-size:10.5px;color:var(--text-2)}
+  .pmeta i{font-size:9px;color:var(--muted)}
+  .pmeta .n{font-family:var(--font-display);font-size:11px}
+
+
+  /* ô kết quả trước → sau */
+  .cellpair{display:inline-flex;align-items:center;gap:7px}
+  .ck{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;font-size:11px;flex-shrink:0}
+  .ck.ok{background:var(--success-dim);color:#fff;border:1px solid var(--border-strong)}
+  .ck.no{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(248,113,113,.32)}
+  .ck.na{color:var(--muted);border:1px solid var(--border);font-size:12px}
+  .ck.pend{color:var(--muted);border:1px dashed var(--border-strong)}
+  .ck.run{color:var(--text);border:1px solid var(--border-strong)}
+  .cellpair .arw{color:var(--muted);font-size:10px}
+  tr.fixed td{background:rgba(255,255,255,.028)}
+  .colgroup-b{border-left:1px solid var(--border)}
+  th.verhead small{display:block;font-family:var(--font-sans);font-size:10px;font-weight:500;color:var(--muted);
+    text-transform:none;letter-spacing:0;margin-top:2px}
+
+  /* nút chạy — trạng thái đang chạy */
+  .btn.running{pointer-events:none;opacity:.9}
+  @media(max-width:720px){
+    .runbar{grid-template-columns:1fr;gap:18px}
+    .run-side{align-items:stretch}.run-note{text-align:left}
+    .btn-run{width:100%}
+  }
+  /* mobile: tiêu đề topbar dài phải co + cắt gọn, không đẩy avatar tràn */
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR (Quản trị) ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Quản trị</div>
+    <a class="nav-item" href="admin-users.html" title="Người dùng"><i class="fa-solid fa-users"></i><span class="label">Người dùng</span></a>
+    <a class="nav-item" href="admin-config.html" title="Cấu hình AI"><i class="fa-solid fa-sliders"></i><span class="label">Cấu hình AI</span></a>
+    <a class="nav-item" href="admin-costs.html" title="Chi phí & nhật ký"><i class="fa-solid fa-coins"></i><span class="label">Chi phí & nhật ký</span></a>
+    <a class="nav-item active" href="admin-prompt-tests.html" title="Kiểm thử prompt"><i class="fa-solid fa-flask"></i><span class="label">Kiểm thử prompt</span></a>
+    <a class="nav-item" href="admin-flagged.html" title="Bài bị báo sai"><i class="fa-solid fa-flag"></i><span class="label">Bài bị báo sai</span><span class="badge">2</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <div class="side-user">
+        <span class="pfp">Q</span>
+        <span class="who"><b>Quản trị viên</b><span>admin@utt.edu.vn</span></span>
+      </div>
+      <a class="nav-item" href="app-dashboard.html" title="Về trang sinh viên"><i class="fa-solid fa-arrow-left"></i><span class="label">Về trang sinh viên</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Kiểm thử prompt <small>Bộ hồi quy chất lượng bài học</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm hồ sơ mẫu…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">Q</span>
+        <span class="who"><b>Quản trị viên</b><span>Admin</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Kiểm thử prompt</h1>
+        <p>Chạy prompt bài học trên <b style="color:var(--text)">5 hồ sơ mẫu</b> và một tài liệu cố định, kiểm tự động 4 tiêu chí. Chỉ chạy khi sửa prompt — mỗi lượt tốn khoảng $0.50.</p>
+      </div>
+
+      <!-- 1) Khối điều khiển -->
+      <section class="card reveal" style="--d:.06s">
+        <div class="runbar">
+          <div>
+            <div class="meta" style="margin-bottom:12px;letter-spacing:.04em;text-transform:uppercase;font-weight:600">Đang so sánh phiên bản</div>
+            <div class="verpair">
+              <span class="vchip"><i class="fa-solid fa-code-branch" style="color:var(--muted)"></i> <span class="pv">lesson-v3</span> <small>đang chạy thật</small></span>
+              <i class="fa-solid fa-arrow-right arw"></i>
+              <span class="vchip next"><i class="fa-solid fa-pen" style="color:var(--muted)"></i> <span class="pv">lesson-v4</span> <small>bản nháp vừa sửa</small></span>
+            </div>
+          </div>
+          <div class="run-side">
+            <button class="btn btn-primary btn-lg btn-run" id="runBtn"><i class="fa-solid fa-play"></i> Chạy lại sau khi sửa prompt</button>
+            <div class="run-note" id="runNote">Lần chạy gần nhất: <b>lesson-v3</b> · 07/09 18:22</div>
+          </div>
+        </div>
+        <div class="sumline" id="sumLine">
+          <span class="s"><i class="fa-solid fa-users" style="color:var(--muted)"></i> 5 hồ sơ × 4 tiêu chí = <b>20</b> phép kiểm</span>
+          <span class="s">lesson-v3 đạt <b>15</b>/20</span>
+          <span class="s good" id="sumV4">lesson-v4 <b>chưa chạy</b></span>
+        </div>
+      </section>
+
+      <!-- 2) Hồ sơ mẫu -->
+      <section class="card reveal" style="--d:.12s">
+        <div class="card-title"><i class="fa-solid fa-id-card"></i> Hồ sơ mẫu
+          <span class="meta" style="margin-left:auto">Cố định giữa các lần chạy</span>
+        </div>
+        <div class="profgrid" id="profGrid"><!-- render bằng JS --></div>
+      </section>
+
+      <!-- 3) Bảng kết quả so sánh -->
+      <section class="card reveal" style="--d:.18s">
+        <div class="card-title"><i class="fa-solid fa-table-list"></i> Kết quả so sánh
+          <span class="meta" style="margin-left:auto">✓ đạt · ✗ chưa đạt · — không áp dụng</span>
+        </div>
+        <div class="tablewrap">
+          <table class="dt sticky" style="min-width:840px">
+            <thead>
+              <tr>
+                <th>Hồ sơ mẫu</th>
+                <th class="c verhead">Đúng khuôn<small>trước → sau</small></th>
+                <th class="c verhead">Có trích dẫn<small>trước → sau</small></th>
+                <th class="c verhead">Lỗi từng mắc<small>trước → sau</small></th>
+                <th class="c verhead">Độ dài đạt<small>trước → sau</small></th>
+              </tr>
+            </thead>
+            <tbody id="resBody"><!-- render bằng JS --></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Hồ sơ mẫu (5) — bám 05 §6 (A yếu, B tốt) + 3 hồ sơ biên
+  // checks: [đúng khuôn, có trích dẫn, có "lỗi từng mắc", độ dài] — 1 đạt · 0 chưa · -1 không áp dụng
+  const PROFILES = [
+    {ini:'A',ghost:false,name:'Nguyễn Văn An',type:'Nền tảng yếu · thích ví dụ thực tế',
+     concept:'3NF (k7)',mem:2,min:30,  v3:[1,1,0,1], v4:[1,1,1,1]},
+    {ini:'B',ghost:false,name:'Trần Thị Bình',type:'Nền tảng tốt · thiên lý thuyết',
+     concept:'BCNF (k8)',mem:0,min:60, v3:[1,1,-1,0], v4:[1,1,-1,1]},
+    {ini:'?',ghost:true,name:'Hồ sơ trắng',type:'Sinh viên mới · chưa có dữ liệu học',
+     concept:'FD (k1)',mem:0,min:45,  v3:[1,1,0,1], v4:[1,1,1,1]},
+    {ini:'M',ghost:false,name:'Hồ sơ nhiều lỗi',type:'5 quan niệm sai đang hiệu lực',
+     concept:'2NF (k6)',mem:5,min:40, v3:[1,0,1,1], v4:[1,1,1,1]},
+    {ini:'T',ghost:false,name:'Tài liệu mỏng',type:'Nguồn chỉ có 2 đoạn trích',
+     concept:'1NF (k5)',mem:1,min:30, v3:[1,0,1,1], v4:[1,1,1,1]},
+  ];
+
+  // ---- hồ sơ mẫu ----
+  document.getElementById('profGrid').innerHTML = PROFILES.map(p=>`
+    <div class="prof">
+      <div class="ph">
+        <span class="pfp2 ${p.ghost?'ghost':''}">${p.ini}</span>
+        <div><div class="pn">${p.name}</div><div class="pt">${p.type}</div></div>
+      </div>
+      <div class="pm">
+        <span class="pmeta"><i class="fa-solid fa-diagram-project"></i> ${p.concept}</span>
+        <span class="pmeta"><i class="fa-solid fa-brain"></i> <span class="n">${p.mem}</span> lỗi cũ</span>
+        <span class="pmeta"><i class="fa-regular fa-clock"></i> <span class="n">${p.min}</span> phút</span>
+      </div>
+    </div>`).join('');
+
+  // ---- ô kết quả ----
+  function icon(state){ // trạng thái đã biết
+    if(state===1)  return '<span class="ck ok"><i class="fa-solid fa-check"></i></span>';
+    if(state===0)  return '<span class="ck no"><i class="fa-solid fa-xmark"></i></span>';
+    return '<span class="ck na">—</span>';
+  }
+  const pend = '<span class="ck pend">·</span>';
+  const run  = '<span class="ck run"><i class="fa-solid fa-spinner fa-spin"></i></span>';
+
+  let ranV4 = false;
+  function cell(before, after, running){
+    const a = running ? run : (ranV4 ? icon(after) : pend);
+    return `<span class="cellpair">${icon(before)}<i class="fa-solid fa-arrow-right arw"></i>${a}</span>`;
+  }
+  function renderRes(running){
+    document.getElementById('resBody').innerHTML = PROFILES.map(p=>{
+      const changed = ranV4 && p.v3.some((b,i)=>b===0 && p.v4[i]===1);
+      return `<tr class="${changed?'fixed':''}">
+        <td><span class="who-cell"><span class="mini-pfp ${p.ghost?'ghost':''}">${p.ini}</span>${p.name}</span></td>
+        <td class="c">${cell(p.v3[0],p.v4[0],running)}</td>
+        <td class="c">${cell(p.v3[1],p.v4[1],running)}</td>
+        <td class="c">${cell(p.v3[2],p.v4[2],running)}</td>
+        <td class="c">${cell(p.v3[3],p.v4[3],running)}</td>
+      </tr>`;
+    }).join('');
+  }
+  renderRes(false);
+
+  // ---- nút chạy lại ----
+  const btn=document.getElementById('runBtn'), note=document.getElementById('runNote'), sumV4=document.getElementById('sumV4');
+  function pad(n){return (n<10?'0':'')+n;}
+  btn.addEventListener('click',()=>{
+    if(btn.classList.contains('running')) return;
+    btn.classList.add('running');
+    btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Đang chạy 5 hồ sơ… (gọi API thật)';
+    note.innerHTML='Đang gọi <b>claude-opus-5</b> · ước tính <b>~$0.50</b>';
+    sumV4.innerHTML='lesson-v4 <b>đang chạy…</b>';
+    renderRes(true);
+    const done=()=>{
+      ranV4=true; renderRes(false);
+      btn.classList.remove('running');
+      btn.innerHTML='<i class="fa-solid fa-rotate-right"></i> Chạy lại sau khi sửa prompt';
+      const now=new Date();
+      note.innerHTML='Lần chạy gần nhất: <b>lesson-v4</b> · '+pad(now.getHours())+':'+pad(now.getMinutes());
+      sumV4.innerHTML='lesson-v4 đạt <b>20</b>/20';
+    };
+    if(reduce) done(); else setTimeout(done,2600);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bài chẩn đoán · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ===== Bài chẩn đoán (S07) — layout tập trung, không sidebar ===== */
+
+  .diag-main{width:100%;max-width:760px;margin:0 auto;padding:clamp(20px,3vw,34px) clamp(16px,3vw,24px) 64px}
+
+  /* QuizProgress */
+  .qhead{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+  .qhead .step{font-size:var(--fs-sm);color:var(--muted)}
+  .qhead .step b{font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--text)}
+  .qhead .tag-concept{font-size:11px}
+  .pbar{height:6px;border-radius:999px;background:var(--m-track);overflow:hidden;margin-bottom:20px}
+  .pbar>i{display:block;height:100%;border-radius:999px;background:#fff;width:10%;transition:width var(--dur-2) var(--ease)}
+  .qnav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+  .qdot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--muted);
+    font-family:var(--font-display);font-weight:700;font-size:12px;
+    transition:background var(--dur-1),color var(--dur-1),border var(--dur-1)}
+  .qdot:hover{background:var(--surface-3);color:var(--text)}
+  .qdot.answered{color:#000;background:#d0d0d0;border-color:transparent}
+  .qdot.current{border-color:#fff;color:#fff;background:var(--surface-3)}
+
+  /* QuizItem */
+  .qcard{padding:28px}
+  .qcard .qtext{font-size:var(--fs-lg);font-weight:600;line-height:1.5;letter-spacing:-.01em}
+  .ex-table{width:100%;border-collapse:collapse;margin:16px 0 4px;font-size:var(--fs-sm);
+    border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+  .ex-table caption{caption-side:top;text-align:left;font-size:11.5px;color:var(--muted);margin-bottom:7px}
+  .ex-table th,.ex-table td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border-faint)}
+  .ex-table th{background:var(--surface-2);color:var(--text-2);font-weight:600;font-size:12px}
+  .ex-table tr:last-child td{border-bottom:none}
+  .ex-table td{color:var(--text-2)}
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+  .opt{display:flex;align-items:flex-start;gap:13px;width:100%;min-height:52px;padding:13px 16px;text-align:left;
+    border-radius:var(--r-md);background:var(--surface-1);border:1px solid var(--border);color:var(--text-2);
+    font-size:var(--fs-sm);line-height:1.5;transition:background var(--dur-1),border var(--dur-1),color var(--dur-1)}
+  .opt:hover{background:var(--surface-2);border-color:var(--border-strong)}
+  .opt .radio{width:20px;height:20px;flex-shrink:0;margin-top:1px;border-radius:50%;
+    border:1.5px solid var(--border-strong);display:grid;place-items:center;transition:.15s}
+  .opt .radio::after{content:"";width:9px;height:9px;border-radius:50%;background:#000;transform:scale(0);transition:transform .15s var(--ease-pop)}
+  .opt.sel{background:var(--surface-3);border-color:#fff;color:var(--text)}
+  .opt.sel .radio{background:#fff;border-color:#fff}
+  .opt.sel .radio::after{transform:scale(1)}
+  .opt .okey{font-family:var(--font-display);font-weight:700;color:var(--muted);margin-right:2px}
+  .opt.sel .okey{color:var(--text)}
+
+  .qfoot{display:flex;align-items:center;gap:12px;margin-top:26px}
+  .qfoot .grow{flex:1}
+
+  /* result-hero (dùng 1 lần) — MasteryGrid (.mgrid/.mtile) đã ở app.css */
+  .result-hero{text-align:center;padding:8px 0 4px;margin-bottom:8px}
+  .result-hero .big{font-family:var(--font-display);font-weight:700;font-size:56px;line-height:1;letter-spacing:-.02em}
+  .result-hero .big small{font-size:26px;color:var(--muted)}
+  .result-hero h1{font-size:var(--fs-xl);font-weight:600;margin-top:10px}
+  .result-hero p{color:var(--muted-strong);font-size:var(--fs-sm);margin-top:6px;max-width:46ch;margin-left:auto;margin-right:auto;line-height:1.55}
+
+  @media (max-width:640px){
+    .mgrid{grid-template-columns:repeat(2,1fr)}
+    .focus-top .ttl{display:none}
+    .qfoot .btn{flex:1}
+    .qdot{width:44px;height:44px}   /* cỡ chạm ≥44px trên mobile */
+  }
+</style>
+</head>
+<body>
+<div class="focus-shell">
+
+  <header class="focus-top">
+    <a class="brand" href="app-map.html" title="Sen">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+    <span class="ttl">· <b>Bài chẩn đoán đầu vào</b> — Cơ sở dữ liệu</span>
+    <span class="grow"></span>
+    <a class="focus-exit" href="app-map.html"><i class="fa-solid fa-xmark"></i> Thoát</a>
+  </header>
+
+  <div class="diag-main">
+
+    <!-- ==================== LÀM BÀI ==================== -->
+    <div id="quizView">
+      <div class="qhead">
+        <span class="step">Câu <b id="qNow">1</b> / 10</span>
+        <span class="tag tag-human tag-concept" id="qConcept">Phụ thuộc hàm</span>
+      </div>
+      <div class="pbar"><i id="pFill"></i></div>
+
+      <div class="qnav" id="qnav" role="tablist" aria-label="Danh sách câu hỏi"></div>
+
+      <section class="card qcard reveal" style="--d:0s" id="qcard">
+        <!-- nội dung câu sinh bằng JS -->
+      </section>
+
+      <div class="qfoot">
+        <button class="btn btn-ghost btn-lg" id="btnPrev"><i class="fa-solid fa-arrow-left"></i> Trước</button>
+        <span class="grow"></span>
+        <button class="btn btn-ghost btn-lg" id="btnNext">Sau <i class="fa-solid fa-arrow-right"></i></button>
+        <button class="btn btn-primary btn-lg" id="btnSubmit" style="display:none"><i class="fa-solid fa-flag-checkered"></i> Nộp bài</button>
+      </div>
+    </div>
+
+    <!-- ==================== KẾT QUẢ ==================== -->
+    <div id="resultView" hidden>
+      <div class="result-hero reveal" style="--d:0s">
+        <div class="big"><span id="rScore">0</span><small>/10</small></div>
+        <h1>Đã dựng bản đồ thành thạo của bạn</h1>
+        <p>Hệ thống khởi tạo mức thành thạo cho cả 8 khái niệm và đã lập lộ trình học đầu tiên. Bạn đang yếu ở nhánh chuẩn hóa cao — hãy đi theo lộ trình.</p>
+      </div>
+
+      <section class="card reveal" style="--d:.06s;margin-bottom:20px">
+        <div class="card-title"><i class="fa-solid fa-table-cells-large"></i> Lưới thành thạo — Chuẩn hóa CSDL</div>
+        <div class="mgrid" id="mgrid"></div>
+      </section>
+
+      <section class="card reveal" style="--d:.12s;margin-bottom:24px">
+        <div class="card-title"><i class="fa-solid fa-triangle-exclamation"></i> Cần ưu tiên
+          <span class="tag tag-human" style="margin-left:auto" id="weakCount">7 cần ưu tiên</span>
+        </div>
+        <div class="grid" style="gap:0" id="weakList"></div>
+      </section>
+
+      <div class="qfoot" style="margin-top:0">
+        <a class="btn btn-primary btn-lg" href="app-plan.html"><i class="fa-solid fa-route"></i> Xem lộ trình</a>
+        <a class="btn btn-ghost btn-lg" href="app-map.html"><i class="fa-solid fa-diagram-project"></i> Về bản đồ</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const alphaOf = s => 0.30 + s/100*0.65;
+  const light   = s => 'rgba(255,255,255,'+alphaOf(s).toFixed(3)+')';
+  const mclass  = s => s<40?'m-weak':s<60?'m-fair':s<80?'m-good':'m-strong';
+  const el = id => document.getElementById(id);
+
+  // ---------- 10 câu chẩn đoán, trải đều 8 khái niệm ----------
+  const Q = [
+    {c:'Phụ thuộc hàm (FD)',
+     q:'Cho quan hệ SinhVien(MSSV, HoTen, Lop) với MSSV là khóa. Phụ thuộc hàm nào ĐÚNG?',
+     opts:['HoTen → MSSV','MSSV → HoTen, Lop','Lop → MSSV','HoTen → Lop'], ans:1},
+    {c:'Khóa & khóa dự tuyển',
+     q:'Khóa dự tuyển (candidate key) được định nghĩa là:',
+     opts:['Bất kỳ tập thuộc tính nào xác định được các thuộc tính khác','Siêu khóa tối thiểu — bỏ bất kỳ thuộc tính nào thì không còn xác định được toàn bộ quan hệ','Thuộc tính luôn được chọn làm khóa chính','Tập gồm toàn bộ thuộc tính của quan hệ'], ans:1},
+    {c:'Phụ thuộc hàm đầy đủ',
+     q:'Với khóa ghép {MaSV, MaMon}, thuộc tính Diem phụ thuộc hàm ĐẦY ĐỦ vào khóa khi:',
+     opts:['Diem phụ thuộc vào MaSV hoặc MaMon riêng lẻ','Diem phụ thuộc vào toàn bộ {MaSV, MaMon} và không vào tập con thực sự nào','Diem là một phần của khóa','Diem xác định ngược lại được {MaSV, MaMon}'], ans:1},
+    {c:'Phụ thuộc bắc cầu',
+     q:'Cho A→B và B→C, trong đó B không phải là khóa. Có thể kết luận gì?',
+     opts:['A→C là một phụ thuộc bắc cầu','C→A luôn đúng','Không thể suy ra quan hệ nào giữa A và C','B chắc chắn là khóa dự tuyển'], ans:0},
+    {c:'Phụ thuộc bắc cầu',
+     q:'Cho tập phụ thuộc F = {A→B, B→C}. Bao đóng A⁺ (các thuộc tính suy ra được từ A) là:',
+     opts:['{A}','{A, B}','{A, B, C}','{B, C}'], ans:2},
+    {c:'Dạng chuẩn 1 (1NF)',
+     q:'Một quan hệ đạt dạng chuẩn 1 (1NF) khi:',
+     opts:['Mọi giá trị thuộc tính là nguyên tử, không có thuộc tính đa trị hay nhóm lặp','Không còn phụ thuộc bộ phận vào khóa','Không còn phụ thuộc bắc cầu','Mọi vế trái phụ thuộc hàm đều là siêu khóa'], ans:0},
+    {c:'Dạng chuẩn 2 (2NF)',
+     q:'Bảng DangKy(MaSV, MaMon, TenSV, Diem) có khóa {MaSV, MaMon}, và TenSV chỉ phụ thuộc vào MaSV. Bảng vi phạm dạng chuẩn nào?',
+     table:'<caption>DangKy — TenSV phụ thuộc bộ phận vào khóa</caption><tr><th>MaSV</th><th>MaMon</th><th>TenSV</th><th>Diem</th></tr><tr><td>SV01</td><td>DB</td><td>An</td><td>8</td></tr><tr><td>SV01</td><td>OS</td><td>An</td><td>7</td></tr>',
+     opts:['1NF','2NF — do có phụ thuộc bộ phận vào khóa ghép','3NF','BCNF'], ans:1},
+    {c:'Dạng chuẩn 3 (3NF)',
+     q:'Bảng NhanVien(MaNV, MaPhong, TenPhong) với MaNV→MaPhong và MaPhong→TenPhong. Bảng vi phạm dạng chuẩn nào?',
+     table:'<caption>NhanVien — TenPhong phụ thuộc bắc cầu vào khóa MaNV</caption><tr><th>MaNV</th><th>MaPhong</th><th>TenPhong</th></tr><tr><td>NV1</td><td>P01</td><td>Kỹ thuật</td></tr><tr><td>NV2</td><td>P01</td><td>Kỹ thuật</td></tr>',
+     opts:['1NF','2NF','3NF — do có phụ thuộc bắc cầu vào khóa','Không vi phạm chuẩn nào'], ans:2},
+    {c:'Dạng chuẩn 3 (3NF)',
+     q:'Điểm khác biệt chính giữa 2NF và 3NF là:',
+     opts:['2NF loại phụ thuộc bắc cầu, 3NF loại phụ thuộc bộ phận','2NF loại phụ thuộc bộ phận vào khóa, 3NF loại thêm phụ thuộc bắc cầu','Hai dạng chuẩn này tương đương nhau','3NF cho phép thuộc tính đa trị còn 2NF thì không'], ans:1},
+    {c:'Dạng chuẩn BCNF',
+     q:'Một quan hệ đạt dạng chuẩn Boyce–Codd (BCNF) khi:',
+     opts:['Với mọi phụ thuộc hàm không tầm thường X→Y thì X phải là siêu khóa','Chỉ cần không còn phụ thuộc bắc cầu','Mọi thuộc tính đều là nguyên tử','Quan hệ có ít nhất một khóa dự tuyển'], ans:0}
+  ];
+  const KEY='ABCD';
+  const answers = new Array(Q.length).fill(null);
+  let cur=0;
+
+  // ---------- render câu hiện tại ----------
+  function renderNav(){
+    const nav=el('qnav'); nav.innerHTML='';
+    Q.forEach((_,i)=>{
+      const b=document.createElement('button');
+      b.className='qdot'+(answers[i]!=null?' answered':'')+(i===cur?' current':'');
+      b.textContent=i+1; b.setAttribute('aria-label','Câu '+(i+1)+(answers[i]!=null?' — đã trả lời':''));
+      b.onclick=()=>{cur=i;render();};
+      nav.appendChild(b);
+    });
+  }
+  function render(){
+    const item=Q[cur];
+    el('qNow').textContent=cur+1;
+    el('qConcept').textContent=item.c;
+    el('pFill').style.width=((cur+1)/Q.length*100)+'%';
+
+    let html='<div class="qtext">'+item.q+'</div>';
+    if(item.table) html+='<table class="ex-table">'+item.table+'</table>';
+    html+='<div class="opts">';
+    item.opts.forEach((o,i)=>{
+      html+='<button type="button" class="opt'+(answers[cur]===i?' sel':'')+'" data-i="'+i+'">'+
+        '<span class="radio"></span><span><span class="okey">'+KEY[i]+'.</span> '+o+'</span></button>';
+    });
+    html+='</div>';
+    el('qcard').innerHTML=html;
+    el('qcard').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      answers[cur]=+b.dataset.i; render();
+    });
+
+    el('btnPrev').disabled = cur===0;
+    const last = cur===Q.length-1;
+    el('btnNext').style.display = last?'none':'';
+    el('btnSubmit').style.display = last?'':'none';
+    renderNav();
+  }
+  el('btnPrev').onclick=()=>{if(cur>0){cur--;render();}};
+  el('btnNext').onclick=()=>{if(cur<Q.length-1){cur++;render();}};
+  el('btnSubmit').onclick=submit;
+
+  // ---------- nộp bài → kết quả ----------
+  // mức thành thạo A sau chẩn đoán (bộ demo §6.3)
+  const MAP=[
+    {k:'k1',name:'Phụ thuộc hàm (FD)',score:30},
+    {k:'k2',name:'Khóa & khóa dự tuyển',score:40},
+    {k:'k3',name:'Phụ thuộc hàm đầy đủ',score:25},
+    {k:'k4',name:'Phụ thuộc bắc cầu',score:20},
+    {k:'k5',name:'Dạng chuẩn 1 (1NF)',score:55},
+    {k:'k6',name:'Dạng chuẩn 2 (2NF)',score:35},
+    {k:'k7',name:'Dạng chuẩn 3 (3NF)',score:15},
+    {k:'k8',name:'Boyce–Codd (BCNF)',score:10}
+  ];
+
+  function paintBar(bar,score){ bar.style.background=light(score);
+    if(reduce){bar.style.width=score+'%';}
+    else{bar.style.width='0';requestAnimationFrame(()=>setTimeout(()=>bar.style.width=score+'%',120));} }
+
+  function submit(){
+    // điểm số câu đúng
+    let correct=0; answers.forEach((a,i)=>{if(a===Q[i].ans)correct++;});
+    el('quizView').hidden=true;
+    el('resultView').hidden=false;
+    window.scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+
+    // đếm số điểm
+    if(reduce){el('rScore').textContent=correct;}
+    else{let n=0,t0=performance.now();const step=now=>{const p=Math.min((now-t0)/900,1);
+      el('rScore').textContent=Math.round(correct*(1-Math.pow(1-p,3)));
+      if(p<1)requestAnimationFrame(step);else el('rScore').textContent=correct;};requestAnimationFrame(step);}
+
+    // lưới thành thạo
+    const g=el('mgrid'); g.innerHTML='';
+    MAP.forEach(m=>{
+      const d=document.createElement('div'); d.className='mtile';
+      d.innerHTML='<span class="lvl"></span>'+
+        '<div class="mk">'+m.k.toUpperCase()+'</div>'+
+        '<div class="mname">'+m.name+'</div>'+
+        '<div class="mfoot"><span class="mnum">'+m.score+'</span>'+
+          (m.score<60?'<span class="weak">yếu</span>':'')+'</div>'+
+        '<div class="mbar '+mclass(m.score)+'"><i data-w="'+m.score+'"></i></div>';
+      g.appendChild(d);
+    });
+    // nền ô sáng dần theo điểm (mã hóa bằng độ sáng) + thanh
+    g.querySelectorAll('.mtile').forEach((t,idx)=>{
+      const s=MAP[idx].score;
+      t.querySelector('.lvl').style.opacity=(0.04+s/100*0.16).toFixed(3);
+      paintBar(t.querySelector('.mbar>i'),s);
+    });
+
+    // danh sách cần ưu tiên: các khái niệm yếu rõ (<55; k5=55 chỉ "sát ngưỡng" §6.3)
+    const weak=MAP.filter(m=>m.score<55).sort((a,b)=>a.score-b.score);
+    el('weakCount').textContent=weak.length+' cần ưu tiên';
+    const list=el('weakList'); list.innerHTML='';
+    weak.slice(0,5).forEach(m=>{
+      const a=document.createElement('div'); a.className='concept-row';
+      a.innerHTML='<div><div class="cname">'+m.name+'</div><div class="csub">Chuẩn hóa CSDL · Cơ sở dữ liệu</div></div>'+
+        '<span class="mastery '+mclass(m.score)+' weak-tag"><span class="dot"></span><span class="n">'+m.score+'</span></span>'+
+        '<div class="cbar"><div class="mbar '+mclass(m.score)+'"><i data-w="'+m.score+'"></i></div></div>';
+      list.appendChild(a);
+    });
+    list.querySelectorAll('.concept-row').forEach((r,i)=>{
+      const s=weak[i].score;
+      r.querySelector('.mastery .dot').style.background=light(s);
+      paintBar(r.querySelector('.mbar>i'),s);
+    });
+  }
+
+  render();
+</script>
+</body>
+</html>

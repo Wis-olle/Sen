@@ -1,0 +1,201 @@
+/* ============================================================
+   Sen · Design tokens
+   Hệ thống hỗ trợ học tập cá nhân hóa AI — UTT
+   Dark-first. Trích từ ai-runtime.html + velorah-hero.html, mở rộng.
+   Mọi màu chữ trên nền đen đã kiểm tương phản WCAG AA (>= 4.5:1).
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* ---------- Nền & bề mặt (đen thuần như homepage) ---------- */
+  --bg:            #000000;              /* nền gốc, giữ nguyên ai-runtime */
+  --bg-elev:       #000000;              /* app shell — đen thuần như homepage */
+  --surface-1:     rgba(255,255,255,.035); /* card thường */
+  --surface-2:     rgba(255,255,255,.06);  /* card nổi / hover */
+  --surface-3:     rgba(255,255,255,.10);  /* control, input, chip nền */
+  --surface-pop:   #111114;                /* ĐỤC: popover, modal, tooltip, sheet, đầu bảng dính */
+  --surface-toast: #ffffff;                /* toast = pill trắng (chữ đen), như CTA/nav */
+  --scrim:         rgba(0,0,0,.55);        /* phủ tối lên video (login) */
+
+  /* ---------- Không khí (atmosphere) — MÀU CHỈ SỐNG Ở ĐÂY ----------
+     Đo từ video nền/bg-dune (STYLE §2). Chỉ dùng trong lớp nền
+     (body::before, .bg, .atm) với opacity giới hạn; component không bao giờ mang. */
+  --atm-sky:     #c1b8c8;  /* trời tím-xám nhạt */
+  --atm-rose:    #d8bec9;  /* hồng bụi sát chân trời */
+  --atm-horizon: #a07080;  /* viền chân trời */
+  --atm-plum:    #3a2226;  /* đụn trên (quầng mận nền app) */
+  --atm-wine:    #271717;  /* đụn giữa */
+  --atm-black:   #000000;  /* đụn dưới = nền trang */
+
+  /* ---------- Chữ ---------- */
+  --text:          #ffffff;             /* tiêu đề, chữ chính */
+  --text-2:        #d0d0d0;             /* body phụ (subhead) — AA: ~13:1 */
+  --muted:         #8e8e8e;             /* nhãn, caption — AA: ~4.6:1 */
+  --muted-strong:  #a8a8a8;             /* nhãn cần rõ hơn — AA: ~6:1 */
+  --on-light:      #1c1c1e;             /* chữ trên nền trắng (nav pill) */
+  --nav-text:      #2e2e2e;             /* chữ nav pill trắng, giữ gốc */
+
+  /* ---------- Viền ---------- */
+  --border:        rgba(255,255,255,.10);
+  --border-strong: rgba(255,255,255,.18);
+  --border-faint:  rgba(255,255,255,.06);
+
+  /* ---------- Accent (ĐƠN SẮC TRẮNG — như homepage, không màu) ---------- */
+  --accent:        #ffffff;             /* link, active, đồ thị */
+  --accent-strong: #ffffff;             /* nhấn mạnh, focus */
+  --accent-dim:    rgba(255,255,255,.10);/* nền accent mờ */
+  --accent-border: rgba(255,255,255,.28);
+
+  /* ---------- Ngữ nghĩa (đơn sắc; chỉ --danger dùng màu, rất hiếm) ---------- */
+  --success:       #ffffff;             /* "xong / đúng" — trắng */
+  --success-dim:   rgba(255,255,255,.12);
+  --warn:          #d0d0d0;             /* "chú ý" — xám sáng */
+  --warn-dim:      rgba(255,255,255,.10);
+  --danger:        #f87171;             /* CHỈ dùng cho lỗi thật / "sai". AA ~8:1 */
+  --danger-dim:    rgba(248,113,113,.14);
+
+  /* ---------- Thang thành thạo 0–100 (đơn sắc: tối→sáng) ----------
+     Dùng cho thẻ khái niệm, lưới bản đồ, mastery pill.
+     Mã hóa bằng ĐỘ SÁNG (không dùng màu). Nhãn số luôn để màu chữ chính (AA).
+     Khái niệm yếu <60 đánh dấu bằng nhãn "yếu", không dựa vào màu. */
+  --m-weak:        #6b6b6d;  /* 0–39   xám tối   */
+  --m-fair:        #9a9a9c;  /* 40–59  xám vừa   */
+  --m-good:        #d0d0d0;  /* 60–79  xám sáng  */
+  --m-strong:      #ffffff;  /* 80–100 trắng     */
+  --m-weak-dim:    rgba(255,255,255,.06);
+  --m-fair-dim:    rgba(255,255,255,.09);
+  --m-good-dim:    rgba(255,255,255,.13);
+  --m-strong-dim:  rgba(255,255,255,.18);
+  --m-track:       rgba(255,255,255,.08);  /* nền thanh tiến độ mastery */
+
+  /* ---------- 4 bước trạng thái xử lý tài liệu ----------
+     đã tải → đã trích xuất → đã lập chỉ mục → đã có bản đồ */
+  --step-pending:  #6b6b6d;             /* chưa tới */
+  --step-active:   #ffffff;             /* đang chạy (nhấp nháy nhẹ) */
+  --step-done:     #ffffff;             /* xong + dấu check */
+  --step-track:    rgba(255,255,255,.12);/* đường nối giữa các bước */
+
+  /* ---------- Chip trích dẫn [D3] — như trust-pill homepage ---------- */
+  --cite-bg:       rgba(255,255,255,.12);
+  --cite-border:   rgba(255,255,255,.28);
+  --cite-text:     #ffffff;
+  --cite-bg-hover: rgba(255,255,255,.20);
+
+  /* ---------- Nav / pill sáng (giữ từ ai-runtime) ---------- */
+  --pill-dark:     #28282a;
+  --sign-in-text:  #c8c8c8;
+  --trust-bg:      #28282a;
+  --trust-border:  rgba(255,255,255,.4);
+  --trust-text:    #c4c2c3;
+
+  /* ---------- Typography ---------- */
+  --font-sans:    "Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-display: "Doto","Inter",system-ui,monospace;  /* dot-matrix, thay BubbledotICG */
+
+  --fs-xs:   .75rem;    /* 12 */
+  --fs-sm:   .8125rem;  /* 13 */
+  --fs-base: .9375rem;  /* 15 — body app mặc định */
+  --fs-md:   1rem;      /* 16 */
+  --fs-lg:   1.125rem;  /* 18 */
+  --fs-xl:   1.375rem;  /* 22 */
+  --fs-2xl:  1.75rem;   /* 28 */
+  --fs-3xl:  2.25rem;   /* 36 */
+
+  --lh-tight:  1.12;
+  --lh-snug:   1.32;
+  --lh-normal: 1.55;
+
+  --tracking-tight: -.02em;
+  --tracking-display: -.04em;
+
+  /* ---------- Spacing (nền 4px) ---------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px;
+
+  /* ---------- Bo góc ---------- */
+  --r-pill: 999px;
+  --r-lg:   28px;   /* sheet, modal lớn */
+  --r-card: 22px;   /* card chính */
+  --r-md:   14px;   /* control, input */
+  --r-sm:   10px;   /* chip, badge nhỏ */
+
+  /* ---------- Đổ bóng ---------- */
+  --sh-nav:  0 4px 14px rgba(0,0,0,.16);
+  --sh-card: 0 10px 40px rgba(0,0,0,.45);
+  --sh-pop:  0 20px 60px rgba(0,0,0,.5);
+
+  /* ---------- Glow ---------- */
+  /* CTA trắng phát sáng — công thức gốc ai-runtime */
+  --glow-cta:       0 0 0 1px rgba(255,255,255,.15), 0 0 22px rgba(255,255,255,.32), 0 0 44px rgba(255,255,255,.12);
+  --glow-cta-hover: 0 0 0 1px rgba(255,255,255,.25), 0 0 30px rgba(255,255,255,.45), 0 0 60px rgba(255,255,255,.20);
+  /* Glow trắng phụ (dùng lại đúng glow CTA — không có quầng màu) */
+  --glow-accent:    var(--glow-cta);
+  --focus-ring:     0 0 0 2px var(--bg), 0 0 0 4px #ffffff;
+
+  /* ---------- Glass (từ velorah liquid-glass) ---------- */
+  --glass-bg:       rgba(255,255,255,.02);
+  --glass-blur:     10px;
+  --glass-inset:    inset 0 1px 1px rgba(255,255,255,.10);
+
+  /* ---------- Motion ---------- */
+  --ease:        cubic-bezier(.22,1,.36,1);
+  --ease-pop:    cubic-bezier(.2,1.4,.4,1);
+  --dur-1:       .22s;   /* hover, chuyển nhỏ */
+  --dur-2:       .45s;   /* panel, menu */
+  --dur-reveal:  .85s;   /* reveal vào trang */
+  --reveal-blur: 6px;
+  --reveal-y:    22px;
+
+  /* ---------- Layout app shell ---------- */
+  --sidebar-w:      248px;
+  --sidebar-w-mini: 72px;
+  --topbar-h:       64px;
+  --content-max:    1100px;
+}
+
+/* ============================================================
+   Light theme — cấu trúc token để sẵn, chưa tinh chỉnh phần nhìn.
+   Kích hoạt: <html data-theme="light">. Chỉ remap token nền/chữ/viền.
+   ============================================================ */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:            #f6f6f4;
+  --bg-elev:       #ffffff;
+  --surface-1:     rgba(0,0,0,.03);
+  --surface-2:     rgba(0,0,0,.05);
+  --surface-3:     rgba(0,0,0,.08);
+  --surface-pop:   #ffffff;
+  --surface-toast: #16161a;   /* light: pill tối, chữ sáng (đảo như toast cổ điển) */
+  --scrim:         rgba(255,255,255,.55);
+  --text:          #16161a;
+  --text-2:        #3a3a40;
+  --muted:         #6b6b72;
+  --muted-strong:  #55555c;
+  --on-light:      #1c1c1e;
+  --border:        rgba(0,0,0,.10);
+  --border-strong: rgba(0,0,0,.18);
+  --border-faint:  rgba(0,0,0,.06);
+  --accent:        #16161a;
+  --accent-strong: #16161a;
+  --accent-dim:    rgba(0,0,0,.06);
+  --accent-border: rgba(0,0,0,.22);
+  --m-weak:        #b8b8ba; --m-fair:#8a8a8c; --m-good:#4a4a4e; --m-strong:#16161a;
+  --m-track:       rgba(0,0,0,.08);
+  --glass-bg:      rgba(255,255,255,.5);
+  --glass-inset:   inset 0 1px 1px rgba(255,255,255,.7);
+}
+
+/* ============================================================
+   Reduced motion — tôn trọng cấu hình người dùng
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: .001ms;
+    --dur-2: .001ms;
+    --dur-reveal: .001ms;
+    --reveal-blur: 0px;
+    --reveal-y: 0px;
+  }
+}

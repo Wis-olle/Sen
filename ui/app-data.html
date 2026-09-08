@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dữ liệu của tôi · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ riêng trang Dữ liệu của tôi (S15) ============ */
+
+
+
+
+
+
+
+  /* khối theo dõi + vùng nguy hiểm riêng trang */
+  .track-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r-md);
+    background:var(--surface-2);border:1px solid var(--border);margin-bottom:var(--sp-5)}
+  .track-row .tr-ic{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+    background:var(--surface-3);border:1px solid var(--border);color:var(--text)}
+  .track-row .tr-txt{flex:1;min-width:0}
+  .track-row .tr-title{font-size:var(--fs-sm);font-weight:600}
+  .track-row .tr-state{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .track-row.paused .tr-ic{color:var(--muted)}
+
+  .sitehint{display:flex;align-items:flex-start;gap:8px;font-size:11.5px;color:var(--muted);
+    line-height:1.5;margin:2px 0 12px}
+  .sitehint i{margin-top:2px;font-size:11px}
+
+  .acct-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .acct-actions .sep-note{flex-basis:100%;height:1px;background:var(--border);margin:6px 0}
+  .danger-note{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);line-height:1.5;
+    max-width:52ch}
+  .danger-note i{margin-top:2px;color:var(--danger);font-size:12px}
+
+  @media (max-width:1024px){ .statrow{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:760px){
+    .statrow{grid-template-columns:repeat(2,1fr);gap:12px}
+    .acct-actions .btn{width:100%}
+  }
+  @media (max-width:460px){ .statrow{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item active" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Dữ liệu của tôi <small>Thứ Hai, 08/09/2026</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm, tài liệu, môn học…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Dữ liệu của tôi</h1>
+        <p>Toàn bộ dữ liệu hệ thống đã thu về bạn. Bạn kiểm soát: tạm dừng theo dõi, giới hạn trang, tải về hoặc xóa sạch bất cứ lúc nào.</p>
+      </div>
+
+      <!-- 1) Tổng quan (StatCard) -->
+      <div class="statrow reveal" style="--d:.05s">
+        <div class="stat">
+          <div class="slabel"><i class="fa-solid fa-wave-square"></i> Tín hiệu học đã thu</div>
+          <div class="sval"><span class="snum">1.248</span></div>
+        </div>
+        <div class="stat">
+          <div class="slabel"><i class="fa-solid fa-clock"></i> Tổng thời gian đọc</div>
+          <div class="sval"><span class="snum">32,3</span><span class="sunit">giờ</span></div>
+        </div>
+        <div class="stat">
+          <div class="slabel"><i class="fa-solid fa-folder-open"></i> Tài liệu</div>
+          <div class="sval"><span class="snum">6</span><span class="sunit">tệp</span></div>
+        </div>
+        <div class="stat">
+          <div class="slabel"><i class="fa-solid fa-book-open"></i> Bài học đã tạo</div>
+          <div class="sval"><span class="snum">18</span><span class="sunit">bài</span></div>
+        </div>
+      </div>
+
+      <div class="bento">
+
+        <!-- 2) Tín hiệu học gần đây -->
+        <section class="card reveal col-7" style="--d:.11s">
+          <div class="card-title"><i class="fa-solid fa-list"></i> Tín hiệu học gần đây</div>
+          <div class="tablewrap">
+            <table class="dt" style="min-width:540px">
+              <thead>
+                <tr><th>Thời điểm</th><th>Trang</th><th>Khái niệm</th><th style="text-align:right">Thời lượng</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="num">08/09 · 20:14</td><td class="sub">Ch.4 · tr. 12</td><td>Phụ thuộc hàm (FD)</td><td class="num" style="text-align:right">4p 30s</td></tr>
+                <tr><td class="num">08/09 · 20:03</td><td class="sub">Ch.4 · tr. 11</td><td>Phụ thuộc hàm (FD)</td><td class="num" style="text-align:right">3p 12s</td></tr>
+                <tr><td class="num">08/09 · 19:47</td><td class="sub">Ch.4 · tr. 18</td><td>Phụ thuộc bắc cầu</td><td class="num" style="text-align:right">6p 02s</td></tr>
+                <tr><td class="num">07/09 · 21:22</td><td class="sub">Ch.4 · tr. 9</td><td>Khóa &amp; khóa dự tuyển</td><td class="num" style="text-align:right">2p 48s</td></tr>
+                <tr><td class="num">07/09 · 21:05</td><td class="sub">Ch.4 · tr. 7</td><td>Dạng chuẩn 1 (1NF)</td><td class="num" style="text-align:right">5p 20s</td></tr>
+                <tr><td class="num">06/09 · 20:31</td><td class="sub">Ch.4 · tr. 22</td><td>Dạng chuẩn 3 (3NF)</td><td class="num" style="text-align:right">3p 55s</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="meta" style="margin-top:16px">Hiển thị 6 tín hiệu gần nhất trong tổng số 1.248. Tải toàn bộ dữ liệu để xem đầy đủ.</p>
+        </section>
+
+        <!-- 3) Theo dõi & quyền riêng tư -->
+        <section class="card reveal col-5" style="--d:.17s">
+          <div class="card-title"><i class="fa-solid fa-shield-halved"></i> Theo dõi &amp; trang được phép</div>
+
+          <div class="track-row" id="trackRow">
+            <span class="tr-ic"><i class="fa-solid fa-eye" id="trackIcon"></i></span>
+            <div class="tr-txt">
+              <div class="tr-title">Tạm dừng theo dõi</div>
+              <div class="tr-state" id="trackState">Đang theo dõi hoạt động học</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="pauseTrack" aria-label="Tạm dừng theo dõi"><span class="track"><span class="knob"></span></span></label>
+          </div>
+
+          <div class="sitehint"><i class="fa-solid fa-circle-info"></i>
+            <span>Tiện ích trình duyệt chỉ ghi nhận hoạt động trên các trang dưới đây.</span></div>
+
+          <div class="sitelist" id="siteList">
+            <div class="site"><span class="sdomain">daotao.utt.edu.vn</span>
+              <button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="site"><span class="sdomain">thuvien.utt.edu.vn:8080</span>
+              <button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="site"><span class="sdomain">lms.utt.edu.vn</span>
+              <button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button></div>
+          </div>
+          <div class="siteadd">
+            <input class="input" id="siteInput" placeholder="Thêm tên miền, vd: elearning.utt.edu.vn" />
+            <button class="btn btn-ghost" id="siteAdd"><i class="fa-solid fa-plus"></i> Thêm</button>
+          </div>
+        </section>
+
+        <!-- 4) Quản lý tài khoản -->
+        <section class="card reveal col-12" style="--d:.23s">
+          <div class="card-title"><i class="fa-solid fa-user-gear"></i> Quản lý tài khoản</div>
+          <div class="acct-actions">
+            <button class="btn btn-ghost btn-lg" id="downloadBtn"><i class="fa-solid fa-download"></i> Tải toàn bộ dữ liệu</button>
+            <span class="danger-note"><i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Bản sao gồm hồ sơ, tín hiệu học, bản đồ kiến thức và lịch sử bài học (định dạng JSON).</span></span>
+            <div class="sep-note"></div>
+            <button class="btn btn-danger btn-lg" id="deleteBtn"><i class="fa-solid fa-trash-can"></i> Xóa tài khoản và toàn bộ dữ liệu</button>
+            <span class="danger-note"><i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Không thể hoàn tác. Toàn bộ dữ liệu học tập sẽ bị xóa vĩnh viễn.</span></span>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ConfirmDialog: xóa tài khoản (gõ xác nhận) -->
+<div class="scrim" id="delScrim" role="dialog" aria-modal="true" aria-labelledby="delTitle">
+  <div class="modal danger">
+    <div class="mtitle" id="delTitle"><span class="mi"><i class="fa-solid fa-trash-can"></i></span> Xóa tài khoản?</div>
+    <div class="mbody">
+      Hành động này xóa vĩnh viễn tài khoản <b>Nguyễn Văn An</b> cùng toàn bộ tín hiệu học,
+      bản đồ kiến thức và lịch sử bài học. <b>Không thể hoàn tác.</b>
+      <div class="mtype">
+        <label for="delConfirm">Gõ <b>XÓA</b> để xác nhận</label>
+        <input class="input" id="delConfirm" placeholder="XÓA" autocomplete="off" />
+      </div>
+    </div>
+    <div class="mactions">
+      <button class="btn btn-ghost" id="delCancel">Hủy</button>
+      <button class="btn btn-danger" id="delConfirmBtn" disabled>Xóa vĩnh viễn</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tạm dừng theo dõi — đổi trạng thái + icon
+  const pause = document.getElementById('pauseTrack');
+  pause.addEventListener('change', ()=>{
+    const row = document.getElementById('trackRow');
+    const on = pause.checked;
+    row.classList.toggle('paused', on);
+    document.getElementById('trackIcon').className = on ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+    document.getElementById('trackState').textContent = on ? 'Đã tạm dừng — không ghi nhận mới' : 'Đang theo dõi hoạt động học';
+  });
+
+  // SiteList thêm/bớt
+  const list = document.getElementById('siteList');
+  const inp  = document.getElementById('siteInput');
+  function addSite(){
+    const v = inp.value.trim();
+    if(!v) return;
+    const el = document.createElement('div');
+    el.className = 'site';
+    el.innerHTML = '<span class="sdomain"></span><button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button>';
+    el.querySelector('.sdomain').textContent = v;   // textContent = chống chèn HTML
+    list.appendChild(el);
+    inp.value = '';
+  }
+  document.getElementById('siteAdd').addEventListener('click', addSite);
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addSite(); }});
+  list.addEventListener('click', e=>{ const b=e.target.closest('.srm'); if(b) b.closest('.site').remove(); });
+
+  // ConfirmDialog xóa (gõ XÓA)
+  const scrim=document.getElementById('delScrim'), conf=document.getElementById('delConfirm'),
+        ok=document.getElementById('delConfirmBtn');
+  const open=()=>{scrim.classList.add('open');conf.value='';ok.disabled=true;setTimeout(()=>conf.focus(),40)};
+  const close=()=>scrim.classList.remove('open');
+  document.getElementById('deleteBtn').addEventListener('click', open);
+  document.getElementById('delCancel').addEventListener('click', close);
+  scrim.addEventListener('click', e=>{ if(e.target===scrim) close(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && scrim.classList.contains('open')) close(); });
+  conf.addEventListener('input', ()=>{ ok.disabled = conf.value.trim().toUpperCase() !== 'XÓA'; });
+</script>
+</body>
+</html>

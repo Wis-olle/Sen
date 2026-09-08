@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contact Cybernetic — Mainframe®</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','ui-sans-serif','system-ui','sans-serif'] } } } };
+</script>
+<style>
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .animate-blink { animation: blink 1s step-end infinite; }
+  @keyframes dropin { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
+  .dropin { animation: dropin .6s ease both; }
+  @keyframes pop { from{opacity:0; transform:scale(.4)} to{opacity:1; transform:scale(1)} }
+  .pop { animation: pop .35s cubic-bezier(.2,1.4,.4,1) both; }
+  body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
+  ::selection { background:#EAECE9; color:#1C2E1E; }
+</style>
+</head>
+<body class="relative bg-white text-neutral-900 font-sans antialiased overflow-x-hidden flex flex-col lg:block lg:min-h-screen">
+
+  <!-- Navbar -->
+  <header class="fixed top-0 inset-x-0 z-10 px-5 sm:px-8 py-4 sm:py-5 flex flex-row justify-between items-center bg-transparent">
+    <div class="flex flex-row items-center gap-3">
+      <span class="text-[21px] sm:text-[26px] tracking-tight text-black font-medium select-none">Mainframe&reg;</span>
+      <span class="text-[25px] sm:text-[30px] text-black select-none tracking-[-0.02em] font-medium leading-none mb-1">&#10033;</span>
+    </div>
+    <nav class="hidden md:flex flex-row text-[23px] text-black">
+      <a href="#" class="hover:opacity-60 transition-opacity">Labs</a><span class="opacity-40">,&nbsp;</span>
+      <a href="#" class="hover:opacity-60 transition-opacity">Studio</a><span class="opacity-40">,&nbsp;</span>
+      <a href="#" class="hover:opacity-60 transition-opacity">Openings</a><span class="opacity-40">,&nbsp;</span>
+      <a href="#" class="hover:opacity-60 transition-opacity">Shop</a>
+    </nav>
+    <a href="#" class="hidden md:inline text-[23px] text-black underline underline-offset-2 hover:opacity-60 transition-opacity">Get in touch</a>
+    <button id="burger" aria-label="Menu" class="md:hidden flex flex-col justify-center gap-[5px] w-8 h-8">
+      <span class="block w-6 h-[2px] bg-black transition-all duration-300"></span>
+      <span class="block w-6 h-[2px] bg-black transition-all duration-300"></span>
+      <span class="block w-6 h-[2px] bg-black transition-all duration-300"></span>
+    </button>
+  </header>
+
+  <!-- Mobile overlay -->
+  <div id="mobileMenu" class="md:hidden fixed inset-0 z-[9] bg-white/95 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col items-center justify-center gap-8 text-3xl text-black">
+    <a href="#">Labs</a><a href="#">Studio</a><a href="#">Openings</a><a href="#">Shop</a>
+    <a href="#" class="underline underline-offset-2">Get in touch</a>
+  </div>
+
+  <!-- Background video (crossfade loop: two stacked copies) -->
+  <div class="order-last lg:order-none relative lg:absolute lg:inset-0 lg:z-0 overflow-hidden pointer-events-none w-full aspect-square md:aspect-video lg:aspect-auto lg:h-full bg-neutral-50 lg:bg-transparent">
+    <video id="vidA" muted playsinline preload="auto"
+      class="absolute inset-0 w-full h-full object-cover object-right lg:object-right-bottom transition-opacity duration-700 ease-linear"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260601_110537_3a579fa0-7bbc-4d94-9d25-0e816c7840f5.mp4"></video>
+    <video id="vidB" muted playsinline preload="auto"
+      class="absolute inset-0 w-full h-full object-cover object-right lg:object-right-bottom transition-opacity duration-700 ease-linear opacity-0"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260601_110537_3a579fa0-7bbc-4d94-9d25-0e816c7840f5.mp4"></video>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 flex flex-col order-first lg:order-none w-full bg-white lg:bg-transparent pb-8 lg:pb-0 lg:min-h-screen">
+    <main id="spade-hero" class="w-full max-w-7xl mx-auto px-6 py-12 flex-1 flex flex-col justify-center">
+
+      <div class="dropin">
+        <h1 id="headline" class="text-5xl md:text-6xl lg:text-[76px] font-normal tracking-tight text-black leading-[1.08] mb-8 select-none w-full whitespace-pre-wrap"></h1>
+      </div>
+
+      <div class="dropin" style="animation-delay:.1s">
+        <p class="text-lg md:text-xl text-[#5A635A] leading-relaxed font-normal mb-14 max-w-2xl">
+          Whether you have questions, feedback, <br /> drop us a message and we'll get back to you as soon as possible.
+        </p>
+      </div>
+
+      <div class="dropin" style="animation-delay:.2s">
+        <h2 class="text-2xl font-medium tracking-tight mb-2">What sort of service?</h2>
+        <p class="opacity-85 text-[#738273] mb-8">Select all that apply</p>
+
+        <div id="pills" class="flex flex-wrap gap-3 mb-6"></div>
+
+        <div id="banner"></div>
+      </div>
+
+    </main>
+  </div>
+
+<script>
+  const CHECK = '<svg class="pop" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  // --- Typewriter ---
+  (function typewriter(text, speed=38, startDelay=600){
+    const el = document.getElementById('headline');
+    const cursor = '<span class="inline-block w-[2px] h-[1.1em] bg-black align-middle ml-[2px] animate-blink"></span>';
+    let i = 0;
+    el.innerHTML = cursor;
+    setTimeout(() => {
+      const t = setInterval(() => {
+        i++;
+        el.innerHTML = text.slice(0, i).replace(/\n/g, '<br>') + (i < text.length ? cursor : '');
+        if (i >= text.length) clearInterval(t);
+      }, speed);
+    }, startDelay);
+  })("we'd love to\nhear from you!");
+
+  // --- Mobile menu ---
+  const burger = document.getElementById('burger');
+  const menu = document.getElementById('mobileMenu');
+  const bars = burger.querySelectorAll('span');
+  let open = false;
+  burger.addEventListener('click', () => {
+    open = !open;
+    menu.classList.toggle('opacity-0', !open);
+    menu.classList.toggle('pointer-events-none', !open);
+    menu.classList.toggle('opacity-100', open);
+    menu.classList.toggle('pointer-events-auto', open);
+    bars[0].style.transform = open ? 'rotate(45deg) translateY(7px)' : '';
+    bars[1].style.opacity   = open ? '0' : '1';
+    bars[2].style.transform = open ? 'rotate(-45deg) translateY(-7px)' : '';
+  });
+
+  // --- Service pills ---
+  const OPTIONS = ["Brand","Digital","Campaign","Other"];
+  const selected = new Set();
+  const pillsEl = document.getElementById('pills');
+  const bannerEl = document.getElementById('banner');
+
+  function renderPills(){
+    pillsEl.innerHTML = '';
+    OPTIONS.forEach(opt => {
+      const active = selected.has(opt);
+      const b = document.createElement('button');
+      b.className = "flex items-center gap-2 px-5 py-3 rounded-full text-base transition-all duration-200 " +
+        (active
+          ? "bg-[#1C2E1E] text-white shadow-md shadow-emerald-950/5"
+          : "bg-white text-[#1C2E1E] border border-[#F1F3F1] hover:bg-[#F1F3F1]/55");
+      b.innerHTML = (active ? CHECK : '') + '<span>'+opt+'</span>';
+      b.onclick = () => { active ? selected.delete(opt) : selected.add(opt); renderPills(); renderBanner(); };
+      pillsEl.appendChild(b);
+    });
+  }
+
+  function renderBanner(){
+    if (selected.size === 0){
+      bannerEl.innerHTML = '<p class="italic text-xs" style="opacity:.5">Please click to select services above.</p>';
+      return;
+    }
+    const list = OPTIONS.filter(o => selected.has(o)).join(", ");
+    bannerEl.innerHTML =
+      '<div class="pop bg-[#FAFBF9] border border-[#F1F3F1] rounded-2xl px-5 py-4 flex items-center justify-between gap-4 max-w-2xl">' +
+        '<span class="text-[#1C2E1E]">Ready to inquire about: <span class="font-medium">'+list+'</span></span>' +
+        '<button class="flex items-center gap-1 text-[#4D6D47] uppercase text-xs font-medium hover:opacity-70 transition-opacity">Let\'s Go &rarr;</button>' +
+      '</div>';
+  }
+
+  renderPills();
+  renderBanner();
+
+  // --- Video: seamless crossfade loop (both copies play forward = smooth) ---
+  const FADE = 0.7;                 // must match transition-opacity duration-700
+  let active = document.getElementById('vidA');
+  let standby = document.getElementById('vidB');
+  let swapping = false;
+
+  active.play().catch(() => {});
+
+  function loopTick(){
+    const a = active;
+    if (!swapping && a.duration && a.currentTime >= a.duration - FADE){
+      swapping = true;
+      standby.currentTime = 0;
+      standby.play().catch(() => {});
+      standby.style.opacity = '1';
+      a.style.opacity = '0';
+      const finished = a;
+      setTimeout(() => { finished.pause(); }, FADE * 1000); // free the decoder once hidden
+      [active, standby] = [standby, active];
+      swapping = false;
+    }
+    requestAnimationFrame(loopTick);
+  }
+  requestAnimationFrame(loopTick);
+</script>
+</body>
+</html>

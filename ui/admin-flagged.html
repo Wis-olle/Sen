@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bài bị báo sai · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng màn Bài bị báo sai ---- */
+  .fl-grid{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
+  @media(max-width:900px){.fl-grid{grid-template-columns:1fr}}
+
+  /* hàng đợi (trái) */
+  .queue{display:flex;flex-direction:column;gap:8px}
+  .qrow{position:relative;display:block;width:100%;text-align:left;background:var(--surface-1);
+    border:1px solid var(--border);border-radius:var(--r-md);padding:14px 15px;cursor:pointer;
+    transition:background var(--dur-1),border var(--dur-1),transform var(--dur-1)}
+  .qrow:hover{background:var(--surface-2);transform:translateY(-1px)}
+  .qrow.active{background:var(--surface-2);border-color:var(--border-strong)}
+  .qrow.active::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:#fff}
+  .qrow .qtop{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+  .qrow .qc{font-size:var(--fs-sm);font-weight:600;line-height:1.2}
+  .qrow .qstat{margin-left:auto;flex-shrink:0}
+  .qrow .qwho{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted)}
+  .qrow .qwho .mini-pfp{width:20px;height:20px;font-size:9.5px}
+  .qrow .qwhen{font-family:var(--font-display);font-size:10.5px}
+  .qrow .qreason{font-size:12px;color:var(--text-2);margin-top:9px;line-height:1.45;
+    display:flex;gap:7px}
+  .qrow .qreason i{color:var(--danger);font-size:11px;margin-top:2px;flex-shrink:0}
+  .spill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;
+    font-size:10.5px;font-weight:600}
+  .spill i{font-size:8px}
+  .spill.wait{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border)}
+  .spill.wait i{color:#fff}
+  .spill.seen{background:transparent;color:var(--muted);border:1px solid var(--border)}
+
+  /* khung xem lại (phải) */
+  .rv-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .rv-head h2{font-size:var(--fs-xl);font-weight:600;letter-spacing:-.01em}
+  .rv-head .rmeta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .rv-reason{display:flex;gap:11px;align-items:flex-start;background:var(--danger-dim);
+    border:1px solid rgba(248,113,113,.28);border-radius:var(--r-md);padding:13px 15px;margin:16px 0 22px}
+  .rv-reason i{color:var(--danger);margin-top:2px}
+  .rv-reason .rl{font-size:11px;color:var(--danger);font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+  .rv-reason .rt{font-size:var(--fs-sm);color:var(--text);margin-top:3px;line-height:1.5}
+
+  .rv-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:1120px){.rv-cols{grid-template-columns:1fr}}
+  .rv-colh{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:600;color:var(--muted);
+    letter-spacing:.04em;text-transform:uppercase;margin-bottom:13px}
+  .rv-colh i{font-size:12px}
+
+  .pblock{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-md);
+    padding:13px 15px;margin-bottom:10px}
+  .plabel{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:6px;
+    background:var(--surface-3);border:1px solid var(--border);font-size:10.5px;font-weight:700;
+    letter-spacing:.05em;color:var(--text-2);margin-bottom:10px}
+  .pblock p{font-size:12.5px;color:var(--text-2);line-height:1.6}
+  .pblock ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .pblock li{font-size:12.5px;color:var(--text-2);line-height:1.5;padding-left:15px;position:relative}
+  .pblock li::before{content:"–";position:absolute;left:0;color:var(--muted)}
+  .src{font-size:12.5px;color:var(--text-2);line-height:1.55;padding:8px 0;border-bottom:1px solid var(--border-faint)}
+  .src:last-child{border-bottom:none}
+  .learner-line{font-size:12.5px;color:var(--text-2);line-height:1.6}
+  .learner-line b{color:var(--text)}
+
+  .lesson-out{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-md);padding:16px 18px}
+  .lesson-out h4{font-size:var(--fs-md);font-weight:600;margin-bottom:10px}
+  .lesson-out p{font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:11px}
+  .lesson-out .tbl{width:100%;border-collapse:collapse;margin:4px 0 12px;font-size:12px}
+  .lesson-out .tbl th,.lesson-out .tbl td{border:1px solid var(--border);padding:6px 10px;text-align:left;color:var(--text-2)}
+  .lesson-out .tbl th{color:var(--text);font-weight:600;background:var(--surface-2)}
+  .flag-hl{background:var(--danger-dim);color:#fff;border-bottom:2px solid var(--danger);
+    border-radius:4px;padding:1px 4px;font-weight:500}
+  .flag-note{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:var(--danger);
+    margin-top:2px;background:var(--danger-dim);border-radius:8px;padding:8px 11px}
+  .flag-note i{margin-top:2px}
+
+  .rv-foot{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;padding-top:22px;border-top:1px solid var(--border)}
+  .btn.running{pointer-events:none;opacity:.9}
+
+  /* Toast dùng bản chuẩn ở app.css (pill trắng) */
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR (Quản trị) ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Quản trị</div>
+    <a class="nav-item" href="admin-users.html" title="Người dùng"><i class="fa-solid fa-users"></i><span class="label">Người dùng</span></a>
+    <a class="nav-item" href="admin-config.html" title="Cấu hình AI"><i class="fa-solid fa-sliders"></i><span class="label">Cấu hình AI</span></a>
+    <a class="nav-item" href="admin-costs.html" title="Chi phí & nhật ký"><i class="fa-solid fa-coins"></i><span class="label">Chi phí & nhật ký</span></a>
+    <a class="nav-item" href="admin-prompt-tests.html" title="Kiểm thử prompt"><i class="fa-solid fa-flask"></i><span class="label">Kiểm thử prompt</span></a>
+    <a class="nav-item active" href="admin-flagged.html" title="Bài bị báo sai"><i class="fa-solid fa-flag"></i><span class="label">Bài bị báo sai</span><span class="badge" id="navBadge">2</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <div class="side-user">
+        <span class="pfp">Q</span>
+        <span class="who"><b>Quản trị viên</b><span>admin@utt.edu.vn</span></span>
+      </div>
+      <a class="nav-item" href="app-dashboard.html" title="Về trang sinh viên"><i class="fa-solid fa-arrow-left"></i><span class="label">Về trang sinh viên</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Bài bị báo sai <small>Hàng đợi rà soát chất lượng</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm theo khái niệm, sinh viên…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">Q</span>
+        <span class="who"><b>Quản trị viên</b><span>Admin</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Bài bị báo sai</h1>
+        <p>Bài học sinh viên đánh dấu <b style="color:var(--text)">"bài này sai"</b>. Mở một mục để soi lại prompt ba phần và đầu ra, rồi xử lý hoặc sinh lại.</p>
+      </div>
+
+      <div class="fl-grid">
+        <!-- 1) Hàng đợi -->
+        <section class="card reveal" style="--d:.06s;padding:20px">
+          <div class="card-title" style="margin-bottom:16px"><i class="fa-solid fa-flag"></i> Hàng đợi
+            <span class="meta" style="margin-left:auto"><span id="waitCount">2</span> chờ · 4 tổng</span>
+          </div>
+          <div class="queue" id="queue"><!-- render bằng JS --></div>
+        </section>
+
+        <!-- 2) Khung xem lại -->
+        <section class="card reveal" style="--d:.12s" id="reviewCard">
+          <div id="reviewBody"><!-- render bằng JS --></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast" aria-live="polite"><i class="fa-solid fa-check"></i> <span id="toastMsg"></span></div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Hàng đợi bài bị báo sai — bám 05 §6 (khái niệm, sinh viên, Memory)
+  const ITEMS = [
+    {
+      id:'f1', ini:'A', concept:'Dạng chuẩn 3 (3NF)', cid:'k7',
+      student:'Nguyễn Văn An', when:'08/09 · 20:16', status:'wait',
+      reason:'Ví dụ bảng minh họa chọn sai khóa chính — gây hiểu nhầm phụ thuộc bắc cầu.',
+      rules:[
+        'Chỉ dùng thông tin trong [ĐOẠN NGUỒN]; mọi khẳng định kèm trích dẫn [Dn].',
+        'Nhắc lại ngắn "lỗi từng mắc" của người học ở đầu bài.',
+        'Độ dài 250–400 từ; ưu tiên ví dụ bảng dữ liệu cụ thể (hồ sơ A).',
+        'Kết bằng 3 câu hỏi kiểm tra.'
+      ],
+      sources:[
+        {c:'D7',p:'tr.17',t:'Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.'},
+        {c:'D4',p:'tr.14',t:'Cho X → Y và Y → Z, trong đó Y không phải là khóa: Z phụ thuộc bắc cầu vào X qua trung gian Y. Đây là nguồn gốc dư thừa mà dạng chuẩn 3 sinh ra để loại bỏ.'},
+        {c:'D2',p:'tr.12',t:'Khóa dự tuyển là siêu khóa tối thiểu: bỏ bất kỳ thuộc tính nào cũng mất tính xác định. Thuộc tính không tham gia khóa dự tuyển nào là thuộc tính không khóa.'}
+      ],
+      learner:[
+        '<b>Nguyễn Văn An</b> · CNTT K64 · mastery 3NF = <b>15</b>/100.',
+        'Lỗi từng mắc: "Nhầm 2NF là đủ cho 3NF — bỏ qua điều kiện phụ thuộc bắc cầu".',
+        'Ưa ví dụ thực tế; buổi học 30 phút.'
+      ],
+      out:`<h4>Phụ thuộc bắc cầu và 3NF</h4>
+        <p>Bạn từng nhầm rằng đạt 2NF là đủ cho 3NF. Điểm khác nằm ở <em>phụ thuộc bắc cầu</em>: nếu một thuộc tính không khóa lại xác định một thuộc tính không khóa khác, quan hệ chưa đạt 3NF <span class="cite">D7 <span class="pg">tr.17</span></span>.</p>
+        <p>Xét bảng ví dụ:</p>
+        <table class="tbl"><thead><tr><th>MaSV</th><th>Lop</th><th>GVCN</th></tr></thead>
+        <tbody><tr><td>SV01</td><td>CN01</td><td>Thầy Minh</td></tr><tr><td>SV02</td><td>CN01</td><td>Thầy Minh</td></tr></tbody></table>
+        <p>Trong bảng này, <span class="flag-hl">khóa chính là GVCN</span>, và vì Lop phụ thuộc GVCN nên tồn tại phụ thuộc bắc cầu cần tách bảng <span class="cite">D2 <span class="pg">tr.12</span></span>.</p>
+        <div class="flag-note"><i class="fa-solid fa-triangle-exclamation"></i><span>Chỗ tô: khóa chính đúng phải là <b>MaSV</b>. Nói "khóa chính là GVCN" là sai, làm hỏng cả ví dụ bắc cầu.</span></div>`
+    },
+    {
+      id:'f2', ini:'B', concept:'Dạng chuẩn Boyce–Codd (BCNF)', cid:'k8',
+      student:'Trần Thị Bình', when:'08/09 · 20:41', status:'wait',
+      reason:'Định nghĩa BCNF bị lẫn với 3NF — thiếu điều kiện "mọi vế trái phụ thuộc hàm phải là siêu khóa".',
+      rules:[
+        'Chỉ dùng thông tin trong [ĐOẠN NGUỒN]; mọi khẳng định kèm trích dẫn [Dn].',
+        'Trình bày hình thức, có điều kiện đầy đủ (hồ sơ B thiên lý thuyết).',
+        'Độ dài 300–450 từ.',
+        'Kết bằng 3 câu hỏi kiểm tra.'
+      ],
+      sources:[
+        {c:'D8',p:'tr.18',t:'Một quan hệ ở dạng chuẩn Boyce–Codd (BCNF) nếu với mọi phụ thuộc hàm không tầm thường X → Y thì X là siêu khóa. BCNF chặt hơn 3NF.'},
+        {c:'D7',p:'tr.17',t:'Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.'}
+      ],
+      learner:[
+        '<b>Trần Thị Bình</b> · KTPM K63 · mastery BCNF = <b>45</b>/100.',
+        'Không có lỗi từng mắc đang hiệu lực cho khái niệm này.',
+        'Thiên định nghĩa hình thức; buổi học 60 phút.'
+      ],
+      out:`<h4>Dạng chuẩn Boyce–Codd (BCNF)</h4>
+        <p>BCNF là một dạng chuẩn chặt hơn 3NF <span class="cite">D7 <span class="pg">tr.17</span></span>. Một quan hệ đạt BCNF khi <span class="flag-hl">không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa chính</span>.</p>
+        <p>Nói cách khác, ta xét từng phụ thuộc hàm và loại bỏ dư thừa dựa trên khóa chính của bảng.</p>
+        <div class="flag-note"><i class="fa-solid fa-triangle-exclamation"></i><span>Chỗ tô là định nghĩa của <b>3NF</b>, không phải BCNF. BCNF đòi: với mọi phụ thuộc hàm X→Y không tầm thường, X phải là <b>siêu khóa</b> <span style="color:var(--danger)">D8 tr.18</span>.</span></div>`
+    },
+    {
+      id:'f3', ini:'A', concept:'Phụ thuộc bắc cầu', cid:'k4',
+      student:'Nguyễn Văn An', when:'07/09 · 21:05', status:'seen',
+      reason:'Trích dẫn [D2] không khớp đoạn nguồn — chỉ vào đoạn nói về khóa dự tuyển.',
+      rules:[
+        'Chỉ dùng thông tin trong [ĐOẠN NGUỒN]; trích dẫn phải đúng mã đoạn.',
+        'Nhắc lại "lỗi từng mắc" của người học.',
+        'Độ dài 250–400 từ; ví dụ cụ thể.'
+      ],
+      sources:[
+        {c:'D4',p:'tr.14',t:'Cho X → Y và Y → Z, trong đó Y không phải là khóa: Z phụ thuộc bắc cầu vào X qua trung gian Y. Đây là nguồn gốc dư thừa mà dạng chuẩn 3 sinh ra để loại bỏ.'},
+        {c:'D2',p:'tr.12',t:'Khóa dự tuyển là siêu khóa tối thiểu: bỏ bất kỳ thuộc tính nào cũng mất tính xác định. Thuộc tính không tham gia khóa dự tuyển nào là thuộc tính không khóa.'}
+      ],
+      learner:[
+        '<b>Nguyễn Văn An</b> · CNTT K64 · mastery Phụ thuộc bắc cầu = <b>20</b>/100.',
+        'Lỗi từng mắc: "Coi phụ thuộc bắc cầu như phụ thuộc hàm thường, không nhận ra trung gian".',
+        'Ưa ví dụ thực tế; buổi học 30 phút.'
+      ],
+      out:`<h4>Phụ thuộc bắc cầu</h4>
+        <p>Bạn từng coi phụ thuộc bắc cầu như phụ thuộc hàm thường. Điểm mấu chốt là <em>thuộc tính trung gian</em>: A→B và B→C kéo theo A→C <span class="cite">D4 <span class="pg">tr.14</span></span>.</p>
+        <p>Chính thuộc tính trung gian B là thứ cần loại bỏ khi chuẩn hóa <span class="flag-hl"><span class="cite">D2 <span class="pg">tr.12</span></span></span>.</p>
+        <div class="flag-note"><i class="fa-solid fa-triangle-exclamation"></i><span>Trích dẫn [D2] chỉ vào đoạn "khóa dự tuyển", không liên quan phụ thuộc bắc cầu. Bỏ trích dẫn hoặc chỉ lại đúng đoạn.</span></div>`
+    },
+    {
+      id:'f4', ini:'D', concept:'Dạng chuẩn 2 (2NF)', cid:'k6',
+      student:'Lê Thị Dung', when:'06/09 · 19:30', status:'seen',
+      reason:'Bài quá dài và lặp ý — vượt ngưỡng độ dài, nhắc lại cùng một định nghĩa 3 lần.',
+      rules:[
+        'Chỉ dùng thông tin trong [ĐOẠN NGUỒN]; mọi khẳng định kèm trích dẫn [Dn].',
+        'Độ dài 250–400 từ — KHÔNG lặp ý.',
+        'Kết bằng 3 câu hỏi kiểm tra.'
+      ],
+      sources:[
+        {c:'D6',p:'tr.16',t:'Một quan hệ ở dạng chuẩn 2 (2NF) nếu nó ở 1NF và mọi thuộc tính không khóa đều phụ thuộc hàm đầy đủ vào khóa, không còn phụ thuộc bộ phận.'},
+        {c:'D3',p:'tr.13',t:'Y phụ thuộc hàm đầy đủ vào X nếu không tồn tại tập con thực sự của X vẫn xác định được Y; nếu có thì đó là phụ thuộc bộ phận.'}
+      ],
+      learner:[
+        '<b>Lê Thị Dung</b> · CNTT K64 · mastery 2NF = <b>35</b>/100.',
+        'Lỗi từng mắc: "Bỏ qua điều kiện phụ thuộc đầy đủ khi khóa là khóa ghép".',
+        'Buổi học 45 phút.'
+      ],
+      out:`<h4>Dạng chuẩn 2 (2NF)</h4>
+        <p>Một quan hệ đạt 2NF khi đã ở 1NF và mọi thuộc tính không khóa phụ thuộc đầy đủ vào khóa chính <span class="cite">D6 <span class="pg">tr.16</span></span>.</p>
+        <p><span class="flag-hl">Nói lại cho rõ: 2NF nghĩa là mọi thuộc tính không khóa phụ thuộc đầy đủ vào khóa chính. Tức là không có phụ thuộc bộ phận. Một lần nữa, điều kiện của 2NF là phụ thuộc đầy đủ vào khóa.</span></p>
+        <div class="flag-note"><i class="fa-solid fa-triangle-exclamation"></i><span>Ba câu cùng nói một ý, đẩy bài vượt 400 từ. Cắt còn một lần, thêm ví dụ khóa ghép thay cho lặp.</span></div>`
+    }
+  ];
+
+  const q=document.getElementById('queue'), rv=document.getElementById('reviewBody');
+  const navBadge=document.getElementById('navBadge'), waitCount=document.getElementById('waitCount');
+  let activeId='f1';
+
+  function statPill(s){
+    return s==='wait'
+      ? '<span class="spill wait"><i class="fa-solid fa-circle"></i> Chờ</span>'
+      : '<span class="spill seen"><i class="fa-solid fa-check"></i> Đã xem</span>';
+  }
+  function renderQueue(){
+    q.innerHTML = ITEMS.map(it=>`
+      <button class="qrow ${it.id===activeId?'active':''}" data-id="${it.id}">
+        <div class="qtop"><span class="qc">${it.concept}</span><span class="qstat">${statPill(it.status)}</span></div>
+        <div class="qwho"><span class="mini-pfp">${it.ini}</span> ${it.student} · <span class="qwhen">${it.when}</span></div>
+        <div class="qreason"><i class="fa-solid fa-flag"></i> ${it.reason}</div>
+      </button>`).join('');
+    q.querySelectorAll('.qrow').forEach(b=>b.addEventListener('click',()=>{
+      activeId=b.dataset.id; renderQueue(); renderReview();
+      if(innerWidth<=900) document.getElementById('reviewCard').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+    }));
+    const waits=ITEMS.filter(i=>i.status==='wait').length;
+    navBadge.textContent=waits; waitCount.textContent=waits;
+    if(waits===0){navBadge.style.display='none';}
+  }
+  function renderReview(){
+    const it=ITEMS.find(i=>i.id===activeId);
+    rv.innerHTML=`
+      <div class="rv-head">
+        <div style="flex:1;min-width:0">
+          <h2>${it.concept}</h2>
+          <div class="rmeta">
+            <span class="chip"><span class="mini-pfp" style="width:18px;height:18px;font-size:9px;margin-right:-2px">${it.ini}</span> ${it.student}</span>
+            <span class="chip"><i class="fa-regular fa-clock"></i> ${it.when}</span>
+            <span class="chip"><i class="fa-solid fa-hashtag"></i> ${it.cid}</span>
+            ${statPill(it.status)}
+          </div>
+        </div>
+      </div>
+      <div class="rv-reason">
+        <i class="fa-solid fa-flag"></i>
+        <div><div class="rl">Lý do sinh viên báo sai</div><div class="rt">${it.reason}</div></div>
+      </div>
+
+      <div class="rv-cols">
+        <div>
+          <div class="rv-colh"><i class="fa-solid fa-terminal"></i> Prompt ba phần</div>
+          <div class="pblock">
+            <span class="plabel">QUY TẮC</span>
+            <ul>${it.rules.map(r=>`<li>${r}</li>`).join('')}</ul>
+          </div>
+          <div class="pblock">
+            <span class="plabel">ĐOẠN NGUỒN</span>
+            ${it.sources.map(s=>`<div class="src"><span class="cite">${s.c} <span class="pg">${s.p}</span></span> ${s.t}</div>`).join('')}
+          </div>
+          <div class="pblock">
+            <span class="plabel">NGƯỜI HỌC</span>
+            ${it.learner.map(l=>`<div class="learner-line">${l}</div>`).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="rv-colh"><i class="fa-solid fa-book-open"></i> Đầu ra bài học</div>
+          <div class="lesson-out" id="lessonOut">${it.out}</div>
+        </div>
+      </div>
+
+      <div class="rv-foot">
+        <button class="btn btn-primary" id="btnDone" ${it.status==='seen'?'disabled':''}>
+          <i class="fa-solid fa-check"></i> ${it.status==='seen'?'Đã xử lý':'Đánh dấu đã xử lý'}</button>
+        <button class="btn btn-ghost" id="btnRegen"><i class="fa-solid fa-rotate-right"></i> Sinh lại</button>
+      </div>`;
+
+    const bd=document.getElementById('btnDone');
+    if(bd) bd.addEventListener('click',()=>{
+      it.status='seen'; renderQueue(); renderReview(); toast('Đã đánh dấu xử lý — '+it.concept);
+    });
+    document.getElementById('btnRegen').addEventListener('click',regen);
+  }
+  function regen(){
+    const btn=document.getElementById('btnRegen'), out=document.getElementById('lessonOut');
+    if(btn.classList.contains('running')) return;
+    btn.classList.add('running');
+    btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Đang sinh lại…';
+    const finish=()=>{
+      btn.classList.remove('running');
+      btn.innerHTML='<i class="fa-solid fa-rotate-right"></i> Sinh lại';
+      out.querySelectorAll('.flag-hl').forEach(el=>{
+        el.style.background='var(--success-dim)'; el.style.borderBottomColor='#fff'; el.style.color='#fff';});
+      out.querySelectorAll('.flag-note').forEach(el=>{
+        el.style.background='var(--success-dim)'; el.style.color='var(--text)';
+        el.innerHTML='<i class="fa-solid fa-check"></i><span>Đã sinh lại bản mới với cùng đoạn nguồn — chỗ sai đã được sửa. Bản cũ giữ trong lịch sử phiên bản.</span>';});
+      toast('Đã sinh lại bài học');
+    };
+    if(reduce) finish(); else setTimeout(finish,1900);
+  }
+
+  const tEl=document.getElementById('toast'), tMsg=document.getElementById('toastMsg');
+  let tTimer;
+  function toast(msg){ tMsg.textContent=msg; tEl.classList.add('show');
+    clearTimeout(tTimer); tTimer=setTimeout(()=>tEl.classList.remove('show'),2600); }
+
+  renderQueue(); renderReview();
+</script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hồ sơ · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ===== riêng trang Hồ sơ ===== */
+
+  .ro-note{display:inline-flex;align-items:center;gap:6px;margin-left:auto;
+    font-size:11px;font-weight:500;color:var(--muted)}
+  .ro-note i{font-size:10px}
+
+  /* lưới thông tin chỉ đọc từ cổng đào tạo */
+  .ro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:2px 26px}
+  .ro-field{padding:14px 2px;border-bottom:1px solid var(--border-faint)}
+  .ro-field .k{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);
+    letter-spacing:.02em;margin-bottom:5px}
+  .ro-field .k i{font-size:9px;opacity:.7}
+  .ro-field .v{font-size:var(--fs-md);font-weight:600;color:var(--text)}
+  .ro-field .v.num{font-family:var(--font-display);font-weight:700;letter-spacing:.02em}
+
+  /* nhóm trường sửa được */
+  .field{margin-bottom:22px}
+  .field:last-child{margin-bottom:0}
+  .field > label.flab{display:block;font-size:var(--fs-sm);font-weight:600;color:var(--text);margin-bottom:4px}
+  .field .fhint{font-size:11.5px;color:var(--muted);margin-bottom:11px;line-height:1.5}
+  .ta{width:100%;min-height:74px;resize:vertical;padding:13px 15px;border-radius:14px;
+    background:var(--surface-1);border:1px solid var(--border);color:var(--text);
+    font-family:inherit;font-size:var(--fs-sm);line-height:1.55;outline:none;
+    transition:border var(--dur-1),background var(--dur-1)}
+  .ta:focus{border-color:var(--accent-border);background:var(--surface-2)}
+
+  /* PickChips — chip chọn nhiều, cỡ chạm rộng */
+  .picks{display:flex;flex-wrap:wrap;gap:9px}
+  .pick{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 15px;
+    border-radius:999px;background:var(--surface-2);border:1px solid var(--border);
+    color:var(--text-2);font-size:var(--fs-sm);font-weight:500;
+    transition:background var(--dur-1),border var(--dur-1),color var(--dur-1),transform var(--dur-1)}
+  .pick i{font-size:11px;color:var(--muted);transition:color var(--dur-1)}
+  .pick:hover{background:var(--surface-3);color:var(--text);transform:translateY(-1px)}
+  .pick[aria-pressed="true"]{background:#fff;border-color:#fff;color:#000}
+  .pick[aria-pressed="true"] i{color:#000}
+
+
+  /* lưới khung giờ rảnh 7 ngày × khung giờ */
+  .fs-wrap{overflow-x:auto;margin:0 -4px;padding:0 4px}
+  .fs{display:grid;grid-template-columns:64px repeat(7,minmax(38px,1fr));gap:6px;min-width:360px}
+  .fs .corner{}
+  .fs .dhead{text-align:center;font-size:11px;font-weight:700;color:var(--muted);
+    letter-spacing:.03em;padding-bottom:2px}
+  .fs .dhead.wend{color:var(--text-2)}
+  .fs .rlabel{display:flex;align-items:center;font-size:11px;color:var(--muted);
+    white-space:nowrap;padding-right:4px}
+  .fs .cell{min-height:44px;border-radius:11px;background:var(--surface-1);
+    border:1px solid var(--border);cursor:pointer;transition:background var(--dur-1),border var(--dur-1),transform var(--dur-1);
+    display:grid;place-items:center;color:transparent;font-size:11px}
+  .fs .cell:hover{background:var(--surface-2);border-color:var(--border-strong)}
+  .fs .cell[aria-pressed="true"]{background:#fff;border-color:#fff;color:#000}
+  .fs .cell[aria-pressed="true"]::after{content:"\f00c";font-family:"Font Awesome 6 Free";font-weight:900;font-size:9px}
+  .fs-legend{display:flex;align-items:center;gap:16px;margin-top:14px;font-size:11.5px;color:var(--muted)}
+  .fs-legend span{display:inline-flex;align-items:center;gap:7px}
+  .fs-legend .sw{width:14px;height:14px;border-radius:5px;border:1px solid var(--border)}
+  .fs-legend .sw.on{background:#fff;border-color:#fff}
+  .fs-legend .sw.off{background:var(--surface-1)}
+
+  .save-row{display:flex;align-items:center;gap:14px;margin-top:var(--sp-8);flex-wrap:wrap}
+  .save-row .meta{margin-left:auto}
+
+
+  @media (max-width:760px){
+    .save-row .meta{margin-left:0;flex:1 1 100%}
+    .topbar .page-title small{display:none}
+    .topbar .page-title{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item active" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Hồ sơ <small>Thông tin &amp; tùy chọn học tập</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm, tài liệu, môn học…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Hồ sơ của bạn</h1>
+        <p>Thông tin từ cổng đào tạo là <b style="color:var(--text)">chỉ đọc</b>. Các tùy chọn bên dưới quyết định cách hệ thống lập kế hoạch và soạn bài cho bạn.</p>
+      </div>
+
+      <!-- ===== KHỐI 1: Thông tin trường (chỉ đọc) ===== -->
+      <section class="card reveal" style="--d:.06s;margin-bottom:var(--sp-8)">
+        <div class="card-title"><i class="fa-solid fa-building-columns"></i> Thông tin sinh viên
+          <span class="ro-note"><i class="fa-solid fa-lock"></i> đồng bộ từ cổng đào tạo</span>
+        </div>
+        <div class="ro-grid">
+          <div class="ro-field"><div class="k"><i class="fa-solid fa-lock"></i> Họ và tên</div><div class="v">Nguyễn Văn An</div></div>
+          <div class="ro-field"><div class="k"><i class="fa-solid fa-lock"></i> Mã sinh viên</div><div class="v num">UTT-CN-01</div></div>
+          <div class="ro-field"><div class="k"><i class="fa-solid fa-lock"></i> Ngành</div><div class="v">Công nghệ thông tin</div></div>
+          <div class="ro-field"><div class="k"><i class="fa-solid fa-lock"></i> Khóa</div><div class="v num">K64</div></div>
+          <div class="ro-field"><div class="k"><i class="fa-solid fa-lock"></i> Học kỳ hiện tại</div><div class="v num">20261</div></div>
+          <div class="ro-field"><div class="k"><i class="fa-solid fa-lock"></i> Trường</div><div class="v">Đại học Công nghệ GTVT</div></div>
+        </div>
+      </section>
+
+      <!-- ===== KHỐI 2: Tùy chọn học tập ===== -->
+      <section class="card reveal" style="--d:.12s;margin-bottom:var(--sp-8)">
+        <div class="card-title"><i class="fa-solid fa-sliders"></i> Tùy chọn học tập</div>
+
+        <div class="field">
+          <label class="flab" for="goal">Mục tiêu học kỳ</label>
+          <div class="fhint">Hệ thống dùng câu này để chọn độ sâu bài học và mức độ đi vào chứng minh hình thức.</div>
+          <textarea class="ta" id="goal">Qua môn, hiểu để làm bài tập</textarea>
+        </div>
+
+        <div class="field">
+          <label class="flab">Định dạng ưa thích</label>
+          <div class="fhint">Chọn nhiều — bài học sẽ ưu tiên các dạng này.</div>
+          <div class="picks" id="fmt">
+            <button type="button" class="pick" aria-pressed="true"><i class="fa-solid fa-diagram-project"></i> Ví dụ thực tế</button>
+            <button type="button" class="pick" aria-pressed="true"><i class="fa-solid fa-pen-to-square"></i> Bài tập</button>
+            <button type="button" class="pick" aria-pressed="false"><i class="fa-solid fa-book"></i> Đọc lý thuyết</button>
+            <button type="button" class="pick" aria-pressed="false"><i class="fa-solid fa-square-root-variable"></i> Chứng minh hình thức</button>
+            <button type="button" class="pick" aria-pressed="false"><i class="fa-solid fa-play"></i> Video</button>
+            <button type="button" class="pick" aria-pressed="false"><i class="fa-solid fa-diagram-next"></i> Sơ đồ</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="flab">Thời lượng một phiên</label>
+          <div class="fhint">Bài học và lịch ôn được cắt vừa một phiên.</div>
+          <div class="seg" id="dur" role="group" aria-label="Thời lượng một phiên">
+            <button type="button" aria-pressed="true">30<span class="u">phút</span></button>
+            <button type="button" aria-pressed="false">45<span class="u">phút</span></button>
+            <button type="button" aria-pressed="false">60<span class="u">phút</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== KHỐI 3: Khung giờ rảnh ===== -->
+      <section class="card reveal" style="--d:.18s">
+        <div class="card-title"><i class="fa-solid fa-clock"></i> Khung giờ rảnh</div>
+        <div class="fhint" style="margin-bottom:16px;font-size:11.5px;color:var(--muted)">Bấm để bật/tắt từng ô. Kế hoạch ôn chỉ xếp vào các ô bạn chọn — hiện đang rảnh <b style="color:var(--text-2)">tối 20–22h các ngày và cả cuối tuần</b>.</div>
+        <div class="fs-wrap">
+          <div class="fs" id="fsGrid">
+            <div class="corner"></div>
+            <div class="dhead">T2</div><div class="dhead">T3</div><div class="dhead">T4</div>
+            <div class="dhead">T5</div><div class="dhead">T6</div>
+            <div class="dhead wend">T7</div><div class="dhead wend">CN</div>
+            <!-- các hàng khung giờ sinh bằng JS -->
+          </div>
+        </div>
+        <div class="fs-legend">
+          <span><span class="sw on"></span> Rảnh</span>
+          <span><span class="sw off"></span> Bận / không chọn</span>
+        </div>
+
+        <div class="save-row">
+          <button class="btn btn-primary" id="saveBtn"><i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi</button>
+          <button class="btn btn-ghost" id="resetBtn"><i class="fa-solid fa-rotate-left"></i> Khôi phục</button>
+          <span class="meta">Đổi khung giờ hoặc thời lượng sẽ khiến lộ trình được tính lại.</span>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Đã lưu</span></div>
+
+<script>
+  // ----- toast -----
+  let toastT;
+  const toast=(msg)=>{const t=document.getElementById('toast');
+    document.getElementById('toastMsg').textContent=msg;t.classList.add('show');
+    clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);};
+
+  // ----- chip chọn nhiều -----
+  document.getElementById('fmt').addEventListener('click',e=>{
+    const b=e.target.closest('.pick'); if(!b)return;
+    b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')==='true'?'false':'true');
+  });
+
+  // ----- segmented (single choice) -----
+  document.getElementById('dur').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    [...document.querySelectorAll('#dur button')].forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+  });
+
+  // ----- lưới giờ rảnh: sinh hàng + trạng thái mặc định của An -----
+  const rows=['Sáng 6–8','Sáng 8–10','Trưa 12–13','Chiều 14–16','Chiều 16–18','Tối 18–20','Tối 20–22'];
+  const grid=document.getElementById('fsGrid');
+  // mặc định rảnh: hàng cuối (Tối 20–22) mọi ngày + cả cột T7(5) & CN(6)
+  const preset=(r,c)=> r===rows.length-1 || c>=5;
+  const build=()=>{
+    // xóa hàng cũ (giữ 8 ô header đầu)
+    while(grid.children.length>8)grid.removeChild(grid.lastChild);
+    rows.forEach((label,r)=>{
+      const rl=document.createElement('div');rl.className='rlabel';rl.textContent=label;grid.appendChild(rl);
+      for(let c=0;c<7;c++){
+        const cell=document.createElement('button');
+        cell.type='button';cell.className='cell';
+        cell.setAttribute('aria-pressed', preset(r,c)?'true':'false');
+        cell.setAttribute('aria-label', label+' '+['T2','T3','T4','T5','T6','T7','CN'][c]);
+        grid.appendChild(cell);
+      }
+    });
+  };
+  build();
+  grid.addEventListener('click',e=>{
+    const cell=e.target.closest('.cell'); if(!cell)return;
+    cell.setAttribute('aria-pressed', cell.getAttribute('aria-pressed')==='true'?'false':'true');
+  });
+
+  document.getElementById('saveBtn').onclick=()=>toast('Đã lưu hồ sơ · lộ trình sẽ được tính lại');
+  document.getElementById('resetBtn').onclick=()=>{build();toast('Đã khôi phục khung giờ mặc định');};
+</script>
+</body>
+</html>

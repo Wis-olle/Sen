@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Velorah® — Where dreams rise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Instrument+Serif&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        background: 'hsl(201 100% 13%)',
+        foreground: 'hsl(0 0% 100%)',
+        'muted-foreground': 'hsl(240 4% 66%)',
+      },
+      fontFamily: { body: ['Inter','ui-sans-serif','system-ui','sans-serif'] },
+    } }
+  };
+</script>
+<style>
+  :root { --font-display:'Instrument Serif',serif; --font-body:'Inter',sans-serif; }
+  body { font-family: var(--font-body); background: hsl(201 100% 13%); color:#fff; }
+  .font-display { font-family: var(--font-display); }
+
+  .liquid-glass {
+    background: rgba(255,255,255,0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+      rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  @keyframes fade-rise { from{opacity:0; transform:translateY(24px)} to{opacity:1; transform:translateY(0)} }
+  .animate-fade-rise { animation: fade-rise .8s ease-out both; }
+  .animate-fade-rise-delay { animation: fade-rise .8s ease-out .2s both; }
+  .animate-fade-rise-delay-2 { animation: fade-rise .8s ease-out .4s both; }
+</style>
+</head>
+<body class="min-h-screen overflow-x-hidden font-body antialiased">
+
+  <!-- Fullscreen background video (crossfade loop: two stacked copies) -->
+  <video id="vidA" muted playsinline preload="auto"
+    class="fixed inset-0 w-full h-full object-cover z-0 transition-opacity duration-700 ease-linear"
+    src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"></video>
+  <video id="vidB" muted playsinline preload="auto"
+    class="fixed inset-0 w-full h-full object-cover z-0 transition-opacity duration-700 ease-linear opacity-0"
+    src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"></video>
+
+  <!-- Navigation -->
+  <nav class="relative z-10 flex flex-row justify-between items-center px-8 py-6 max-w-7xl mx-auto">
+    <a href="#" class="font-display text-3xl tracking-tight text-foreground">Velorah<sup class="text-xs">&reg;</sup></a>
+    <div class="hidden md:flex items-center gap-8 text-sm">
+      <a href="#" class="text-foreground transition-colors">Home</a>
+      <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Studio</a>
+      <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">About</a>
+      <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Journal</a>
+      <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Reach Us</a>
+    </div>
+    <button class="liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground transition-transform duration-200 hover:scale-[1.03]">Begin Journey</button>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-32 pb-40 py-[90px]">
+    <h1 class="animate-fade-rise font-display font-normal text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-[-2.46px] max-w-7xl">
+      Where <em class="not-italic text-muted-foreground">dreams</em> rise <em class="not-italic text-muted-foreground">through the silence.</em>
+    </h1>
+    <p class="animate-fade-rise-delay text-muted-foreground text-base sm:text-lg max-w-2xl mt-8 leading-relaxed">
+      We're designing tools for deep thinkers, bold creators, and quiet rebels. Amid the chaos, we build digital spaces for sharp focus and inspired work.
+    </p>
+    <button class="animate-fade-rise-delay-2 liquid-glass rounded-full px-14 py-5 text-base text-foreground mt-12 cursor-pointer transition-transform duration-200 hover:scale-[1.03]">Begin Journey</button>
+  </section>
+
+<script>
+  // Seamless crossfade loop — both copies play forward (no scrubbing, no restart cut).
+  const FADE = 0.7; // matches transition-opacity duration-700
+  let active = document.getElementById('vidA');
+  let standby = document.getElementById('vidB');
+  let swapping = false;
+
+  active.play().catch(() => {});
+
+  function loopTick(){
+    const a = active;
+    if (!swapping && a.duration && a.currentTime >= a.duration - FADE){
+      swapping = true;
+      standby.currentTime = 0;
+      standby.play().catch(() => {});
+      standby.style.opacity = '1';
+      a.style.opacity = '0';
+      const finished = a;
+      setTimeout(() => { finished.pause(); }, FADE * 1000);
+      [active, standby] = [standby, active];
+      swapping = false;
+    }
+    requestAnimationFrame(loopTick);
+  }
+  requestAnimationFrame(loopTick);
+</script>
+</body>
+</html>

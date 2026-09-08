@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Đăng nhập — Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<style>
+  body{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:var(--cream)}
+  /* ---- panel trái (hổ phách) ---- */
+  .auth-panel{position:relative;margin:16px 0 16px 16px;border-radius:28px;background:var(--amber);overflow:hidden;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;padding:28px 32px}
+  .auth-panel .brand{color:var(--ink);justify-self:start}
+  .auth-scene{position:relative;flex:1;min-height:420px}
+  .auth-scene .figure{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(520px,88%)}
+  .auth-scene .fcard{left:2%;top:8%;--rot:-5deg}
+  .auth-scene .badge-rot{right:-40px;top:-46px}
+  .auth-quote{position:relative;z-index:2;font-family:var(--serif);font-style:italic;font-optical-sizing:auto;font-size:clamp(20px,1.8vw,26px);line-height:1.3;max-width:26ch;color:var(--ink)}
+  .auth-quote small{display:block;margin-top:10px;font-family:var(--sans);font-style:normal;font-size:13px;font-weight:600;color:var(--on-amber-2)}
+  .auth-panel .blob-l{left:-120px;top:30%;width:320px}
+  .auth-panel .blob-r{right:-110px;top:6%;width:260px}
+  .mk-auth-sp{right:12%;top:10%;width:30px;height:30px}
+  .mk-auth-lines{left:8%;bottom:26%;width:48px;height:28px;transform:rotate(-30deg)}
+  /* ---- form phải ---- */
+  .auth-main{display:grid;place-items:center;padding:48px 24px}
+  .auth-card{width:min(440px,100%)}
+  .auth-card h1{font-size:clamp(32px,3vw,40px);margin-bottom:10px}
+  .auth-card .sub{color:var(--muted);margin-bottom:28px}
+  .field{display:grid;gap:8px;margin-bottom:16px}
+  .field label{font-size:13.5px;font-weight:600}
+  .field .in{position:relative}
+  .field input{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);background:var(--white);padding:0 16px;font:inherit;font-size:15px;color:var(--ink);transition:border-color .25s,box-shadow .25s}
+  .field input::placeholder{color:#a39d94}
+  .field input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 4px rgba(248,195,101,.45)}
+  .field .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
+  .field .eye:hover{background:var(--cream)}
+  .field .eye svg{width:18px;height:18px}
+  .row-between{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 22px;font-size:14px}
+  .check{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+  .check input{appearance:none;width:18px;height:18px;border-radius:6px;border:1.5px solid var(--line);background:var(--white);display:grid;place-items:center;transition:background .2s,border-color .2s}
+  .check input:checked{background:var(--ink);border-color:var(--ink)}
+  .check input:checked::after{content:"";width:5px;height:9px;border:solid var(--amber);border-width:0 2px 2px 0;transform:rotate(45deg);margin-top:-2px}
+  .btn-block{width:100%;justify-content:center;height:52px;font-size:15.5px}
+  .divider{display:flex;align-items:center;gap:14px;margin:18px 0;color:var(--muted);font-size:13px}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line-2)}
+  .demo{margin-top:26px;padding:16px 18px;border-radius:16px;background:var(--white);border:1px solid var(--line-2)}
+  .demo .t{font-size:13px;font-weight:600;margin-bottom:10px}
+  .demo-row{display:flex;gap:8px;flex-wrap:wrap}
+  .demo-chip{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 12px 7px 7px;background:var(--cream);font-size:13px;font-weight:600;transition:background .2s,transform .3s var(--ease-out)}
+  .demo-chip:hover{background:var(--amber);transform:translateY(-2px)}
+  .demo-chip .av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:800}
+  .demo-chip .av.a{background:var(--blue)}.demo-chip .av.b{background:var(--green)}
+  .demo-chip small{font-family:var(--num);font-weight:700;color:var(--muted)}
+  .auth-foot{margin-top:22px;text-align:center;font-size:14px;color:var(--muted)}
+  .auth-foot a{font-weight:600;color:var(--ink)}
+  @media (max-width:900px){
+    body{grid-template-columns:1fr}
+    .auth-panel{margin:12px;padding:20px 22px;min-height:0}
+    .auth-scene{min-height:230px}
+    .auth-scene .figure{width:min(360px,80%)}
+    .auth-scene .fcard,.auth-scene .badge-rot,.mk-auth-lines{display:none}
+    .auth-quote{font-size:19px}
+    .auth-main{padding:28px 20px 48px}
+  }
+</style>
+</head>
+<body>
+
+<aside class="auth-panel" aria-label="Giới thiệu">
+  <svg class="blob blob-l" viewBox="0 0 360 360" aria-hidden="true"><path d="M181 22c46-12 86 20 104 60 20 44 70 54 62 106-7 46-52 60-84 92-30 30-74 62-116 52C97 320 76 266 40 232 4 198-8 148 20 108 48 66 118 39 181 22Z"/></svg>
+  <svg class="blob blob-r" viewBox="0 0 300 300" aria-hidden="true"><path d="M150 14c40 0 60 34 92 52 36 20 58 52 46 92-10 34-46 44-68 72-22 30-48 66-90 60-40-6-50-52-82-74C14 192-4 150 14 112 34 70 100 14 150 14Z"/></svg>
+  <a class="brand" href="index.html" aria-label="Sen — trang chủ">
+    <svg viewBox="0 0 32 32" fill="none" stroke="#1d1d1d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M16 27c-6.5 0-10-4.2-10-9.5 0-3 1.4-5.4 3.2-7.3.6 2.4 1.9 4 3.6 4.9C12.5 11.6 14 8 16 5c2 3 3.5 6.6 3.2 10.1 1.7-.9 3-2.5 3.6-4.9C24.6 12.1 26 14.5 26 17.5 26 22.8 22.5 27 16 27Z" fill="#fff6e5"/>
+      <path d="M16 27V15"/>
+    </svg>
+    <span>Sen</span>
+  </a>
+  <div class="auth-scene" aria-hidden="true">
+    <div class="figure"><picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/doodles/sitting-reading-blue.svg" type="image/svg+xml" /><img src="assets/anim/sitting-reading-blue.webp" data-static="assets/doodles/sitting-reading-blue.svg" alt="" width="800" height="600" /></picture></div>
+    <div class="fcard fc-mastery">
+      <div class="who"><span class="av a">A</span><div class="t" style="margin:0">An · Chuẩn hóa 3NF</div></div>
+      <div class="s">Mức thành thạo</div>
+      <div class="bar"><i></i></div>
+      <div class="row"><div class="num"><b>62</b><small>/100</small></div><span class="chip">Cần ôn</span></div>
+      <div class="badge-rot">
+        <svg viewBox="0 0 112 112">
+          <defs><path id="ring" d="M56 56m-42 0a42 42 0 1 1 84 0a42 42 0 1 1 -84 0"/></defs>
+          <circle class="bg" cx="56" cy="56" r="54"/>
+          <g class="ring"><text><textPath href="#ring">SOẠN RIÊNG CHO BẠN • CÓ TRÍCH DẪN • </textPath></text></g>
+          <path class="core" d="M56 40l4.5 11.5L72 56l-11.5 4.5L56 72l-4.5-11.5L40 56l11.5-4.5Z"/>
+        </svg>
+      </div>
+    </div>
+    <svg class="mark mk-auth-sp" viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg>
+    <svg class="mark mk-auth-lines" viewBox="0 0 738 420"><path d="M2.27338 370.738L294.595 409.738M27.9152 229.238L736.853 173.424M2.27338 123.559L489.836 9.73828"/></svg>
+  </div>
+  <p class="auth-quote">“Cùng một chương, hai sinh viên nhận hai bài học khác nhau.”<small>Kịch bản demo · Cơ sở dữ liệu · Chương 4</small></p>
+</aside>
+
+<main class="auth-main">
+  <div class="auth-card">
+    <h1 class="display">Chào mừng <span class="pill">trở lại</span></h1>
+    <p class="sub">Đăng nhập để tiếp tục bài học hôm nay.</p>
+    <form action="app-dashboard.html" method="get" novalidate>
+      <div class="field">
+        <label for="email">Email sinh viên</label>
+        <div class="in"><input id="email" name="email" type="email" autocomplete="username" placeholder="mssv@sv.utt.edu.vn" /></div>
+      </div>
+      <div class="field">
+        <label for="pw">Mật khẩu</label>
+        <div class="in">
+          <input id="pw" name="pw" type="password" autocomplete="current-password" placeholder="••••••••" />
+          <button class="eye" type="button" aria-label="Hiện mật khẩu" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="row-between">
+        <label class="check"><input type="checkbox" name="remember" checked />Ghi nhớ đăng nhập</label>
+        <a class="u-draw" href="#">Quên mật khẩu?</a>
+      </div>
+      <button class="btn btn-dark btn-block" type="submit">Đăng nhập
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></button>
+      <div class="divider">hoặc</div>
+      <a class="btn btn-outline btn-block" href="#">Tiếp tục với tài khoản UTT</a>
+    </form>
+    <div class="demo">
+      <div class="t">Tài khoản demo — bấm để điền</div>
+      <div class="demo-row">
+        <button class="demo-chip" type="button" data-email="an@sv.utt.edu.vn"><span class="av a">A</span>An <small>62/100</small></button>
+        <button class="demo-chip" type="button" data-email="binh@sv.utt.edu.vn"><span class="av b">B</span>Bình <small>41/100</small></button>
+      </div>
+    </div>
+    <p class="auth-foot">Chưa có tài khoản? <a class="u-draw" href="#">Đăng ký miễn phí</a></p>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script>
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const eye = $('.eye'), pw = $('#pw');
+  eye.addEventListener('click', () => { const show = pw.type === 'password'; pw.type = show ? 'text' : 'password'; eye.setAttribute('aria-pressed', show); eye.setAttribute('aria-label', show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'); });
+  $$('.demo-chip').forEach(b => b.addEventListener('click', () => { $('#email').value = b.dataset.email; pw.value = 'demo1234'; $('#email').focus(); }));
+  const rm = matchMedia('(prefers-reduced-motion: reduce)').matches || /[?&]static/.test(location.search);
+  if (rm) { document.documentElement.classList.add('is-static'); $$('img[data-static]').forEach(i => { i.src = i.dataset.static; }); }
+  if (rm || !window.gsap) return;
+  const paths = $$('.mark path'); paths.forEach(p => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });
+  const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+  tl.from('.auth-panel', { x: -24, opacity: 0, duration: .9 }, 0)
+    .from('.auth-scene .figure', { y: 40, opacity: 0, scale: .96, transformOrigin: '50% 100%', duration: 1 }, .3)
+    .from('.auth-scene .fcard', { y: 40, opacity: 0, scale: .75, duration: .9, ease: 'back.out(1.5)' }, .6)
+    .from('.fc-mastery .bar i', { scaleX: 0, transformOrigin: '0% 50%', duration: 1, ease: 'power3.out' }, 1)
+    .from('.badge-rot', { scale: 0, opacity: 0, duration: .8, ease: 'back.out(2)' }, .9)
+    .to(paths, { strokeDashoffset: 0, duration: .7, stagger: .15, ease: 'power2.out' }, .9)
+    .from('.auth-quote', { y: 16, opacity: 0, duration: .8 }, .8)
+    .from('.auth-card > *, .auth-card form > *', { y: 22, opacity: 0, duration: .8, stagger: .07 }, .25)
+    .from('.auth-card .pill', { scale: .6, rotation: -8, duration: .8, ease: 'back.out(1.8)' }, .5);
+  gsap.to('.auth-scene .fcard', { y: -8, duration: 3, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.6 });
+  gsap.to('.auth-scene .figure', { y: -5, duration: 4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.6 });
+  if (matchMedia('(hover:hover)').matches) $$('.btn').forEach(b => {
+    b.addEventListener('mousemove', e => { const r = b.getBoundingClientRect(); gsap.to(b, { x: (e.clientX - r.left - r.width / 2) * .12, y: (e.clientY - r.top - r.height / 2) * .22, duration: .4 }); });
+    b.addEventListener('mouseleave', () => gsap.to(b, { x: 0, y: 0, duration: .6, ease: 'elastic.out(1,.4)' }));
+  });
+})();
+</script>
+</body>
+</html>

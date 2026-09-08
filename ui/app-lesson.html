@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bài học hôm nay · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ===================== BÀI HỌC (S09) ===================== */
+  .lesson-wrap{display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:40px;align-items:start}
+
+  /* ----- Header bài học ----- */
+  .lesson-head{margin-bottom:8px}
+  .crumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:12px}
+  .crumb i{font-size:8px}
+  .lesson-head h1{font-size:var(--fs-2xl);font-weight:600;letter-spacing:-.02em;line-height:1.15}
+  .lesson-head .lead{color:var(--muted-strong);margin-top:10px;font-size:var(--fs-base);line-height:1.55;max-width:60ch}
+  .lesson-head .lead b{color:var(--text);font-weight:600}
+  .head-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+
+  /* ----- Prose chung (đọc thoáng) ----- */
+  /* LessonProse */
+  .prose{font-size:15.5px;line-height:1.72;color:var(--text-2)}
+  .prose p{margin:0 0 14px}
+  .prose p:last-child{margin-bottom:0}
+  .prose strong{color:var(--text);font-weight:600}
+  .prose .term{color:var(--text);font-weight:600;border-bottom:1px dotted var(--border-strong)}
+
+  /* ----- Khối section trong bài ----- */
+  .sec{padding-top:38px;scroll-margin-top:88px}
+  .sec:first-of-type{padding-top:26px}
+  .sec-eyebrow{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+  .sec-eyebrow .sn{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.02em;
+    color:var(--muted);background:var(--surface-2);border:1px solid var(--border);
+    width:30px;height:24px;display:grid;place-items:center;border-radius:7px;flex-shrink:0}
+  .sec-eyebrow h2{font-size:var(--fs-lg);font-weight:600;letter-spacing:-.01em}
+  .sec-eyebrow .sub{font-size:12px;color:var(--muted);margin-left:2px}
+
+  /* ----- Mục tiêu ----- */
+  .objectives{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-card);padding:22px 24px}
+  .objectives ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .objectives li{display:flex;gap:12px;font-size:var(--fs-base);color:var(--text-2);line-height:1.5}
+  .objectives li i{color:var(--text);font-size:13px;margin-top:3px;flex-shrink:0}
+  .objectives li b{color:var(--text);font-weight:600}
+
+  /* ----- Ôn tiên quyết ----- */
+  .prereq-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .prereq{border:1px solid var(--border);border-radius:var(--r-md);padding:15px 16px;background:var(--surface-1)}
+  .prereq .pk{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+  .prereq .pname{font-size:var(--fs-sm);font-weight:600;color:var(--text)}
+  .prereq .ptext{font-size:12.5px;color:var(--muted-strong);line-height:1.5}
+
+  /* ----- Bảng dữ liệu ví dụ ----- */
+  /* riêng bảng ví dụ trong bài (DataTable base + caption đã ở app.css) */
+  table.dt td{font-variant-numeric:tabular-nums}
+  table.dt col.key,table.dt td.key{color:var(--text);font-weight:600}
+  table.dt .dep{background:var(--surface-2)}
+  table.dt th.dep{color:var(--text-2)}
+
+  .dep-note{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0;
+    font-family:var(--font-display);font-size:13px;letter-spacing:.01em;color:var(--text-2)}
+  .dep-note .tok{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:4px 9px;color:var(--text)}
+  .dep-note .arr{color:var(--muted)}
+  .dep-note .bad{border-color:var(--border-strong);border-style:dashed}
+  .dep-note .cap{font-family:var(--font-sans);font-size:12px;color:var(--muted);margin-left:2px}
+
+  .split-arrow{display:flex;align-items:center;justify-content:center;gap:10px;
+    color:var(--muted);font-size:12.5px;margin:16px 0}
+  .split-arrow i{font-size:14px}
+  .split-tables{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  /* ----- Thẻ trí nhớ (lỗi từng mắc) ----- */
+
+  /* ----- Ngoài tài liệu ----- */
+  .outside{border:1px solid var(--border);border-radius:var(--r-card);padding:18px 20px;
+    background:var(--surface-1);position:relative}
+  .outside .otag{margin-bottom:10px}
+  .outside p{font-size:var(--fs-base);color:var(--text-2);line-height:1.6}
+
+  /* ----- Quiz ----- */
+  .quiz-progress{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);margin-bottom:16px}
+  .quiz-progress .qbar{flex:1;height:5px;border-radius:999px;background:var(--m-track);overflow:hidden;max-width:180px}
+  .quiz-progress .qbar>i{display:block;height:100%;width:0;background:#fff;border-radius:999px;transition:width .4s var(--ease)}
+  .quiz-item{border:1px solid var(--border);border-radius:var(--r-card);padding:22px 24px;background:var(--surface-1)}
+  .quiz-item + .quiz-item{margin-top:14px}
+  .quiz-item .qnum{font-family:var(--font-display);font-size:12px;color:var(--muted);letter-spacing:.02em}
+  .quiz-q{font-size:var(--fs-md);font-weight:600;color:var(--text);line-height:1.45;margin:8px 0 4px}
+  .quiz-q code{font-family:var(--font-display);font-size:.92em;background:var(--surface-2);
+    border:1px solid var(--border);border-radius:6px;padding:1px 6px;color:var(--text)}
+  .quiz-opts{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+  .quiz-opt{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border:1px solid var(--border);
+    border-radius:var(--r-md);background:var(--surface-1);cursor:pointer;text-align:left;width:100%;
+    color:var(--text-2);font-size:var(--fs-sm);line-height:1.45;
+    transition:border var(--dur-1),background var(--dur-1),transform var(--dur-1)}
+  .quiz-opt:hover{border-color:var(--border-strong);background:var(--surface-2);color:var(--text)}
+  .quiz-opt .kbd{flex-shrink:0;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;
+    border:1px solid var(--border-strong);font-family:var(--font-display);font-size:11px;font-weight:700;
+    color:var(--muted);margin-top:1px}
+  .quiz-opt .ans{flex:1}
+  .quiz-opt .rmark{flex-shrink:0;font-size:14px;opacity:0;transition:opacity var(--dur-1)}
+  .quiz-item.answered .quiz-opt{cursor:default}
+  .quiz-item.answered .quiz-opt:hover{transform:none}
+  .quiz-opt.is-correct{border-color:#fff;background:var(--success-dim);color:var(--text)}
+  .quiz-opt.is-correct .kbd{border-color:#fff;color:#fff}
+  .quiz-opt.is-correct .rmark{opacity:1;color:#fff}
+  .quiz-opt.is-wrong{border-color:var(--danger);background:var(--danger-dim);color:var(--text)}
+  .quiz-opt.is-wrong .kbd{border-color:var(--danger);color:var(--danger)}
+  .quiz-opt.is-wrong .rmark{opacity:1;color:var(--danger)}
+  .quiz-explain{margin-top:15px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface-2);
+    border:1px solid var(--border);font-size:13px;color:var(--text-2);line-height:1.6;
+    max-height:0;opacity:0;overflow:hidden;padding-top:0;padding-bottom:0;border-width:0;
+    transition:max-height .4s var(--ease),opacity .3s var(--ease),padding .4s var(--ease)}
+  .quiz-item.answered .quiz-explain{max-height:260px;opacity:1;padding-top:14px;padding-bottom:14px;border-width:1px}
+  .quiz-explain b{color:var(--text)}
+  .quiz-explain .exlabel{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:11px;
+    letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+
+  /* ----- Footer bài (rating + so sánh) ----- */
+  .lesson-foot{margin-top:46px;padding-top:30px;border-top:1px solid var(--border);
+    display:flex;flex-direction:column;gap:24px}
+  /* RatingBar */
+  .rating h3{font-size:var(--fs-md);font-weight:600;margin-bottom:4px}
+  .rating .rsub{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .rating .rbtns{display:flex;flex-wrap:wrap;gap:10px}
+  .rbtn{display:inline-flex;align-items:center;gap:9px;height:44px;padding:0 18px;border-radius:var(--r-pill);
+    background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:var(--fs-sm);
+    font-weight:600;transition:background var(--dur-1),border var(--dur-1),color var(--dur-1),transform var(--dur-1)}
+  .rbtn i{font-size:14px}
+  .rbtn:hover{background:var(--surface-3);color:var(--text);border-color:var(--border-strong);transform:translateY(-1px)}
+  .rbtn.sel{background:#fff;color:#000;border-color:#fff}
+  .rbtn.sel i{color:#000}
+  .foot-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .foot-actions .done-note{font-size:12.5px;color:var(--muted);display:none;align-items:center;gap:8px}
+  .foot-actions .done-note.show{display:inline-flex}
+
+  /* ----- Right rail ----- */
+  .rail{position:sticky;top:88px;display:flex;flex-direction:column;gap:16px}
+  .rail-card{border:1px solid var(--border);border-radius:var(--r-card);padding:18px;background:var(--surface-1)}
+  .rail-card .rc-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:14px}
+  .toc{display:flex;flex-direction:column;gap:2px}
+  .toc a{display:flex;align-items:center;gap:11px;padding:7px 10px;border-radius:9px;font-size:13px;
+    color:var(--muted);transition:background var(--dur-1),color var(--dur-1)}
+  .toc a .tn{font-family:var(--font-display);font-size:11px;width:16px;flex-shrink:0}
+  .toc a:hover{background:var(--surface-2);color:var(--text-2)}
+  .toc a.active{background:var(--surface-2);color:var(--text);font-weight:500}
+  .toc a.active .tn{color:#fff}
+
+  .rail-mastery .rm-top{display:flex;align-items:baseline;gap:8px}
+  .rail-mastery .rm-num{font-family:var(--font-display);font-weight:700;font-size:40px;line-height:.9;
+    color:#fff;letter-spacing:-.01em}
+  .rail-mastery .rm-max{font-size:13px;color:var(--muted)}
+  .rail-mastery .rm-label{font-size:12.5px;color:var(--muted-strong);margin-top:8px}
+  .rail-mastery .mbar{margin-top:12px}
+  .rail-mastery .rm-delta{display:none;align-items:center;gap:6px;margin-top:11px;font-size:12px;
+    font-weight:600;color:var(--text);animation:reveal-in .5s var(--ease) both}
+  .rail-mastery .rm-delta.show{display:inline-flex}
+  .rail-mastery .rm-delta i{font-size:11px}
+
+  .rail-facts{display:flex;flex-direction:column;gap:12px}
+  .rail-fact{display:flex;align-items:center;gap:12px}
+  .rail-fact .fi{width:34px;height:34px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--muted);font-size:13px}
+  .rail-fact .fl{font-size:11.5px;color:var(--muted)}
+  .rail-fact .fv{font-size:var(--fs-sm);color:var(--text);font-weight:600;margin-top:1px}
+
+  /* ----- Popover trích dẫn (phần tử nổi → được phép bóng) ----- */
+
+  /* ----- Toast (phần tử nổi → được phép bóng) ----- */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(24px);z-index:130;
+    display:flex;align-items:center;gap:14px;max-width:min(520px,92vw);
+    background:var(--surface-pop);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--r-md);
+    padding:13px 16px 13px 18px;box-shadow:var(--sh-pop);opacity:0;pointer-events:none;
+    transition:opacity .35s var(--ease),transform .35s var(--ease)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+  .toast .ti{width:34px;height:34px;flex-shrink:0;border-radius:9px;background:var(--surface-3);
+    display:grid;place-items:center;color:#fff;font-size:14px}
+  .toast .tbody{flex:1;min-width:0}
+  .toast .tl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .toast .tt{font-size:13px;color:var(--text);line-height:1.45;margin-top:2px}
+  .toast .tt b{color:#fff;font-weight:600}
+  .toast .ta{flex-shrink:0}
+  .toast .tx{flex-shrink:0;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+    background:transparent;border:none;color:var(--muted);font-size:13px;transition:color var(--dur-1),background var(--dur-1)}
+  .toast .tx:hover{color:var(--text);background:var(--surface-2)}
+
+  /* ----- Responsive ----- */
+  @media (max-width:900px){
+    .lesson-wrap{grid-template-columns:minmax(0,1fr);gap:0}
+    .rail{display:none}
+  }
+  @media (max-width:560px){
+    .prereq-grid,.split-tables{grid-template-columns:1fr}
+    .rating .rbtns{gap:8px}
+    .rbtn{flex:1 1 44%;justify-content:center;padding:0 12px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item active" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Bài học hôm nay <small>Thứ Hai, 08/09/2026</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm, tài liệu, môn học…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="lesson-wrap">
+
+        <!-- ============ CỘT NỘI DUNG ============ -->
+        <article>
+          <!-- Header bài -->
+          <header class="lesson-head reveal" style="--d:0s">
+            <div class="crumb">
+              <span>Cơ sở dữ liệu</span><i class="fa-solid fa-chevron-right"></i>
+              <span>Chuẩn hóa CSDL</span><i class="fa-solid fa-chevron-right"></i>
+              <span style="color:var(--text-2)">Bài học</span>
+            </div>
+            <h1>Dạng chuẩn 3 (3NF)</h1>
+            <p class="lead">Bài này được soạn riêng cho <b>An</b> từ <b>Chương 4 — Chuẩn hóa cơ sở dữ liệu</b>: ngắn gọn, mở đầu bằng ví dụ bảng dữ liệu cụ thể, nhấn vào những chỗ bạn hay nhầm.</p>
+            <div class="head-meta">
+              <span class="mastery m-weak weak-tag" data-mastery-live><span class="dot"></span><span class="n">15</span></span>
+              <span class="chip"><i class="fa-regular fa-clock"></i> 30 phút</span>
+              <span class="chip"><i class="fa-solid fa-wand-magic-sparkles"></i> Bài cá nhân hóa</span>
+              <span class="chip"><i class="fa-solid fa-file-lines"></i> Nguồn: Chương 4 (PDF)</span>
+            </div>
+          </header>
+
+          <!-- 1. Mục tiêu -->
+          <section class="sec reveal" id="sec-1" style="--d:.05s">
+            <div class="sec-eyebrow"><span class="sn">01</span><h2>Mục tiêu bài học</h2></div>
+            <div class="objectives">
+              <ul>
+                <li><i class="fa-solid fa-check"></i><span>Nói được <b>khi nào một bảng đạt 3NF</b> và khi nào chưa.</span></li>
+                <li><i class="fa-solid fa-check"></i><span>Chỉ ra <b>phụ thuộc bắc cầu</b> trong một bảng dữ liệu thật.</span></li>
+                <li><i class="fa-solid fa-check"></i><span><b>Tách bảng</b> để loại phụ thuộc bắc cầu, đưa về 3NF.</span></li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- 2. Ôn tiên quyết -->
+          <section class="sec reveal" id="sec-2" style="--d:.1s">
+            <div class="sec-eyebrow"><span class="sn">02</span><h2>Ôn nhanh tiên quyết</h2><span class="sub">2 khái niệm cần trước</span></div>
+            <div class="prereq-grid">
+              <div class="prereq">
+                <div class="pk">
+                  <span class="pname">Phụ thuộc bắc cầu</span>
+                  <span class="mastery m-weak weak-tag"><span class="dot"></span><span class="n">20</span></span>
+                </div>
+                <p class="ptext">Khi <b>A → B</b> và <b>B → C</b> mà B không phải khóa, thì C phụ thuộc vào A <b>qua trung gian</b> B <button class="cite" data-cite="D4">D4<span class="pg">tr.14</span></button></p>
+              </div>
+              <div class="prereq">
+                <div class="pk">
+                  <span class="pname">Dạng chuẩn 2 (2NF)</span>
+                  <span class="mastery m-weak weak-tag"><span class="dot"></span><span class="n">35</span></span>
+                </div>
+                <p class="ptext">Bảng ở 1NF và mọi thuộc tính không khóa phụ thuộc <b>đầy đủ</b> vào cả khóa <button class="cite" data-cite="D6">D6<span class="pg">tr.16</span></button></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Giải thích -->
+          <section class="sec reveal" id="sec-3" style="--d:.05s">
+            <div class="sec-eyebrow"><span class="sn">03</span><h2>3NF là gì?</h2></div>
+            <div class="prose">
+              <p>Một bảng ở <span class="term">dạng chuẩn 3 (3NF)</span> nếu nó <strong>đã ở 2NF</strong> và <strong>không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa chính</strong> <button class="cite" data-cite="D7">D7<span class="pg">tr.17</span></button>.</p>
+              <p>Nói cho dễ nhớ: mọi cột "thường" trong bảng phải phụ thuộc <strong>trực tiếp vào khóa</strong>, chứ không được phụ thuộc vào một cột thường khác. Nếu một cột lại xác định cột thứ ba, thì cột thứ ba đó đang "đi vòng" — đó chính là phụ thuộc bắc cầu cần loại bỏ <button class="cite" data-cite="D2">D2<span class="pg">tr.12</span></button>.</p>
+            </div>
+          </section>
+
+          <!-- 4. Ví dụ theo ngành -->
+          <section class="sec reveal" id="sec-4" style="--d:.05s">
+            <div class="sec-eyebrow"><span class="sn">04</span><h2>Ví dụ: bảng Sinh viên</h2><span class="sub">dữ liệu thật, không lý thuyết suông</span></div>
+            <div class="prose"><p>Xét bảng <code style="font-family:var(--font-display);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:1px 7px;color:var(--text)">SinhVien(MaSV, TenSV, MaLop, TenLop, Khoa)</code>, khóa chính là <b style="color:var(--text)">MaSV</b>:</p></div>
+
+            <div class="tablewrap">
+              <table class="dt">
+                <caption>Bảng SinhVien — chưa chuẩn hóa</caption>
+                <thead>
+                  <tr><th>MaSV</th><th>TenSV</th><th>MaLop</th><th class="dep">TenLop</th><th class="dep">Khoa</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td class="key">SV001</td><td>Nguyễn Văn An</td><td>L01</td><td class="dep">CNTT K64</td><td class="dep">Công nghệ thông tin</td></tr>
+                  <tr><td class="key">SV002</td><td>Lê Thị Hoa</td><td>L01</td><td class="dep">CNTT K64</td><td class="dep">Công nghệ thông tin</td></tr>
+                  <tr><td class="key">SV003</td><td>Trần Văn Cường</td><td>L02</td><td class="dep">KTPM K63</td><td class="dep">Công nghệ thông tin</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="dep-note">
+              <span class="tok">MaSV</span><span class="arr">→</span>
+              <span class="tok">MaLop</span><span class="arr">→</span>
+              <span class="tok bad">TenLop, Khoa</span>
+              <span class="cap">TenLop, Khoa phụ thuộc bắc cầu vào MaSV qua MaLop — vi phạm 3NF</span>
+            </div>
+
+            <div class="prose"><p>Thấy chỗ lặp không? <b style="color:var(--text)">L01</b> luôn kéo theo <b style="color:var(--text)">"CNTT K64"</b>. Vì <b style="color:var(--text)">MaLop → TenLop, Khoa</b>, hai cột này không phụ thuộc trực tiếp vào MaSV. Cách sửa: <strong>tách làm hai bảng</strong> <button class="cite" data-cite="D7">D7<span class="pg">tr.17</span></button>:</p></div>
+
+            <div class="split-arrow"><i class="fa-solid fa-scissors"></i><span>Tách để loại phụ thuộc bắc cầu</span></div>
+
+            <div class="split-tables">
+              <div class="tablewrap">
+                <table class="dt">
+                  <caption>SinhVien(MaSV, TenSV, MaLop)</caption>
+                  <thead><tr><th>MaSV</th><th>TenSV</th><th>MaLop</th></tr></thead>
+                  <tbody>
+                    <tr><td class="key">SV001</td><td>Nguyễn Văn An</td><td>L01</td></tr>
+                    <tr><td class="key">SV002</td><td>Lê Thị Hoa</td><td>L01</td></tr>
+                    <tr><td class="key">SV003</td><td>Trần Văn Cường</td><td>L02</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tablewrap">
+                <table class="dt">
+                  <caption>Lop(MaLop, TenLop, Khoa)</caption>
+                  <thead><tr><th>MaLop</th><th>TenLop</th><th>Khoa</th></tr></thead>
+                  <tbody>
+                    <tr><td class="key">L01</td><td>CNTT K64</td><td>Công nghệ thông tin</td></tr>
+                    <tr><td class="key">L02</td><td>KTPM K63</td><td>Công nghệ thông tin</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="prose" style="margin-top:16px"><p>Giờ mỗi cột chỉ phụ thuộc trực tiếp vào khóa của bảng nó đứng — cả hai bảng đều ở <strong>3NF</strong>. Đổi tên lớp chỉ sửa <b style="color:var(--text)">một dòng</b> ở bảng Lop, không còn lặp.</p></div>
+          </section>
+
+          <!-- 5. Lỗi bạn từng mắc -->
+          <section class="sec reveal" id="sec-5" style="--d:.05s">
+            <div class="sec-eyebrow"><span class="sn">05</span><h2>Lỗi bạn từng mắc</h2><span class="sub">hệ thống nhớ 2 điểm bạn hay nhầm ở đây</span></div>
+            <div class="memory-card">
+              <div class="mi"><i class="fa-solid fa-brain"></i></div>
+              <div>
+                <div class="mlabel">Nhớ bạn từng nhầm</div>
+                <div class="mtext">Cứ nghĩ "đã ở 2NF là đủ 3NF" — bỏ qua điều kiện <b>không có phụ thuộc bắc cầu</b>.</div>
+                <div class="mevidence"><i class="fa-solid fa-clock-rotate-left"></i> Sai 2 lần ở quiz 3NF trước đó</div>
+              </div>
+            </div>
+            <div class="memory-card">
+              <div class="mi"><i class="fa-solid fa-brain"></i></div>
+              <div>
+                <div class="mlabel">Nhớ bạn từng nhầm</div>
+                <div class="mtext">Coi phụ thuộc bắc cầu như phụ thuộc hàm thường, <b>không nhận ra cột trung gian</b> (như MaLop ở ví dụ trên).</div>
+                <div class="mevidence"><i class="fa-solid fa-clock-rotate-left"></i> Sai câu chẩn đoán về Phụ thuộc bắc cầu</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 6. Ngoài tài liệu -->
+          <section class="sec reveal" id="sec-6" style="--d:.05s">
+            <div class="sec-eyebrow"><span class="sn">06</span><h2>Liên hệ thực tế</h2></div>
+            <div class="outside">
+              <div class="otag"><span class="tag tag-out"><i class="fa-solid fa-circle-info"></i> Ngoài tài liệu môn học</span></div>
+              <p>Trong hệ thống thật, đôi khi người ta cố ý <b style="color:var(--text)">không</b> chuẩn hóa tới 3NF (gọi là <i>denormalization</i>) để đọc dữ liệu nhanh hơn, chấp nhận lặp để đỡ phải nối bảng. Đây là đánh đổi hiệu năng — không phải nội dung thi, nhưng đáng biết khi đi làm.</p>
+            </div>
+          </section>
+
+          <!-- 7. Quiz -->
+          <section class="sec reveal" id="sec-7" style="--d:.05s">
+            <div class="sec-eyebrow"><span class="sn">07</span><h2>3 câu kiểm tra</h2><span class="sub">chấm ngay, có giải thích</span></div>
+            <div class="quiz-progress">
+              <span><b id="qDone" style="color:var(--text)">0</b>/3 câu đã trả lời</span>
+              <span class="qbar"><i id="qBar"></i></span>
+            </div>
+
+            <div class="quiz" id="quiz">
+              <!-- Câu 1 -->
+              <div class="quiz-item" data-correct="B">
+                <div class="qnum">Câu 01</div>
+                <div class="quiz-q">Một bảng đã ở 2NF. Cần thêm điều kiện nào để nó đạt 3NF?</div>
+                <div class="quiz-opts">
+                  <button class="quiz-opt" data-opt="A"><span class="kbd">A</span><span class="ans">Mọi thuộc tính đều phải là khóa</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="B"><span class="kbd">B</span><span class="ans">Không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa chính</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="C"><span class="kbd">C</span><span class="ans">Bảng chỉ được có đúng một khóa dự tuyển</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="D"><span class="kbd">D</span><span class="ans">Bảng không được chứa phụ thuộc hàm nào</span><i class="rmark fa-solid"></i></button>
+                </div>
+                <div class="quiz-explain">
+                  <div class="exlabel"><i class="fa-solid fa-lightbulb"></i> Giải thích</div>
+                  <span>3NF = đã ở 2NF <b>và</b> không còn phụ thuộc bắc cầu của thuộc tính không khóa vào khóa chính <button class="cite" data-cite="D7">D7<span class="pg">tr.17</span></button>. Các đáp án còn lại mô tả điều kiện khác, không phải 3NF.</span>
+                </div>
+              </div>
+
+              <!-- Câu 2 -->
+              <div class="quiz-item" data-correct="B">
+                <div class="qnum">Câu 02</div>
+                <div class="quiz-q">Bảng <code>R(MaSV, MaLop, TenLop)</code> với <code>MaSV→MaLop</code>, <code>MaLop→TenLop</code>, đã ở 2NF. R có ở 3NF không?</div>
+                <div class="quiz-opts">
+                  <button class="quiz-opt" data-opt="A"><span class="kbd">A</span><span class="ans">Có — đã ở 2NF là đủ để đạt 3NF</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="B"><span class="kbd">B</span><span class="ans">Không — TenLop phụ thuộc bắc cầu vào MaSV qua MaLop</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="C"><span class="kbd">C</span><span class="ans">Có — vì bảng chỉ có một khóa chính</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="D"><span class="kbd">D</span><span class="ans">Không — vì thiếu phụ thuộc hàm đầy đủ</span><i class="rmark fa-solid"></i></button>
+                </div>
+                <div class="quiz-explain">
+                  <div class="exlabel"><i class="fa-solid fa-lightbulb"></i> Giải thích</div>
+                  <span>Đúng như phần bạn hay nhầm: 2NF <b>chưa</b> đủ. Ở đây <b>MaSV → MaLop → TenLop</b> nên TenLop phụ thuộc bắc cầu vào khóa MaSV — vi phạm 3NF <button class="cite" data-cite="D4">D4<span class="pg">tr.14</span></button>.</span>
+                </div>
+              </div>
+
+              <!-- Câu 3 -->
+              <div class="quiz-item" data-correct="B">
+                <div class="qnum">Câu 03</div>
+                <div class="quiz-q">Để đưa <code>R(MaSV, MaLop, TenLop)</code> ở trên về 3NF, nên làm gì?</div>
+                <div class="quiz-opts">
+                  <button class="quiz-opt" data-opt="A"><span class="kbd">A</span><span class="ans">Gộp tất cả cột vào một bảng lớn hơn</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="B"><span class="kbd">B</span><span class="ans">Tách thành R1(MaSV, MaLop) và R2(MaLop, TenLop)</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="C"><span class="kbd">C</span><span class="ans">Xóa hẳn cột TenLop cho gọn</span><i class="rmark fa-solid"></i></button>
+                  <button class="quiz-opt" data-opt="D"><span class="kbd">D</span><span class="ans">Thêm một khóa chính mới cho bảng</span><i class="rmark fa-solid"></i></button>
+                </div>
+                <div class="quiz-explain">
+                  <div class="exlabel"><i class="fa-solid fa-lightbulb"></i> Giải thích</div>
+                  <span>Tách để mỗi thuộc tính không khóa chỉ phụ thuộc trực tiếp vào khóa bảng nó đứng <button class="cite" data-cite="D7">D7<span class="pg">tr.17</span></button>. Xóa cột làm mất dữ liệu; gộp/thêm khóa không loại được phụ thuộc bắc cầu.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Footer bài -->
+          <footer class="lesson-foot reveal" style="--d:.05s">
+            <div class="rating">
+              <h3>Bài học này với bạn thế nào?</h3>
+              <p class="rsub">Đánh giá giúp hệ thống điều chỉnh độ khó và định dạng bài sau.</p>
+              <div class="rbtns" role="group" aria-label="Đánh giá bài học">
+                <button class="rbtn" data-rate="easy"><i class="fa-regular fa-face-smile"></i> Dễ hiểu</button>
+                <button class="rbtn" data-rate="tooEasy"><i class="fa-solid fa-forward"></i> Quá dễ</button>
+                <button class="rbtn" data-rate="tooHard"><i class="fa-solid fa-gauge-high"></i> Quá khó</button>
+                <button class="rbtn" data-rate="wrong"><i class="fa-solid fa-triangle-exclamation"></i> Có chỗ sai</button>
+              </div>
+            </div>
+            <div class="foot-actions">
+              <a class="btn btn-ghost btn-lg" href="app-compare.html"><i class="fa-solid fa-users-between-lines"></i> So sánh với sinh viên B</a>
+              <span class="done-note" id="rateNote"><i class="fa-solid fa-check"></i> Đã ghi nhận đánh giá của bạn</span>
+            </div>
+          </footer>
+        </article>
+
+        <!-- ============ RIGHT RAIL ============ -->
+        <aside class="rail reveal" style="--d:.12s">
+          <div class="rail-card rail-mastery">
+            <div class="rc-title">Mức thành thạo</div>
+            <div class="rm-top">
+              <span class="rm-num" id="railNum">15</span><span class="rm-max">/ 100</span>
+            </div>
+            <div class="rm-label">Dạng chuẩn 3 (3NF)</div>
+            <div class="mbar m-weak"><i id="railBar" data-w="15"></i></div>
+            <div class="rm-delta" id="railDelta"><i class="fa-solid fa-arrow-trend-up"></i> +7 sau bài kiểm tra</div>
+          </div>
+
+          <div class="rail-card">
+            <div class="rc-title">Mục lục bài</div>
+            <nav class="toc" id="toc">
+              <a href="#sec-1"><span class="tn">01</span> Mục tiêu</a>
+              <a href="#sec-2"><span class="tn">02</span> Ôn tiên quyết</a>
+              <a href="#sec-3"><span class="tn">03</span> 3NF là gì?</a>
+              <a href="#sec-4"><span class="tn">04</span> Ví dụ bảng</a>
+              <a href="#sec-5"><span class="tn">05</span> Lỗi từng mắc</a>
+              <a href="#sec-6"><span class="tn">06</span> Liên hệ thực tế</a>
+              <a href="#sec-7"><span class="tn">07</span> Kiểm tra</a>
+            </nav>
+          </div>
+
+          <div class="rail-card">
+            <div class="rc-title">Bài học</div>
+            <div class="rail-facts">
+              <div class="rail-fact"><span class="fi"><i class="fa-regular fa-clock"></i></span><span><span class="fl">Thời lượng</span><span class="fv">30 phút</span></span></div>
+              <div class="rail-fact"><span class="fi"><i class="fa-solid fa-diagram-project"></i></span><span><span class="fl">Tiên quyết</span><span class="fv">2 khái niệm</span></span></div>
+              <div class="rail-fact"><span class="fi"><i class="fa-solid fa-quote-left"></i></span><span><span class="fl">Trích dẫn nguồn</span><span class="fv">5 chỗ · bấm để xem</span></span></div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Popover trích dẫn -->
+<div class="cite-pop" id="citePop" role="dialog" aria-label="Đoạn nguồn trích dẫn">
+  <div class="cp-top">
+    <span class="cp-code" id="cpCode"></span>
+    <span class="cp-src" id="cpSrc"></span>
+    <span class="cp-pg" id="cpPg"></span>
+  </div>
+  <div class="cp-snip" id="cpSnip"></div>
+  <div class="cp-foot"><i class="fa-solid fa-shield-halved"></i> Câu trên bám trực tiếp vào đoạn nguồn này</div>
+</div>
+
+<!-- Toast tính lại kế hoạch -->
+<div class="toast" id="toast" role="status">
+  <span class="ti"><i class="fa-solid fa-route"></i></span>
+  <div class="tbody">
+    <div class="tl">Kế hoạch đã tính lại</div>
+    <div class="tt">Dồn thêm <b>một phiên 3NF ngày 16/09</b> vì bạn vừa tiến bộ.</div>
+  </div>
+  <a class="btn btn-primary btn-sm ta" href="app-plan.html">Xem lộ trình</a>
+  <button class="tx" id="toastX" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+</div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- thanh mastery: độ sáng trắng theo điểm (đồng bộ dashboard) ---- */
+  function paintBar(el, s){
+    const light='rgba(255,255,255,'+(0.30+s/100*0.65).toFixed(3)+')';
+    el.style.background=light; el.style.width=s+'%';
+    const card=el.closest('.rail-mastery'); if(card){const d=card.querySelector('.dot'); if(d)d.style.background=light;}
+  }
+  requestAnimationFrame(()=>{
+    const rb=document.getElementById('railBar');
+    if(reduce) paintBar(rb,15); else setTimeout(()=>paintBar(rb,15),260);
+  });
+
+  /* ---- Popover trích dẫn ---- */
+  const CITES={
+    D4:{doc:'Chương 4 — Chuẩn hóa CSDL',page:14,text:'Cho X → Y và Y → Z, trong đó Y không phải là khóa: Z phụ thuộc bắc cầu vào X qua trung gian Y. Đây là nguồn gốc dư thừa mà dạng chuẩn 3 sinh ra để loại bỏ.'},
+    D7:{doc:'Chương 4 — Chuẩn hóa CSDL',page:17,text:'Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.'},
+    D2:{doc:'Chương 4 — Chuẩn hóa CSDL',page:12,text:'Khóa dự tuyển là siêu khóa tối thiểu: bỏ bất kỳ thuộc tính nào cũng mất tính xác định. Thuộc tính không tham gia khóa dự tuyển nào là thuộc tính không khóa.'},
+    D6:{doc:'Chương 4 — Chuẩn hóa CSDL',page:16,text:'Một quan hệ ở dạng chuẩn 2 (2NF) nếu nó ở 1NF và mọi thuộc tính không khóa đều phụ thuộc hàm đầy đủ vào khóa, không còn phụ thuộc bộ phận.'}
+  };
+  const pop=document.getElementById('citePop');
+  const cpCode=document.getElementById('cpCode'),cpSrc=document.getElementById('cpSrc'),
+        cpPg=document.getElementById('cpPg'),cpSnip=document.getElementById('cpSnip');
+  let popOpenFor=null;
+  function openCite(btn){
+    const c=CITES[btn.dataset.cite]; if(!c)return;
+    cpCode.textContent=btn.dataset.cite; cpSrc.textContent=c.doc; cpPg.textContent='Trang '+c.page; cpSnip.textContent='“'+c.text+'”';
+    pop.classList.add('show'); popOpenFor=btn;
+    const r=btn.getBoundingClientRect(), pw=pop.offsetWidth, ph=pop.offsetHeight;
+    let left=r.left+r.width/2-pw/2;
+    left=Math.max(12,Math.min(left,innerWidth-pw-12));
+    let top=r.bottom+8;
+    if(top+ph>innerHeight-12) top=r.top-ph-8;
+    pop.style.left=left+'px'; pop.style.top=Math.max(12,top)+'px';
+  }
+  function closeCite(){pop.classList.remove('show');popOpenFor=null;}
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('.cite');
+    if(btn){e.preventDefault(); (popOpenFor===btn)?closeCite():openCite(btn); return;}
+    if(!e.target.closest('#citePop')) closeCite();
+  });
+  addEventListener('keydown',e=>{if(e.key==='Escape')closeCite();});
+  addEventListener('scroll',()=>{if(popOpenFor)openCite(popOpenFor);},true);
+
+  /* ---- Quiz: chấm ngay + đủ 3 câu thì mastery đổi + toast ---- */
+  const items=[...document.querySelectorAll('.quiz-item')];
+  let done=0;
+  const qDone=document.getElementById('qDone'), qBar=document.getElementById('qBar');
+  items.forEach(item=>{
+    const correct=item.dataset.correct;
+    item.querySelectorAll('.quiz-opt').forEach(opt=>{
+      opt.addEventListener('click',()=>{
+        if(item.classList.contains('answered'))return;
+        item.classList.add('answered');
+        const pick=opt.dataset.opt;
+        item.querySelectorAll('.quiz-opt').forEach(o=>{
+          const m=o.querySelector('.rmark');
+          if(o.dataset.opt===correct){o.classList.add('is-correct');m.classList.add('fa-check');}
+          else if(o.dataset.opt===pick){o.classList.add('is-wrong');m.classList.add('fa-xmark');}
+        });
+        done++; qDone.textContent=done; qBar.style.width=(done/items.length*100)+'%';
+        if(done===items.length) finishQuiz();
+      });
+    });
+  });
+
+  function finishQuiz(){
+    const railNum=document.getElementById('railNum');
+    const from=15,to=22;
+    // cập nhật mọi nhãn mastery live (rail + header pill)
+    const liveNs=document.querySelectorAll('[data-mastery-live] .n');
+    if(reduce){
+      railNum.textContent=to; liveNs.forEach(n=>n.textContent=to);
+      paintBar(document.getElementById('railBar'),to);
+    }else{
+      const t0=performance.now(),dur=900,ease=t=>1-Math.pow(1-t,3);
+      const step=now=>{const p=Math.min((now-t0)/dur,1),v=Math.round(from+(to-from)*ease(p));
+        railNum.textContent=v; liveNs.forEach(n=>n.textContent=v);
+        if(p<1)requestAnimationFrame(step);};
+      requestAnimationFrame(step);
+      paintBar(document.getElementById('railBar'),to);
+    }
+    document.getElementById('railDelta').classList.add('show');
+    setTimeout(showToast,700);
+  }
+
+  /* ---- Toast ---- */
+  const toast=document.getElementById('toast');
+  function showToast(){toast.classList.add('show');}
+  document.getElementById('toastX').addEventListener('click',()=>toast.classList.remove('show'));
+
+  /* ---- RatingBar ---- */
+  document.querySelectorAll('.rbtn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.rbtn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      document.getElementById('rateNote').classList.add('show');
+    });
+  });
+
+  /* ---- Scroll-spy mục lục ---- */
+  const tocLinks=[...document.querySelectorAll('#toc a')];
+  const secs=tocLinks.map(a=>document.querySelector(a.getAttribute('href')));
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(ents=>{
+      ents.forEach(en=>{
+        if(en.isIntersecting){
+          const id='#'+en.target.id;
+          tocLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')===id));
+        }
+      });
+    },{rootMargin:'-40% 0px -55% 0px'});
+    secs.forEach(s=>s&&io.observe(s));
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Học kỳ của tôi · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ===== riêng trang Học kỳ ===== */
+
+  /* SyncStatusBanner — "hệ thống đã đọc gì" từ cổng đào tạo */
+  .sync{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start}
+  .sync-left{display:flex;flex-direction:column;gap:5px;max-width:220px}
+  .sync-left .badge-ok{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;
+    height:24px;padding:0 11px;border-radius:999px;background:var(--success-dim);
+    border:1px solid var(--border-strong);color:var(--text);font-size:11px;font-weight:600}
+  .sync-left .when{font-size:var(--fs-sm);color:var(--text-2);margin-top:6px;line-height:1.5}
+  .sync-left .when b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+  .sync-left .src{font-size:11px;color:var(--muted)}
+  .sync-rows{display:flex;flex-direction:column;gap:2px}
+  .sync-row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--border-faint)}
+  .sync-row:last-child{border-bottom:none}
+  .sync-row .ico{width:32px;height:32px;flex-shrink:0;display:grid;place-items:center;border-radius:9px;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12px}
+  .sync-row .txt{flex:1;min-width:0}
+  .sync-row .txt b{font-size:var(--fs-sm);font-weight:600;display:block}
+  .sync-row .txt span{font-size:11.5px;color:var(--muted)}
+  .sync-row .edit{width:34px;height:34px;flex-shrink:0;display:grid;place-items:center;border-radius:9px;
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    transition:background var(--dur-1),color var(--dur-1)}
+  .sync-row .edit:hover{background:var(--surface-3);color:var(--text)}
+
+  .manual-hint{margin-top:16px;padding-top:16px;border-top:1px solid var(--border-faint);
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:var(--fs-sm);color:var(--muted-strong)}
+  .manual-hint i{color:var(--muted)}
+  .manual-form{display:none;margin-top:14px;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .manual-form.open{display:flex}
+  .mf{display:flex;flex-direction:column;gap:5px;flex:1 1 160px}
+  .mf label{font-size:11px;color:var(--muted)}
+  .mf input{height:42px;padding:0 13px;border-radius:12px;background:var(--surface-1);
+    border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:var(--fs-sm);outline:none}
+  .mf input:focus{border-color:var(--accent-border);background:var(--surface-2)}
+
+
+  /* riêng bảng học kỳ (DataTable base + .num đã ở app.css) */
+  table.dt .subj{font-weight:600;color:var(--text)}
+  table.dt .code{font-family:var(--font-display);font-weight:700;font-size:11px;color:var(--muted);letter-spacing:.02em}
+  .pend{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--muted-strong);
+    font-size:10.5px;font-weight:600}
+
+  /* danh sách môn (tab Môn học) */
+  .courses{display:flex;flex-direction:column;gap:2px}
+  .crow{display:flex;align-items:center;gap:14px;padding:15px 4px;border-bottom:1px solid var(--border-faint)}
+  .crow:last-child{border-bottom:none}
+  .crow .cico{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;border-radius:11px;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:15px}
+  .crow .cmain{flex:1;min-width:0;display:flex;flex-direction:column}
+  .crow .cname{font-size:var(--fs-md);font-weight:600}
+  .crow .cmeta{font-size:12px;color:var(--muted);margin-top:2px}
+  .crow .cmeta .code{font-family:var(--font-display);font-weight:700;letter-spacing:.02em;color:var(--text-2)}
+
+  /* lưới TKB */
+  .tt-wrap{overflow-x:auto;margin:0 -4px;padding:0 4px}
+  .tt{display:grid;grid-template-columns:60px repeat(5,minmax(96px,1fr));gap:6px;min-width:560px}
+  .tt .th{text-align:center;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.03em;padding-bottom:2px}
+  .tt .rl{display:flex;align-items:center;font-size:11px;color:var(--muted)}
+  .tt .tcell{min-height:64px;border-radius:12px;background:var(--surface-1);border:1px solid var(--border);
+    padding:9px 10px;display:flex;flex-direction:column;gap:3px;justify-content:center}
+  .tt .tcell.empty{background:transparent;border-style:dashed;border-color:var(--border-faint)}
+  .tt .tcell .tn{font-size:12px;font-weight:600;color:var(--text);line-height:1.3}
+  .tt .tcell .tr{font-size:10.5px;color:var(--muted)}
+
+  /* gợi ý thư viện số */
+  .lib-card{display:flex;gap:14px;align-items:flex-start;height:100%}
+  .lib-card .thumb{width:46px;height:58px;flex-shrink:0;border-radius:9px;background:var(--surface-2);
+    border:1px solid var(--border);display:grid;place-items:center;color:var(--text-2);font-size:18px}
+  .lib-card .lmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+  .lib-card .ltitle{font-size:var(--fs-sm);font-weight:600;line-height:1.4}
+  .lib-card .lsrc{font-size:11px;color:var(--muted)}
+  .lib-card .lmatch{align-self:flex-start}
+  .lib-card .lact{margin-top:auto;padding-top:4px}
+
+
+  @media (max-width:760px){
+    .topbar .page-title{font-size:var(--fs-md)}
+    .sync{grid-template-columns:1fr;gap:16px}
+    .sync-left{max-width:none}
+    .sync-row .edit{width:44px;height:44px}
+    .seg button{min-height:44px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item active" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Học kỳ của tôi <small>Học kỳ 20261 · 4 môn</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm, tài liệu, môn học…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Học kỳ 20261</h1>
+        <p>Dữ liệu học kỳ được <b style="color:var(--text)">đọc tự động</b> từ cổng đào tạo. Kiểm tra bên dưới; sửa hoặc thêm thủ công nếu có sai sót.</p>
+      </div>
+
+      <!-- ===== KHỐI 1: Hệ thống đã đọc gì ===== -->
+      <section class="card reveal" style="--d:.06s;margin-bottom:var(--sp-8)">
+        <div class="card-title"><i class="fa-solid fa-cloud-arrow-down"></i> Hệ thống đã đọc gì</div>
+        <div class="sync">
+          <div class="sync-left">
+            <span class="badge-ok"><i class="fa-solid fa-check"></i> Đồng bộ thành công</span>
+            <div class="when">Lần cuối <b>08/09/2026 · 07:42</b></div>
+            <div class="src">Nguồn: Cổng đào tạo UTT (qldt.utt.edu.vn)</div>
+          </div>
+          <div class="sync-rows">
+            <div class="sync-row">
+              <span class="ico"><i class="fa-solid fa-book"></i></span>
+              <span class="txt"><b>4 môn học kỳ này</b><span>Cơ sở dữ liệu, Cấu trúc dữ liệu, Lập trình HĐT, Mạng máy tính</span></span>
+              <button class="edit" data-edit="Danh sách môn" aria-label="Sửa danh sách môn"><i class="fa-solid fa-pen"></i></button>
+            </div>
+            <div class="sync-row">
+              <span class="ico"><i class="fa-solid fa-table-cells"></i></span>
+              <span class="txt"><b>Thời khóa biểu tuần</b><span>6 buổi lên lớp · cập nhật đến tuần 08–14/09</span></span>
+              <button class="edit" data-edit="Thời khóa biểu" aria-label="Sửa thời khóa biểu"><i class="fa-solid fa-pen"></i></button>
+            </div>
+            <div class="sync-row">
+              <span class="ico"><i class="fa-solid fa-calendar-check"></i></span>
+              <span class="txt"><b>Lịch thi 4 môn</b><span>Từ 20/09 đến 30/09/2026</span></span>
+              <button class="edit" data-edit="Lịch thi" aria-label="Sửa lịch thi"><i class="fa-solid fa-pen"></i></button>
+            </div>
+            <div class="sync-row">
+              <span class="ico"><i class="fa-solid fa-star-half-stroke"></i></span>
+              <span class="txt"><b>Điểm thành phần 4 môn</b><span>Chuyên cần &amp; giữa kỳ · chưa có điểm cuối kỳ</span></span>
+              <button class="edit" data-edit="Bảng điểm" aria-label="Sửa bảng điểm"><i class="fa-solid fa-pen"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="manual-hint">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Chưa cài tiện ích trình duyệt nên một số môn có thể thiếu.</span>
+          <button class="btn btn-ghost btn-sm" id="mfToggle" style="margin-left:auto"><i class="fa-solid fa-plus"></i> Thêm thủ công</button>
+        </div>
+        <div class="manual-form" id="mfForm">
+          <div class="mf"><label for="mfName">Tên môn</label><input id="mfName" type="text" placeholder="VD: Trí tuệ nhân tạo" /></div>
+          <div class="mf"><label for="mfCode">Mã môn</label><input id="mfCode" type="text" placeholder="VD: INT1420" /></div>
+          <div class="mf"><label for="mfExam">Ngày thi</label><input id="mfExam" type="date" /></div>
+          <button class="btn btn-primary" id="mfAdd" style="flex:0 0 auto"><i class="fa-solid fa-check"></i> Thêm</button>
+        </div>
+      </section>
+
+      <!-- ===== KHỐI 2: Chi tiết học kỳ (tab) ===== -->
+      <section class="card reveal" style="--d:.12s;margin-bottom:var(--sp-8)">
+        <div class="seg" role="tablist" style="margin-bottom:24px" aria-label="Chi tiết học kỳ">
+          <button role="tab" aria-selected="true"  data-tab="mon"><i class="fa-solid fa-book"></i> Môn học</button>
+          <button role="tab" aria-selected="false" data-tab="tkb"><i class="fa-solid fa-table-cells"></i> Thời khóa biểu</button>
+          <button role="tab" aria-selected="false" data-tab="thi"><i class="fa-solid fa-calendar-check"></i> Lịch thi</button>
+          <button role="tab" aria-selected="false" data-tab="diem"><i class="fa-solid fa-star-half-stroke"></i> Bảng điểm</button>
+        </div>
+
+        <!-- Tab: Môn học -->
+        <div class="tabpanel" data-panel="mon">
+          <div class="courses">
+            <div class="crow">
+              <span class="cico"><i class="fa-solid fa-database"></i></span>
+              <span class="cmain"><span class="cname">Cơ sở dữ liệu</span><span class="cmeta"><span class="code">INT1234</span> · TS. Lê Văn C · 3 tín chỉ</span></span>
+              <a class="btn btn-ghost btn-sm" href="app-library.html"><i class="fa-solid fa-folder-open"></i> Học liệu</a>
+            </div>
+            <div class="crow">
+              <span class="cico"><i class="fa-solid fa-sitemap"></i></span>
+              <span class="cmain"><span class="cname">Cấu trúc dữ liệu và giải thuật</span><span class="cmeta"><span class="code">INT1206</span> · ThS. Phạm Thị D · 3 tín chỉ</span></span>
+              <a class="btn btn-ghost btn-sm" href="app-library.html"><i class="fa-solid fa-folder-open"></i> Học liệu</a>
+            </div>
+            <div class="crow">
+              <span class="cico"><i class="fa-solid fa-cubes"></i></span>
+              <span class="cmain"><span class="cname">Lập trình hướng đối tượng</span><span class="cmeta"><span class="code">INT1108</span> · TS. Hoàng Văn E · 3 tín chỉ</span></span>
+              <a class="btn btn-ghost btn-sm" href="app-library.html"><i class="fa-solid fa-folder-open"></i> Học liệu</a>
+            </div>
+            <div class="crow">
+              <span class="cico"><i class="fa-solid fa-network-wired"></i></span>
+              <span class="cmain"><span class="cname">Mạng máy tính</span><span class="cmeta"><span class="code">INT1310</span> · ThS. Nguyễn Thị F · 2 tín chỉ</span></span>
+              <a class="btn btn-ghost btn-sm" href="app-library.html"><i class="fa-solid fa-folder-open"></i> Học liệu</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Thời khóa biểu -->
+        <div class="tabpanel" data-panel="tkb" hidden>
+          <div class="tt-wrap">
+            <div class="tt">
+              <div class="th"></div>
+              <div class="th">T2</div><div class="th">T3</div><div class="th">T4</div><div class="th">T5</div><div class="th">T6</div>
+              <div class="rl">Sáng</div>
+              <div class="tcell"><span class="tn">Lập trình HĐT</span><span class="tr">Tiết 1–3 · A1-301</span></div>
+              <div class="tcell"><span class="tn">Cơ sở dữ liệu</span><span class="tr">Tiết 1–3 · A2-301</span></div>
+              <div class="tcell"><span class="tn">Cấu trúc dữ liệu</span><span class="tr">Tiết 1–3 · A3-105</span></div>
+              <div class="tcell empty"></div>
+              <div class="tcell"><span class="tn">TH Lập trình HĐT</span><span class="tr">Tiết 1–3 · Lab B2</span></div>
+              <div class="rl">Chiều</div>
+              <div class="tcell empty"></div>
+              <div class="tcell"><span class="tn">Mạng máy tính</span><span class="tr">Tiết 7–9 · B2-210</span></div>
+              <div class="tcell empty"></div>
+              <div class="tcell"><span class="tn">TH Cơ sở dữ liệu</span><span class="tr">Tiết 7–9 · Lab A2</span></div>
+              <div class="tcell empty"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Lịch thi -->
+        <div class="tabpanel" data-panel="thi" hidden>
+          <div class="tablewrap">
+            <table class="dt" style="min-width:460px">
+              <thead><tr><th>Môn</th><th>Ngày thi</th><th>Ca</th><th>Phòng</th><th>Hình thức</th></tr></thead>
+              <tbody>
+                <tr><td class="subj">Cơ sở dữ liệu <span class="code">INT1234</span></td><td class="num">20/09/2026</td><td>Ca 1 · 7:30</td><td class="num">A2-301</td><td>Tự luận</td></tr>
+                <tr><td class="subj">Cấu trúc dữ liệu <span class="code">INT1206</span></td><td class="num">24/09/2026</td><td>Ca 2 · 9:30</td><td class="num">A3-105</td><td>Tự luận</td></tr>
+                <tr><td class="subj">Lập trình HĐT <span class="code">INT1108</span></td><td class="num">27/09/2026</td><td>Ca 3 · 13:30</td><td class="num">A1-204</td><td>Thực hành</td></tr>
+                <tr><td class="subj">Mạng máy tính <span class="code">INT1310</span></td><td class="num">30/09/2026</td><td>Ca 1 · 7:30</td><td class="num">B2-210</td><td>Trắc nghiệm</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Bảng điểm -->
+        <div class="tabpanel" data-panel="diem" hidden>
+          <div class="tablewrap">
+            <table class="dt" style="min-width:460px">
+              <thead><tr><th>Môn</th><th class="num">Chuyên cần</th><th class="num">Giữa kỳ</th><th class="num">Cuối kỳ</th><th>Tổng kết</th></tr></thead>
+              <tbody>
+                <tr><td class="subj">Cơ sở dữ liệu</td><td class="num">9.0</td><td class="num">7.5</td><td class="num">—</td><td><span class="pend"><i class="fa-solid fa-hourglass-half" style="font-size:9px"></i> chờ thi 20/09</span></td></tr>
+                <tr><td class="subj">Cấu trúc dữ liệu</td><td class="num">8.5</td><td class="num">8.0</td><td class="num">—</td><td><span class="pend"><i class="fa-solid fa-hourglass-half" style="font-size:9px"></i> chờ thi 24/09</span></td></tr>
+                <tr><td class="subj">Lập trình HĐT</td><td class="num">9.0</td><td class="num">6.5</td><td class="num">—</td><td><span class="pend"><i class="fa-solid fa-hourglass-half" style="font-size:9px"></i> chờ thi 27/09</span></td></tr>
+                <tr><td class="subj">Mạng máy tính</td><td class="num">8.0</td><td class="num">7.0</td><td class="num">—</td><td><span class="pend"><i class="fa-solid fa-hourglass-half" style="font-size:9px"></i> chờ thi 30/09</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== KHỐI 3: Gợi ý bài giảng thư viện số ===== -->
+      <section class="reveal" style="--d:.18s">
+        <div class="card-title" style="margin-bottom:var(--sp-5)"><i class="fa-solid fa-wand-magic-sparkles"></i> Gợi ý bài giảng khớp môn của bạn</div>
+        <div class="bento">
+          <div class="card col-6">
+            <div class="lib-card">
+              <span class="thumb"><i class="fa-solid fa-file-pdf"></i></span>
+              <div class="lmain">
+                <span class="ltitle">Chương 4 — Chuẩn hóa cơ sở dữ liệu</span>
+                <span class="lsrc">Thư viện số UTT · DSpace · PDF · 42 trang</span>
+                <span class="chip on lmatch"><i class="fa-solid fa-link"></i> Khớp: Cơ sở dữ liệu</span>
+                <span class="lact"><button class="btn btn-accent btn-sm lib-import"><i class="fa-solid fa-download"></i> Nhập vào Kho học liệu</button></span>
+              </div>
+            </div>
+          </div>
+          <div class="card col-6">
+            <div class="lib-card">
+              <span class="thumb"><i class="fa-solid fa-file-pdf"></i></span>
+              <div class="lmain">
+                <span class="ltitle">Giáo trình Cơ sở dữ liệu — Chương 3: Mô hình quan hệ</span>
+                <span class="lsrc">Thư viện số UTT · DSpace · PDF · 28 trang</span>
+                <span class="chip on lmatch"><i class="fa-solid fa-link"></i> Khớp: Cơ sở dữ liệu</span>
+                <span class="lact"><button class="btn btn-accent btn-sm lib-import"><i class="fa-solid fa-download"></i> Nhập vào Kho học liệu</button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Đã lưu</span></div>
+
+<script>
+  // ----- toast -----
+  let toastT;
+  const toast=(msg)=>{const t=document.getElementById('toast');
+    document.getElementById('toastMsg').textContent=msg;t.classList.add('show');
+    clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);};
+
+  // ----- tabs -----
+  const tablist=document.querySelector('.seg');
+  tablist.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    tablist.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected','false'));
+    b.setAttribute('aria-selected','true');
+    const key=b.dataset.tab;
+    document.querySelectorAll('.tabpanel').forEach(p=>p.hidden = p.dataset.panel!==key);
+  });
+
+  // ----- nút sửa từng dòng đồng bộ (mô phỏng) -----
+  document.querySelectorAll('.sync-row .edit').forEach(b=>{
+    b.onclick=()=>toast('Mở chỉnh sửa: '+b.dataset.edit);
+  });
+
+  // ----- form nhập tay -----
+  const mfForm=document.getElementById('mfForm');
+  document.getElementById('mfToggle').onclick=()=>mfForm.classList.toggle('open');
+  document.getElementById('mfAdd').onclick=()=>{
+    const name=document.getElementById('mfName').value.trim();
+    if(!name){toast('Nhập tên môn trước');return;}
+    mfForm.classList.remove('open');
+    document.getElementById('mfName').value='';document.getElementById('mfCode').value='';document.getElementById('mfExam').value='';
+    toast('Đã thêm môn: '+name);
+  };
+
+  // ----- nhập bài giảng gợi ý -----
+  document.querySelectorAll('.lib-import').forEach(b=>{
+    b.onclick=()=>{b.innerHTML='<i class="fa-solid fa-check"></i> Đã nhập';b.disabled=true;
+      toast('Đã thêm vào Kho học liệu · đang xử lý');};
+  });
+</script>
+</body>
+</html>

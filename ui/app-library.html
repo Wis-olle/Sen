@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kho học liệu · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ riêng trang Kho học liệu (S05) ============ */
+
+  /* IngestBar — khu thêm tài liệu (tải lên / dán link / thư viện số) */
+  .ingest-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}
+  .ingest-grid>*{min-width:0}
+  .dropzone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    text-align:center;min-height:150px;padding:22px;border:1.5px dashed var(--border-strong);
+    border-radius:var(--r-md);background:var(--surface-1);color:var(--text-2);
+    transition:border var(--dur-1),background var(--dur-1),transform var(--dur-1)}
+  .dropzone:hover{border-color:var(--accent-border);background:var(--surface-2);transform:translateY(-1px)}
+  .dropzone .dz-ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
+    background:var(--surface-3);color:var(--text);font-size:18px;border:1px solid var(--border);margin-bottom:2px}
+  .dropzone b{font-size:var(--fs-base);color:var(--text);font-weight:600}
+  .dropzone span.dz-sub{font-size:var(--fs-sm);color:var(--muted)}
+  .ingest-side{display:flex;flex-direction:column;gap:12px;justify-content:center}
+  .link-row{display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 14px;
+    border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--border);
+    transition:border var(--dur-1),background var(--dur-1)}
+  .link-row:focus-within{border-color:var(--accent-border);background:var(--surface-3)}
+  .link-row .link-ic{color:var(--muted);font-size:13px}
+  .link-row input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);
+    font-size:var(--fs-sm);font-family:inherit}
+  .link-row input::placeholder{color:var(--muted)}
+  .ingest-note{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted);line-height:1.5}
+  .ingest-note i{margin-top:2px;font-size:11px}
+
+  /* LibraryList — nhóm tài liệu theo môn */
+  .course-group{margin-bottom:var(--sp-8)}
+  .course-group:last-child{margin-bottom:0}
+  .course-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .course-head .cg-name{font-size:var(--fs-md);font-weight:600;letter-spacing:-.01em}
+  .course-head .cg-count{font-size:var(--fs-xs);color:var(--muted);font-variant-numeric:tabular-nums}
+  .doc-list{display:flex;flex-direction:column;gap:12px}
+
+  /* LibraryDocCard — thẻ tài liệu + ProcessingStepper */
+  .doc-card{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+    padding:16px 18px;border:1px solid var(--border);border-radius:var(--r-md);
+    background:var(--surface-1);color:inherit;
+    transition:border var(--dur-1),background var(--dur-1),transform var(--dur-1)}
+  .doc-card:hover{border-color:var(--border-strong);background:var(--surface-2);transform:translateY(-1px)}
+  .doc-ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;
+    background:var(--surface-3);border:1px solid var(--border);color:var(--text-2);font-size:18px}
+  .doc-main{min-width:0}
+  .doc-name{font-size:var(--fs-base);font-weight:600;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .doc-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .doc-proc{display:flex;align-items:center;gap:14px;margin-top:13px;flex-wrap:wrap}
+  .doc-proc .stepper.mini{flex:0 0 auto}
+  .doc-state{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--text-2)}
+  .doc-state i{font-size:12px}
+  .doc-state.is-run{color:var(--text)}
+  .doc-state.is-run i{animation:spin 1.1s linear infinite}
+  .doc-state.is-wait{color:var(--muted)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .doc-open{width:34px;height:34px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;
+    color:var(--muted);transition:color var(--dur-1),background var(--dur-1),transform var(--dur-1)}
+  .doc-card:hover .doc-open{color:var(--text);background:var(--surface-3);transform:translateX(2px)}
+
+  /* SuggestCard — gợi ý từ thư viện số khớp môn */
+  .suggest-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .suggest-card{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:flex-start;
+    padding:16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-1)}
+  .suggest-main{min-width:0}
+  .suggest-main .doc-name{white-space:normal;line-height:1.35}
+  .suggest-main .doc-meta{margin-top:9px}
+  .suggest-foot{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-top:2px;padding-top:12px;border-top:1px solid var(--border-faint)}
+  .suggest-foot .relev{font-size:11.5px;color:var(--muted)}
+
+
+  @media (max-width:760px){
+    .ingest-grid{grid-template-columns:1fr}
+    .suggest-grid{grid-template-columns:1fr}
+    .doc-card{grid-template-columns:auto 1fr;gap:12px}
+    .doc-open{display:none}
+    .doc-name{white-space:normal}
+    /* cỡ chạm ≥44px trên mobile */
+    .link-row,.link-row .btn,.ingest-side .btn,.suggest-card .btn{min-height:44px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item active" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span><span class="badge">2</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Kho học liệu <small>3 tài liệu · 2 đang xử lý</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm tài liệu, khái niệm…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Kho học liệu</h1>
+        <p>Tải tài liệu học của bạn — hệ thống tự trích xuất, lập chỉ mục và dựng <b style="color:var(--text)">bản đồ kiến thức</b> từ đó.</p>
+      </div>
+
+      <!-- 1) Thêm tài liệu -->
+      <section class="card ingest reveal" style="--d:.06s">
+        <div class="card-title"><i class="fa-solid fa-plus"></i> Thêm tài liệu</div>
+        <div class="ingest-grid">
+          <button class="dropzone" type="button" id="dz">
+            <span class="dz-ic"><i class="fa-solid fa-arrow-up-from-bracket"></i></span>
+            <b>Tải lên tệp</b>
+            <span class="dz-sub">Kéo thả hoặc chọn — PDF, text, markdown</span>
+          </button>
+          <div class="ingest-side">
+            <label class="link-row">
+              <span class="link-ic"><i class="fa-solid fa-link"></i></span>
+              <input type="url" placeholder="Dán liên kết bài viết, trang web…" aria-label="Dán liên kết" />
+              <button class="btn btn-accent btn-sm" type="button">Trích xuất</button>
+            </label>
+            <button class="btn btn-ghost btn-block" type="button" id="dslibBtn">
+              <i class="fa-solid fa-building-columns"></i> Nhập từ thư viện số
+            </button>
+            <p class="ingest-note"><i class="fa-solid fa-puzzle-piece"></i>
+              Cần cài tiện ích trình duyệt để nhập trực tiếp từ thư viện số của trường. Trong bản demo, dùng khối “Gợi ý” bên dưới.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2) Danh sách theo môn -->
+      <section class="reveal" style="--d:.12s">
+
+        <!-- Môn: Cơ sở dữ liệu -->
+        <div class="course-group">
+          <div class="course-head">
+            <span class="cg-name">Cơ sở dữ liệu</span>
+            <span class="chip"><i class="fa-solid fa-hashtag"></i> INT1234</span>
+            <span class="cg-count">· 3 tài liệu</span>
+          </div>
+          <div class="doc-list">
+
+            <!-- mapped: đã có bản đồ (thư viện số) -->
+            <a class="doc-card" href="app-library-doc.html">
+              <span class="doc-ic"><i class="fa-solid fa-file-pdf"></i></span>
+              <span class="doc-main">
+                <span class="doc-name">Chương 4 — Chuẩn hóa cơ sở dữ liệu.pdf</span>
+                <span class="doc-meta">
+                  <span class="chip"><i class="fa-solid fa-file-lines"></i> PDF</span>
+                  <span class="chip"><i class="fa-solid fa-building-columns"></i> Thư viện số</span>
+                  <span class="chip"><i class="fa-solid fa-layer-group"></i> 8 khái niệm</span>
+                </span>
+                <span class="doc-proc">
+                  <ol class="stepper mini" aria-label="Trạng thái xử lý: đã có bản đồ">
+                    <li class="step done"><span class="node"></span></li>
+                    <li class="step done"><span class="node"></span></li>
+                    <li class="step done"><span class="node"></span></li>
+                    <li class="step done"><span class="node"></span></li>
+                  </ol>
+                  <span class="doc-state"><i class="fa-solid fa-circle-check"></i> Đã có bản đồ</span>
+                </span>
+              </span>
+              <span class="doc-open" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+            </a>
+
+            <!-- indexing: đang lập chỉ mục (tải lên) -->
+            <a class="doc-card" href="app-library-doc.html">
+              <span class="doc-ic"><i class="fa-solid fa-file-pdf"></i></span>
+              <span class="doc-main">
+                <span class="doc-name">Slide tuần 5 — Phụ thuộc hàm.pdf</span>
+                <span class="doc-meta">
+                  <span class="chip"><i class="fa-solid fa-file-lines"></i> PDF</span>
+                  <span class="chip"><i class="fa-solid fa-arrow-up-from-bracket"></i> Bạn tải lên</span>
+                </span>
+                <span class="doc-proc">
+                  <ol class="stepper mini" aria-label="Trạng thái xử lý: đang lập chỉ mục">
+                    <li class="step done"><span class="node"></span></li>
+                    <li class="step done"><span class="node"></span></li>
+                    <li class="step active"><span class="node"></span></li>
+                    <li class="step"><span class="node"></span></li>
+                  </ol>
+                  <span class="doc-state is-run"><i class="fa-solid fa-spinner"></i> Đang lập chỉ mục…</span>
+                </span>
+              </span>
+              <span class="doc-open" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+            </a>
+
+            <!-- extracted: đã trích xuất (link) -->
+            <a class="doc-card" href="app-library-doc.html">
+              <span class="doc-ic"><i class="fa-solid fa-link"></i></span>
+              <span class="doc-main">
+                <span class="doc-name">Bài viết: Ví dụ 3NF thực tế</span>
+                <span class="doc-meta">
+                  <span class="chip"><i class="fa-solid fa-globe"></i> Liên kết</span>
+                  <span class="chip"><i class="fa-solid fa-scissors"></i> 6 đoạn</span>
+                </span>
+                <span class="doc-proc">
+                  <ol class="stepper mini" aria-label="Trạng thái xử lý: đã trích xuất">
+                    <li class="step done"><span class="node"></span></li>
+                    <li class="step done"><span class="node"></span></li>
+                    <li class="step"><span class="node"></span></li>
+                    <li class="step"><span class="node"></span></li>
+                  </ol>
+                  <span class="doc-state is-wait"><i class="fa-regular fa-clock"></i> Đã trích xuất — chờ lập chỉ mục</span>
+                </span>
+              </span>
+              <span class="doc-open" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- Môn: Mạng máy tính -->
+        <div class="course-group">
+          <div class="course-head">
+            <span class="cg-name">Mạng máy tính</span>
+            <span class="chip"><i class="fa-solid fa-hashtag"></i> INT1315</span>
+            <span class="cg-count">· 1 tài liệu</span>
+          </div>
+          <div class="doc-list">
+            <a class="doc-card" href="app-library-doc.html">
+              <span class="doc-ic"><i class="fa-solid fa-file-pdf"></i></span>
+              <span class="doc-main">
+                <span class="doc-name">Giáo trình Mạng máy tính — Chương 2 (Tầng liên kết).pdf</span>
+                <span class="doc-meta">
+                  <span class="chip"><i class="fa-solid fa-file-lines"></i> PDF</span>
+                  <span class="chip"><i class="fa-solid fa-arrow-up-from-bracket"></i> Bạn tải lên</span>
+                </span>
+                <span class="doc-proc">
+                  <ol class="stepper mini" aria-label="Trạng thái xử lý: đã tải lên">
+                    <li class="step done"><span class="node"></span></li>
+                    <li class="step active"><span class="node"></span></li>
+                    <li class="step"><span class="node"></span></li>
+                    <li class="step"><span class="node"></span></li>
+                  </ol>
+                  <span class="doc-state is-run"><i class="fa-solid fa-spinner"></i> Đang trích xuất…</span>
+                </span>
+              </span>
+              <span class="doc-open" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Môn chưa có tài liệu — empty state -->
+        <div class="course-group">
+          <div class="course-head">
+            <span class="cg-name">Cấu trúc dữ liệu &amp; giải thuật</span>
+            <span class="chip"><i class="fa-solid fa-hashtag"></i> INT1218</span>
+            <span class="cg-count">· 0 tài liệu</span>
+          </div>
+          <div class="empty">
+            <span class="ei"><i class="fa-regular fa-folder-open"></i></span>
+            <h3>Chưa có tài liệu cho môn này</h3>
+            <p>Tải giáo trình hoặc slide bài giảng lên để hệ thống dựng bản đồ kiến thức và lộ trình ôn tập.</p>
+            <button class="btn btn-accent btn-sm" type="button" onclick="document.getElementById('dz').focus()">
+              <i class="fa-solid fa-arrow-up-from-bracket"></i> Tải tài liệu lên
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 3) Gợi ý từ thư viện số -->
+      <section class="card reveal" style="--d:.18s">
+        <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Gợi ý từ thư viện số khớp môn
+          <span class="tag tag-ai" style="margin-left:auto">Cơ sở dữ liệu</span>
+        </div>
+        <div class="suggest-grid">
+
+          <div class="suggest-card">
+            <span class="doc-ic"><i class="fa-solid fa-file-pdf"></i></span>
+            <span class="suggest-main">
+              <span class="doc-name">Giáo trình Cơ sở dữ liệu — Chương chuẩn hóa quan hệ</span>
+              <span class="doc-meta">
+                <span class="chip"><i class="fa-solid fa-building-columns"></i> DSpace UTT</span>
+                <span class="chip"><i class="fa-regular fa-calendar"></i> 2023</span>
+              </span>
+            </span>
+            <span class="suggest-foot">
+              <span class="relev">Khớp 8/8 khái niệm chương của bạn</span>
+              <button class="btn btn-accent btn-sm import-btn" type="button"><i class="fa-solid fa-plus"></i> Nhập</button>
+            </span>
+          </div>
+
+          <div class="suggest-card">
+            <span class="doc-ic"><i class="fa-solid fa-file-pdf"></i></span>
+            <span class="suggest-main">
+              <span class="doc-name">Bài giảng: Các dạng chuẩn 1NF – BCNF kèm ví dụ</span>
+              <span class="doc-meta">
+                <span class="chip"><i class="fa-solid fa-building-columns"></i> DSpace UTT</span>
+                <span class="chip"><i class="fa-regular fa-calendar"></i> 2024</span>
+              </span>
+            </span>
+            <span class="suggest-foot">
+              <span class="relev">Khớp 4 khái niệm còn yếu</span>
+              <button class="btn btn-accent btn-sm import-btn" type="button"><i class="fa-solid fa-plus"></i> Nhập</button>
+            </span>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Demo tối thiểu: nút "Nhập"/"Nhập từ thư viện số" báo đã xếp hàng xử lý.
+  function toast(msg){
+    let t=document.createElement('div');t.textContent=msg;
+    t.style.cssText='position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:99;'
+      +'background:#fff;color:#000;font:600 13px/1 var(--font-sans);padding:12px 18px;border-radius:999px;'
+      +'box-shadow:var(--sh-pop);opacity:0;transition:opacity .25s,transform .25s';
+    document.body.appendChild(t);
+    requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(-50%) translateY(-4px)';});
+    setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},1900);
+  }
+  document.querySelectorAll('.import-btn').forEach(b=>b.addEventListener('click',e=>{
+    e.preventDefault();toast('Đã thêm vào hàng chờ xử lý — đang trích xuất…');
+  }));
+  document.getElementById('dslibBtn').addEventListener('click',()=>toast('Cần tiện ích trình duyệt — xem gợi ý bên dưới.'));
+  document.getElementById('dz').addEventListener('click',()=>toast('Chọn tệp PDF, text hoặc markdown để tải lên.'));
+</script>
+</body>
+</html>

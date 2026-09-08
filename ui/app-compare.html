@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>So sánh A/B · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ===================== SO SÁNH A/B (S10) — chế độ trình bày, không sidebar ===================== */
+  /* FocusLayout (.focus-shell/.focus-top) ở app.css; chỉ ghi đè tiêu đề + nút quay lại */
+  .focus-top .ttl{font-size:var(--fs-md);font-weight:600;color:var(--text);letter-spacing:-.01em}
+  .focus-top .back{color:var(--muted)}
+  .focus-top .back:hover{color:var(--text)}
+
+  /* ----- Body ----- */
+  .cmp-main{flex:1;width:100%;max-width:1240px;margin:0 auto;
+    padding:clamp(22px,3vw,38px) clamp(16px,3vw,32px) 64px}
+
+  .cmp-intro{margin-bottom:26px}
+  .cmp-intro .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .cmp-intro h1{font-size:var(--fs-2xl);font-weight:600;letter-spacing:-.02em;line-height:1.15;max-width:24ch}
+  .cmp-intro p{color:var(--muted-strong);margin-top:10px;font-size:var(--fs-base);line-height:1.55;max-width:66ch}
+  .cmp-intro p b{color:var(--text);font-weight:600}
+
+  /* ----- Thanh điều khiển ----- */
+  .cmp-controls{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+  .cmp-concept{display:inline-flex;align-items:center;gap:9px;height:40px;padding:0 8px 0 14px;
+    border-radius:var(--r-pill);background:var(--surface-2);border:1px solid var(--border);
+    color:var(--text-2);font-size:var(--fs-sm)}
+  .cmp-concept b{color:var(--text);font-weight:600}
+  .cmp-concept .pin{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;
+    background:var(--surface-3);border:1px solid var(--border);color:var(--text);font-weight:600;font-size:12px}
+  .cmp-grow{flex:1}
+  /* toggle làm nổi khác biệt */
+  .diff-toggle{display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 6px 0 16px;
+    border-radius:var(--r-pill);background:var(--surface-2);border:1px solid var(--border);
+    color:var(--text-2);font-size:var(--fs-sm);font-weight:600;cursor:pointer;
+    transition:background var(--dur-1),border var(--dur-1),color var(--dur-1)}
+  .diff-toggle:hover{background:var(--surface-3);color:var(--text);border-color:var(--border-strong)}
+  .diff-toggle .sw{width:40px;height:24px;border-radius:999px;background:var(--surface-3);
+    border:1px solid var(--border-strong);position:relative;transition:background var(--dur-1)}
+  .diff-toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+    background:var(--muted);transition:transform var(--dur-1),background var(--dur-1)}
+  .diff-toggle.on{color:#fff;border-color:var(--border-strong)}
+  .diff-toggle.on .sw{background:#fff}
+  .diff-toggle.on .sw::after{transform:translateX(16px);background:#000}
+
+  /* ----- Tabs (mobile) ----- */
+  .cmp-tabs{display:none;gap:8px;margin-bottom:16px}
+  .cmp-tabs button{flex:1;height:44px;border-radius:var(--r-pill);background:var(--surface-2);
+    border:1px solid var(--border);color:var(--text-2);font-weight:600;font-size:var(--fs-sm);
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .cmp-tabs button .pfp{width:22px;height:22px;border-radius:50%;background:var(--surface-3);color:var(--text);
+    display:grid;place-items:center;font-size:11px;font-weight:700}
+  .cmp-tabs button.on{background:#fff;color:#000;border-color:#fff}
+  .cmp-tabs button.on .pfp{background:#000;color:#fff}
+
+  /* ----- Lưới 2 cột ----- */
+  .cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  .cmp-col{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface-1);overflow:hidden}
+
+  /* Hồ sơ đầu cột */
+  /* ProfileSummaryCard */
+  .profile{padding:20px 22px;border-bottom:1px solid var(--border)}
+  .profile .p-id{display:flex;align-items:center;gap:12px}
+  .profile .p-av{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+    font-weight:700;font-size:16px;color:#000;background:#fff}
+  .profile .p-name{font-size:var(--fs-md);font-weight:600;color:var(--text);line-height:1.2}
+  .profile .p-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .profile .p-facts{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-top:16px}
+  .profile .p-fact .fl{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .profile .p-fact .fv{font-size:13px;color:var(--text-2);margin-top:3px;line-height:1.35}
+  .profile .p-fact .fv b{color:var(--text);font-weight:600}
+
+  .cmp-body{padding:8px 22px 24px}
+
+  /* Một block bài rút gọn */
+  .lblock{padding:18px 0;border-bottom:1px solid var(--border-faint)}
+  .lblock:last-child{border-bottom:none}
+  .lblock .lb-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .lblock .lb-n{font-family:var(--font-display);font-size:11px;color:var(--muted);
+    width:26px;height:20px;display:grid;place-items:center;border:1px solid var(--border);border-radius:6px;flex-shrink:0}
+  .lblock .lb-t{font-size:var(--fs-sm);font-weight:600;color:var(--text)}
+  .lblock .lb-diff{margin-left:auto;display:none}
+  .lblock p{font-size:13.5px;color:var(--text-2);line-height:1.62}
+  .lblock p + p{margin-top:9px}
+  .lblock p b{color:var(--text);font-weight:600}
+  .lblock code{font-family:var(--font-display);font-size:.9em;background:var(--surface-2);
+    border:1px solid var(--border);border-radius:5px;padding:1px 6px;color:var(--text)}
+
+  /* mini bảng dữ liệu (mở đầu của A) */
+  .mini-tbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:4px;
+    border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden}
+  .mini-tbl th,.mini-tbl td{padding:6px 10px;text-align:left;border-bottom:1px solid var(--border-faint);white-space:nowrap}
+  .mini-tbl th{color:var(--muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.03em;background:var(--surface-1)}
+  .mini-tbl td{color:var(--text-2)}
+  .mini-tbl tr:last-child td{border-bottom:none}
+  .tbl-wrap{overflow-x:auto}
+
+  /* định nghĩa hình thức (mở đầu của B) */
+  .formal{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px}
+  .formal .fdef{font-size:13.5px;color:var(--text);line-height:1.6}
+  .formal ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:7px}
+  .formal li{display:flex;gap:9px;font-size:12.5px;color:var(--text-2);line-height:1.5}
+  .formal li .ci{font-family:var(--font-display);color:var(--muted);flex-shrink:0}
+
+  /* thẻ lỗi từng mắc gọn */
+  .mini-mem{display:flex;gap:11px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2)}
+  .mini-mem + .mini-mem{margin-top:9px}
+  .mini-mem .mmi{width:28px;height:28px;flex-shrink:0;border-radius:8px;background:var(--surface-3);
+    border:1px solid var(--border);display:grid;place-items:center;color:var(--text);font-size:12px}
+  .mini-mem .mmt{font-size:12.5px;color:var(--text-2);line-height:1.45}
+  .mini-mem .mmt b{color:var(--text);font-weight:600}
+
+  .none-note{display:flex;align-items:center;gap:9px;padding:11px 14px;border:1px dashed var(--border-strong);
+    border-radius:var(--r-md);font-size:12.5px;color:var(--muted);background:transparent}
+  .none-note i{font-size:12px}
+
+  .qcount{display:inline-flex;align-items:baseline;gap:7px}
+  .qcount .qn{font-family:var(--font-display);font-weight:700;font-size:26px;color:#fff;line-height:1}
+  .qcount .ql{font-size:12.5px;color:var(--muted)}
+
+  /* ----- Làm nổi khác biệt ----- */
+  .cmp-grid.diff .lblock.dz{border:1px dashed var(--border-strong);border-radius:var(--r-md);
+    padding:14px 16px;margin:12px 0;background:var(--surface-1)}
+  .cmp-grid.diff .lblock.dz .lb-diff{display:inline-flex}
+
+  /* nhãn khác biệt đơn sắc */
+  .difflabel{display:inline-flex;align-items:center;gap:6px;height:20px;padding:0 8px;border-radius:6px;
+    background:var(--surface-3);border:1px solid var(--border-strong);color:var(--text);
+    font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+  .difflabel i{font-size:9px}
+
+  .cmp-foot{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center}
+  .cmp-foot .thesis{font-size:12.5px;color:var(--muted);text-align:center;max-width:60ch;line-height:1.5}
+
+  /* ----- Responsive ----- */
+  @media (max-width:860px){
+    .cmp-tabs{display:flex}
+    .cmp-grid{grid-template-columns:1fr}
+    .cmp-col.hide-m{display:none}
+    .cmp-controls .cmp-concept{order:2}
+  }
+  @media (max-width:480px){
+    .profile .p-facts{grid-template-columns:1fr}
+    .focus-top .ttl{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="focus-shell">
+
+  <!-- Topbar tối giản -->
+  <header class="focus-top">
+    <a class="brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+    <span class="sep"></span>
+    <span class="ttl">So sánh cá nhân hóa</span>
+    <div class="grow"></div>
+    <a class="btn btn-ghost btn-sm back" href="app-lesson.html"><i class="fa-solid fa-arrow-left"></i> Về bài học</a>
+  </header>
+
+  <main class="cmp-main">
+
+    <!-- Intro -->
+    <div class="cmp-intro reveal" style="--d:0s">
+      <span class="eyebrow"><i class="fa-solid fa-code-compare"></i> Cùng khái niệm · cùng tài liệu</span>
+      <h1>Vì sao hai sinh viên nhận hai bài khác nhau?</h1>
+      <p>Cùng khái niệm <b>Dạng chuẩn 3 (3NF)</b>, cùng một file <b>Chương 4 (PDF)</b> — nhưng hệ thống sinh ra hai bài rất khác. <b>Tài liệu quyết định nội dung đúng; hồ sơ người học quyết định hình dạng bài.</b></p>
+    </div>
+
+    <!-- Controls -->
+    <div class="cmp-controls reveal" style="--d:.06s">
+      <span class="cmp-concept">Khái niệm đang so: <span class="pin"><i class="fa-solid fa-thumbtack"></i> 3NF</span></span>
+      <span class="cmp-grow"></span>
+      <button class="diff-toggle" id="diffToggle" aria-pressed="false">
+        <span>Làm nổi khác biệt</span>
+        <span class="sw"></span>
+      </button>
+    </div>
+
+    <!-- Tabs mobile -->
+    <div class="cmp-tabs" role="tablist">
+      <button class="on" data-tab="A" role="tab" aria-selected="true"><span class="pfp">A</span> Nguyễn Văn An</button>
+      <button data-tab="B" role="tab" aria-selected="false"><span class="pfp">B</span> Trần Thị Bình</button>
+    </div>
+
+    <!-- Lưới 2 cột -->
+    <div class="cmp-grid reveal" id="cmpGrid" style="--d:.12s">
+
+      <!-- ============ CỘT A ============ -->
+      <section class="cmp-col" data-col="A">
+        <div class="profile">
+          <div class="p-id">
+            <span class="p-av">A</span>
+            <div>
+              <div class="p-name">Nguyễn Văn An</div>
+              <div class="p-sub">Công nghệ thông tin · K64 · nền tảng yếu</div>
+            </div>
+          </div>
+          <div class="p-facts">
+            <div class="p-fact"><div class="fl">Mục tiêu</div><div class="fv">Qua môn, <b>hiểu để làm bài tập</b></div></div>
+            <div class="p-fact"><div class="fl">Định dạng thích</div><div class="fv"><b>Ví dụ thực tế</b> + bài tập</div></div>
+            <div class="p-fact"><div class="fl">Phiên học</div><div class="fv"><b>30 phút</b></div></div>
+            <div class="p-fact"><div class="fl">Mastery 3NF</div><div class="fv"><span class="mastery m-weak weak-tag" style="height:22px"><span class="dot"></span><span class="n">15</span></span></div></div>
+          </div>
+        </div>
+
+        <div class="cmp-body">
+          <div class="lblock dz" data-diff="Mở đầu">
+            <div class="lb-head"><span class="lb-n">01</span><span class="lb-t">Mở đầu bằng ví dụ</span>
+              <span class="lb-diff"><span class="difflabel"><i class="fa-solid fa-code-compare"></i> Mở đầu</span></span></div>
+            <p>Bắt đầu ngay bằng bảng dữ liệu thật để thấy chỗ lặp:</p>
+            <div class="tbl-wrap">
+              <table class="mini-tbl">
+                <thead><tr><th>MaSV</th><th>MaLop</th><th>TenLop</th></tr></thead>
+                <tbody>
+                  <tr><td>SV001</td><td>L01</td><td>CNTT K64</td></tr>
+                  <tr><td>SV002</td><td>L01</td><td>CNTT K64</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="lblock dz" data-diff="Giải thích">
+            <div class="lb-head"><span class="lb-n">02</span><span class="lb-t">Giải thích ngắn gọn</span>
+              <span class="lb-diff"><span class="difflabel"><i class="fa-solid fa-code-compare"></i> Giải thích</span></span></div>
+            <p><code>L01</code> luôn kéo theo <code>CNTT K64</code>. Cột này phụ thuộc vào <b>MaLop</b> chứ không vào MaSV — đó là "đi vòng", cần tách bảng cho hết lặp.</p>
+          </div>
+
+          <div class="lblock">
+            <div class="lb-head"><span class="lb-n">03</span><span class="lb-t">Ôn tiên quyết</span></div>
+            <p>Nhắc lại nhanh <b>phụ thuộc bắc cầu</b> và <b>2NF</b> trước khi vào bài — vì hai mục này của An còn yếu (20 và 35).</p>
+          </div>
+
+          <div class="lblock dz" data-diff="Lỗi từng mắc">
+            <div class="lb-head"><span class="lb-n">04</span><span class="lb-t">Lỗi bạn từng mắc</span>
+              <span class="lb-diff"><span class="difflabel"><i class="fa-solid fa-code-compare"></i> Lỗi từng mắc</span></span></div>
+            <div class="mini-mem">
+              <span class="mmi"><i class="fa-solid fa-brain"></i></span>
+              <div class="mmt">Nhớ bạn từng nhầm <b>"2NF là đủ cho 3NF"</b> — bỏ qua phụ thuộc bắc cầu.</div>
+            </div>
+            <div class="mini-mem">
+              <span class="mmi"><i class="fa-solid fa-brain"></i></span>
+              <div class="mmt">Nhớ bạn <b>không nhận ra cột trung gian</b> khi xét phụ thuộc bắc cầu.</div>
+            </div>
+          </div>
+
+          <div class="lblock dz" data-diff="Số câu">
+            <div class="lb-head"><span class="lb-n">05</span><span class="lb-t">Kiểm tra</span>
+              <span class="lb-diff"><span class="difflabel"><i class="fa-solid fa-code-compare"></i> Số câu</span></span></div>
+            <div class="qcount"><span class="qn">3</span><span class="ql">câu — vừa đủ, tập trung vào chỗ hay sai</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CỘT B ============ -->
+      <section class="cmp-col hide-m" data-col="B">
+        <div class="profile">
+          <div class="p-id">
+            <span class="p-av">B</span>
+            <div>
+              <div class="p-name">Trần Thị Bình</div>
+              <div class="p-sub">Kỹ thuật phần mềm · K63 · nền tảng tốt</div>
+            </div>
+          </div>
+          <div class="p-facts">
+            <div class="p-fact"><div class="fl">Mục tiêu</div><div class="fv">Điểm A, <b>hiểu sâu để thi cao học</b></div></div>
+            <div class="p-fact"><div class="fl">Định dạng thích</div><div class="fv"><b>Đọc lý thuyết</b> + chứng minh</div></div>
+            <div class="p-fact"><div class="fl">Phiên học</div><div class="fv"><b>60 phút</b></div></div>
+            <div class="p-fact"><div class="fl">Mastery 3NF</div><div class="fv"><span class="mastery m-good" style="height:22px"><span class="dot"></span><span class="n">60</span></span></div></div>
+          </div>
+        </div>
+
+        <div class="cmp-body">
+          <div class="lblock dz" data-diff="Mở đầu">
+            <div class="lb-head"><span class="lb-n">01</span><span class="lb-t">Mở đầu bằng định nghĩa hình thức</span>
+              <span class="lb-diff"><span class="difflabel"><i class="fa-solid fa-code-compare"></i> Mở đầu</span></span></div>
+            <div class="formal">
+              <div class="fdef">R ở <b>3NF</b> ⇔ với mọi phụ thuộc hàm <code>X → A</code> không tầm thường, hoặc X là siêu khóa, hoặc A là thuộc tính khóa.</div>
+              <ul>
+                <li><span class="ci">i.</span> Đã ở 2NF</li>
+                <li><span class="ci">ii.</span> Không có thuộc tính không khóa phụ thuộc bắc cầu vào khóa</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="lblock dz" data-diff="Giải thích">
+            <div class="lb-head"><span class="lb-n">02</span><span class="lb-t">Giải thích sâu, có chứng minh</span>
+              <span class="lb-diff"><span class="difflabel"><i class="fa-solid fa-code-compare"></i> Giải thích</span></span></div>
+            <p>Xuất phát từ định nghĩa, phân biệt 3NF với BCNF: 3NF <b>cho phép</b> vế trái không là siêu khóa nếu vế phải là thuộc tính khóa, còn BCNF thì không.</p>
+            <p>Chứng minh vì sao phép tách bảo toàn phụ thuộc và không mất mát thông tin, rồi mở rộng sang trường hợp nhiều khóa dự tuyển.</p>
+          </div>
+
+          <div class="lblock">
+            <div class="lb-head"><span class="lb-n">03</span><span class="lb-t">Ôn tiên quyết</span></div>
+            <div class="none-note"><i class="fa-solid fa-forward-fast"></i> Bỏ qua — Bình đã thành thạo tiên quyết (2NF, phụ thuộc bắc cầu đều &gt; 75).</div>
+          </div>
+
+          <div class="lblock dz" data-diff="Lỗi từng mắc">
+            <div class="lb-head"><span class="lb-n">04</span><span class="lb-t">Lỗi bạn từng mắc</span>
+              <span class="lb-diff"><span class="difflabel"><i class="fa-solid fa-code-compare"></i> Lỗi từng mắc</span></span></div>
+            <div class="none-note"><i class="fa-solid fa-circle-check"></i> Không có lỗi ghi nhận ở khái niệm này.</div>
+          </div>
+
+          <div class="lblock dz" data-diff="Số câu">
+            <div class="lb-head"><span class="lb-n">05</span><span class="lb-t">Kiểm tra</span>
+              <span class="lb-diff"><span class="difflabel"><i class="fa-solid fa-code-compare"></i> Số câu</span></span></div>
+            <div class="qcount"><span class="qn">5</span><span class="ql">câu — thêm câu chứng minh &amp; phân biệt BCNF</span></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="cmp-foot reveal" style="--d:.18s">
+      <p class="thesis">Cùng nội dung lõi bám tài liệu, hai bài chỉ khác về <b style="color:var(--text-2)">hình dạng</b>: độ dài, thứ tự, ví dụ, lượng ôn tập và số câu — theo đúng hồ sơ từng người.</p>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  /* ---- Toggle làm nổi khác biệt ---- */
+  const grid=document.getElementById('cmpGrid');
+  const tg=document.getElementById('diffToggle');
+  tg.addEventListener('click',()=>{
+    const on=grid.classList.toggle('diff');
+    tg.classList.toggle('on',on);
+    tg.setAttribute('aria-pressed',on);
+  });
+
+  /* ---- Tabs A/B (mobile) ---- */
+  const tabs=[...document.querySelectorAll('.cmp-tabs button')];
+  const colA=document.querySelector('[data-col="A"]');
+  const colB=document.querySelector('[data-col="B"]');
+  tabs.forEach(t=>{
+    t.addEventListener('click',()=>{
+      tabs.forEach(x=>{x.classList.remove('on');x.setAttribute('aria-selected','false');});
+      t.classList.add('on');t.setAttribute('aria-selected','true');
+      const a=t.dataset.tab==='A';
+      colA.classList.toggle('hide-m',!a);
+      colB.classList.toggle('hide-m',a);
+    });
+  });
+</script>
+</body>
+</html>

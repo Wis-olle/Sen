@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Đăng nhập · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-sans);
+    min-height:100dvh;display:grid;place-items:center;padding:24px;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased}
+
+  /* bg-dune làm nền tĩnh: hiện ngay khi tải, và là fallback nếu video lỗi */
+  .bg{position:fixed;inset:0;overflow:hidden;background:#000 url("assets/bg-dune.jpg") center/cover no-repeat;z-index:0}
+  .bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;
+    transition:opacity .7s linear}
+  .bg-video.hidden{opacity:0}
+  /* phủ tối thêm để card nổi, chữ rõ */
+  .bg::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(90% 90% at 50% 40%,rgba(0,0,0,.45),rgba(0,0,0,.72))}
+
+  .auth{position:relative;z-index:1;width:min(440px,100%)}
+
+  .brand{display:flex;align-items:center;justify-content:center;gap:11px;margin-bottom:20px;
+    animation:rise .8s var(--ease) both}
+  .brand .logo{width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;
+    box-shadow:var(--glow-cta)}
+  .brand .logo svg{width:70%;height:70%}
+  .brand .wordmark{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-.02em}
+
+  .card{position:relative;background:rgba(255,255,255,.03);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border-radius:var(--r-lg);padding:30px 28px 26px;box-shadow:var(--sh-pop),var(--glass-inset);
+    overflow:hidden;animation:rise .8s var(--ease) .1s both}
+  .card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;
+    background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.12) 30%,
+      rgba(255,255,255,0) 55%,rgba(255,255,255,.12) 85%,rgba(255,255,255,.4));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+
+  .head{text-align:center;margin-bottom:20px}
+  .head h1{font-size:22px;font-weight:600;letter-spacing:-.02em}
+  .head p{color:var(--muted-strong);font-size:var(--fs-sm);margin-top:5px}
+
+  /* tabs */
+  .tabs{display:flex;gap:4px;padding:4px;background:var(--surface-2);border:1px solid var(--border);
+    border-radius:var(--r-pill);margin-bottom:22px}
+  .tabs button{flex:1;height:38px;border:none;border-radius:var(--r-pill);background:none;
+    color:var(--muted-strong);font-size:var(--fs-sm);font-weight:600;transition:.2s}
+  .tabs button.active{background:#fff;color:#000;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+  .tabs button:not(.active):hover{color:var(--text)}
+
+  form{display:flex;flex-direction:column;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:var(--fs-xs);font-weight:600;color:var(--muted-strong);padding-left:2px}
+  .input{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;
+    background:var(--surface-3);border:1px solid var(--border);border-radius:var(--r-md);
+    transition:border var(--dur-1),box-shadow var(--dur-1),background var(--dur-1)}
+  .input i{color:var(--muted);font-size:14px;width:16px;text-align:center}
+  .input input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);
+    font-size:var(--fs-base);font-family:inherit}
+  .input input::placeholder{color:var(--muted)}
+  .input:focus-within{border-color:var(--accent-border);background:var(--surface-2);
+    box-shadow:0 0 0 3px var(--accent-dim)}
+  .input .eye{color:var(--muted);background:none;border:none;padding:4px;cursor:pointer}
+  .input .eye:hover{color:var(--text)}
+
+  .reg-only{display:none}
+  body.mode-register .reg-only{display:flex}
+  .row-between{display:flex;align-items:center;justify-content:space-between;margin-top:-2px}
+  .remember{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--muted-strong);cursor:pointer}
+  .remember input{width:16px;height:16px;accent-color:var(--accent)}
+  .link{font-size:var(--fs-sm);color:var(--accent-strong);font-weight:500}
+  .link:hover{text-decoration:underline}
+  body.mode-register .login-only{display:none}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;height:48px;
+    border-radius:var(--r-pill);border:1px solid transparent;font-size:var(--fs-base);font-weight:600;
+    font-family:inherit;transition:transform var(--dur-1) var(--ease),box-shadow var(--dur-1),background var(--dur-1)}
+  .btn-primary{background:#fff;color:#000;box-shadow:var(--glow-cta);margin-top:4px}
+  .btn-primary:hover{transform:translateY(-2px) scale(1.01);box-shadow:var(--glow-cta-hover)}
+  .btn-google{background:var(--surface-2);color:var(--text);border-color:var(--border)}
+  .btn-google:hover{background:var(--surface-3);border-color:var(--border-strong);transform:translateY(-1px)}
+  .btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+  .or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:var(--fs-xs);margin:18px 0 4px}
+  .or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
+
+  .foot{text-align:center;color:var(--muted);font-size:var(--fs-xs);margin-top:20px;line-height:1.6}
+  .foot a{color:var(--muted-strong);text-decoration:underline;text-underline-offset:2px}
+  .back{position:fixed;top:20px;left:20px;z-index:2;display:inline-flex;align-items:center;gap:8px;
+    height:40px;padding:0 16px 0 13px;border-radius:var(--r-pill);background:rgba(20,20,22,.6);
+    border:1px solid var(--border);color:var(--text-2);font-size:var(--fs-sm);
+    backdrop-filter:blur(10px);transition:.2s}
+  .back:hover{background:var(--surface-3);color:var(--text)}
+
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.brand,.card{animation:none!important}.bg-video{transition:none}}
+  @media (max-width:480px){.card{padding:24px 18px 22px}.back{top:14px;left:14px}}
+</style>
+</head>
+<body class="mode-login">
+  <div class="bg">
+    <video id="vidA" class="bg-video" autoplay muted loop playsinline preload="auto" poster="assets/bg-dune.jpg"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
+    <video id="vidB" class="bg-video hidden" muted playsinline preload="auto" poster="assets/bg-dune.jpg"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
+  </div>
+
+  <a class="back" href="index.html"><i class="fa-solid fa-arrow-left"></i> Trang chủ</a>
+
+  <div class="auth">
+    <div class="brand">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg>
+      </span>
+      <span class="wordmark">Sen</span>
+    </div>
+
+    <div class="card">
+      <div class="head">
+        <h1 id="title">Chào mừng trở lại</h1>
+        <p id="sub">Đăng nhập để tiếp tục lộ trình học của bạn</p>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button id="tab-login" class="active" role="tab" aria-selected="true">Đăng nhập</button>
+        <button id="tab-register" role="tab" aria-selected="false">Đăng ký</button>
+      </div>
+
+      <form onsubmit="return go(event)">
+        <div class="field reg-only">
+          <label for="name">Họ và tên</label>
+          <div class="input"><i class="fa-solid fa-user"></i>
+            <input id="name" type="text" placeholder="Nguyễn Văn A" autocomplete="name" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email sinh viên</label>
+          <div class="input"><i class="fa-solid fa-envelope"></i>
+            <input id="email" type="email" placeholder="masv@utt.edu.vn" autocomplete="email" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="pw">Mật khẩu</label>
+          <div class="input"><i class="fa-solid fa-lock"></i>
+            <input id="pw" type="password" placeholder="••••••••" autocomplete="current-password" required />
+            <button type="button" class="eye" aria-label="Hiện mật khẩu" onclick="togglePw(this,'pw')"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+
+        <div class="field reg-only">
+          <label for="pw2">Nhập lại mật khẩu</label>
+          <div class="input"><i class="fa-solid fa-lock"></i>
+            <input id="pw2" type="password" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <div class="row-between login-only">
+          <label class="remember"><input type="checkbox" checked /> Ghi nhớ đăng nhập</label>
+          <a href="#" class="link">Quên mật khẩu?</a>
+        </div>
+
+        <button class="btn btn-primary" type="submit"><span id="cta-label">Đăng nhập</span> <i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+
+      <div class="or">hoặc</div>
+      <button class="btn btn-google" type="button" onclick="location.href='app-dashboard.html'">
+        <i class="fa-brands fa-google" aria-hidden="true"></i>
+        Đăng nhập với Google
+      </button>
+
+      <p class="foot">
+        Bằng việc tiếp tục, bạn đồng ý với <a href="#">Điều khoản</a> và
+        <a href="#">Chính sách dữ liệu cá nhân</a> của Sen.
+      </p>
+    </div>
+  </div>
+
+<script>
+  // crossfade video
+  const FADE=.7;let active=vidA,standby=vidB,swapping=false;active.play().catch(()=>{});
+  (function tick(){const a=active;if(!swapping&&a.duration&&a.currentTime>=a.duration-FADE){
+    swapping=true;standby.currentTime=0;standby.play().catch(()=>{});standby.classList.remove('hidden');
+    a.classList.add('hidden');const f=a;setTimeout(()=>f.pause(),FADE*1000);[active,standby]=[standby,active];swapping=false;}
+    requestAnimationFrame(tick);})();
+
+  // tab đăng nhập / đăng ký
+  const tL=document.getElementById('tab-login'),tR=document.getElementById('tab-register');
+  const setMode=reg=>{
+    document.body.classList.toggle('mode-register',reg);
+    document.body.classList.toggle('mode-login',!reg);
+    tL.classList.toggle('active',!reg);tR.classList.toggle('active',reg);
+    tL.setAttribute('aria-selected',!reg);tR.setAttribute('aria-selected',reg);
+    document.getElementById('title').textContent=reg?'Tạo tài khoản Sen':'Chào mừng trở lại';
+    document.getElementById('sub').textContent=reg?'Bắt đầu lộ trình học cá nhân hóa của bạn':'Đăng nhập để tiếp tục lộ trình học của bạn';
+    document.getElementById('cta-label').textContent=reg?'Tạo tài khoản':'Đăng nhập';
+  };
+  tL.onclick=()=>setMode(false);tR.onclick=()=>setMode(true);
+
+  function togglePw(btn,id){const el=document.getElementById(id);const on=el.type==='password';
+    el.type=on?'text':'password';btn.querySelector('i').className='fa-solid '+(on?'fa-eye-slash':'fa-eye');}
+
+  // mockup: mọi lối vào đều tới dashboard
+  function go(e){e.preventDefault();location.href='app-dashboard.html';return false;}
+</script>
+</body>
+</html>

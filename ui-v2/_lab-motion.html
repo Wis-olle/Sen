@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lab chuyển động — nhân vật & asset có cử động</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<style>
+  body{padding:32px 0 80px}
+  .lab h2{font-size:22px;margin:40px 0 6px}
+  .lab p.note{color:var(--muted);font-size:14px;margin-bottom:16px;max-width:80ch}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .cell{background:var(--amber);border-radius:18px;padding:14px;text-align:center;font-size:12px;font-weight:600;color:var(--ink-2)}
+  .cell.cream{background:var(--cream-deep)}
+  .cell.white{background:var(--white);border:1px solid var(--line-2)}
+  .cell img,.cell .lot{width:100%;height:190px;object-fit:contain;display:block;margin-bottom:8px}
+  .cell .lot svg{width:100%;height:100%}
+  /* C. line boil: nét vẽ "sôi" như hoạt hình tay */
+  .boil{filter:url(#boil)}
+  /* D. icon cử động khi hover */
+  .ic-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+  .ic{background:var(--white);border:1px solid var(--line-2);border-radius:18px;padding:18px 10px;text-align:center;font-size:12px;font-weight:600}
+  .ic .feat-ic{margin:0 auto 10px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="1" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+<div class="container lab">
+  <h1 class="display" style="font-size:34px">Lab chuyển động cho nhân vật &amp; asset</h1>
+  <p class="note">So sánh 4 kỹ thuật để chọn cách "cho nhân vật cử động" hợp phong cách vẽ tay. Thêm <code>?static&amp;f=30</code> để chụp khung số 30 của Lottie.</p>
+
+  <h2>A · Hoạt hình từng khung (Open Doodles animated — LottieFiles, Lottie Simple License) → WebP động, tô lại màu</h2>
+  <p class="note">60 khung, 33 fps, có alpha. Đúng hai nhân vật đang dùng ở hero. Không cần JS: chỉ là <code>&lt;img&gt;</code>.</p>
+  <div class="grid">
+    <div class="cell"><img src="assets/anim/sitting-reading-blue.webp" alt="">sitting-reading · A/B luân phiên (bản đã bỏ quay đầu)</div>
+    <div class="cell"><img src="assets/anim/reading-side-green.webp" alt="">reading-side · gốc bỏ khung chớp</div>
+    <div class="cell"><img src="assets/anim/sprinting-blue.webp" alt="">sprinting · 4 khung (Open Doodles GIF gốc, tách nền)</div>
+  </div>
+
+  <h2>B · Lottie vector (LottieFiles, miễn phí) — phát bằng lottie-web</h2>
+  <p class="note">Kiểm tra phong cách có hợp "vẽ tay" không; màu có thể đổi trong JSON.</p>
+  <div class="grid">
+    <div class="cell white"><div class="lot" data-lottie="assets/lottie/pencil-drawing.json"></div>pencil-drawing (Abdul Latif)</div>
+    <div class="cell white"><div class="lot" data-lottie="assets/lottie/graduation.json"></div>graduation (Mithril)</div>
+    <div class="cell white"><div class="lot" data-lottie="assets/lottie/online-test.json"></div>online-test (Mithril)</div>
+    <div class="cell white"><div class="lot" data-lottie="assets/lottie/curved-arrow.json" data-speed=".6"></div>curved-arrow (Habib Rahal)</div>
+  </div>
+
+  <h2>C · "Line boil" — làm nét vẽ tĩnh rung nhẹ như hoạt hình tay (SVG filter, 8 fps)</h2>
+  <p class="note">Dùng được cho MỌI doodle tĩnh đang có (SVG). Bên trái: tĩnh; bên phải: boil.</p>
+  <div class="grid">
+    <div class="cell cream"><img src="assets/doodles/meditating-amber.svg" alt="">meditating · tĩnh</div>
+    <div class="cell cream"><img class="boil" src="assets/doodles/meditating-amber.svg" alt="">meditating · boil</div>
+    <div class="cell"><img src="assets/doodles/plant-green.svg" alt="">plant · tĩnh</div>
+    <div class="cell"><img class="boil" src="assets/doodles/plant-green.svg" alt="">plant · boil</div>
+  </div>
+
+  <h2>D · Icon tính năng cử động khi hover / khi hiện (GSAP)</h2>
+  <p class="note">Giữ bộ icon Iconoodle hiện tại, thêm cử động có nghĩa: mây đẩy mũi tên lên, nút bản đồ nảy, bút chì viết, tên lửa bay, bong bóng nói lắc, dấu check vẽ.</p>
+  <div class="ic-row">
+    <div class="ic"><div class="feat-ic"><i></i><img src="assets/ico/cloud-upload.svg" alt="" data-anim="up"></div>upload</div>
+    <div class="ic"><div class="feat-ic"><i></i><img src="assets/ico/nodes.svg" alt="" data-anim="bounce"></div>nodes</div>
+    <div class="ic"><div class="feat-ic"><i></i><img src="assets/ico/pencil-fat.svg" alt="" data-anim="write"></div>pencil</div>
+    <div class="ic"><div class="feat-ic"><i></i><img src="assets/ico/rocket.svg" alt="" data-anim="fly"></div>rocket</div>
+    <div class="ic"><div class="feat-ic"><i></i><img src="assets/ico/bubble-lines.svg" alt="" data-anim="wobble"></div>bubble</div>
+    <div class="ic"><div class="feat-ic"><i></i><img src="assets/ico/check-bold.svg" alt="" data-anim="pop"></div>check</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js"></script>
+<script>
+(function(){
+  const q=new URLSearchParams(location.search), isStatic=q.has('static'), frame=parseInt(q.get('f')||'0',10);
+  /* B */
+  document.querySelectorAll('[data-lottie]').forEach(el=>{
+    const a=lottie.loadAnimation({container:el,renderer:'svg',loop:true,autoplay:!isStatic,path:el.dataset.lottie});
+    if(el.dataset.speed) a.setSpeed(parseFloat(el.dataset.speed));
+    if(isStatic) a.addEventListener('DOMLoaded',()=>a.goToAndStop(frame,true));
+  });
+  if(isStatic) return;
+  /* C: đổi seed nhiễu 8 lần/giây → nét "sôi" */
+  const noise=document.getElementById('boilNoise'); let s=1;
+  setInterval(()=>{s=(s%7)+1; noise.setAttribute('seed',s);},125);
+  /* D */
+  const A={
+    up:el=>gsap.fromTo(el,{y:0},{y:-8,duration:.35,yoyo:true,repeat:3,ease:'power1.inOut'}),
+    bounce:el=>gsap.fromTo(el,{scale:1},{scale:1.15,rotation:8,duration:.25,yoyo:true,repeat:3,ease:'power1.inOut',transformOrigin:'50% 50%'}),
+    write:el=>gsap.fromTo(el,{x:0,rotation:0},{x:6,rotation:-6,duration:.18,yoyo:true,repeat:5,ease:'sine.inOut',transformOrigin:'0% 100%'}),
+    fly:el=>gsap.timeline().to(el,{y:-14,x:8,rotation:8,duration:.4,ease:'power2.out'}).to(el,{y:0,x:0,rotation:0,duration:.6,ease:'bounce.out'}),
+    wobble:el=>gsap.fromTo(el,{rotation:-8},{rotation:8,duration:.16,yoyo:true,repeat:5,ease:'sine.inOut',transformOrigin:'50% 100%'}),
+    pop:el=>gsap.fromTo(el,{scale:.6,rotation:-15},{scale:1,rotation:0,duration:.7,ease:'elastic.out(1,.4)',transformOrigin:'50% 50%'}),
+  };
+  document.querySelectorAll('[data-anim]').forEach(el=>{
+    const run=()=>A[el.dataset.anim](el);
+    el.closest('.ic').addEventListener('mouseenter',run);
+    setTimeout(run,600+Math.random()*800);
+  });
+})();
+</script>
+</body>
+</html>

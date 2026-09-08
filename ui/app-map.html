@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bản đồ kiến thức · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ===== riêng trang Bản đồ kiến thức (S06) ===== */
+  .map-filter{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+  .map-filter .grow{flex:1}
+
+  /* ConceptGraph */
+  .map-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:var(--sp-5);align-items:start}
+  .graph-card{padding:20px}
+  .graph-head{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+  .graph-head .gt{font-size:var(--fs-md);font-weight:600;display:flex;align-items:center;gap:9px}
+  .graph-head .gt i{color:var(--text);font-size:14px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-left:auto}
+  .toolbar .tbtn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px;
+    border-radius:var(--r-pill);background:var(--surface-2);border:1px solid var(--border);
+    color:var(--text-2);font-size:var(--fs-xs);font-weight:600;white-space:nowrap;
+    transition:background var(--dur-1),color var(--dur-1),transform var(--dur-1)}
+  .toolbar .tbtn i{font-size:11px}
+  .toolbar .tbtn:hover{background:var(--surface-3);color:var(--text);transform:translateY(-1px)}
+
+  .graph-wrap{overflow-x:auto;overflow-y:hidden;border-radius:var(--r-md);margin-top:8px}
+  .graph-wrap::-webkit-scrollbar{height:8px}
+  .graph-wrap::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:999px}
+  .cgraph{display:block;width:100%;min-width:660px;height:auto}
+  .cgraph .edge{stroke:rgba(255,255,255,.22);stroke-width:1.5;fill:none}
+  .node{cursor:pointer}
+  .node .ndot{stroke:var(--border-strong);stroke-width:1.5;transition:stroke var(--dur-1),stroke-width var(--dur-1),transform var(--dur-1)}
+  .node .nnum{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.02em}
+  .node .nlabel{fill:var(--text-2);font-size:11px;font-weight:500}
+  .node .nsrc{fill:var(--muted);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  .node.human .nsrc{fill:var(--text-2)}
+  .node.human .ring{fill:none;stroke:rgba(255,255,255,.45);stroke-width:1.3;stroke-dasharray:3 3}
+  .node:hover .ndot{stroke:rgba(255,255,255,.55)}
+  .node.sel .ndot{stroke:#fff;stroke-width:2.5}
+  .node:focus-visible{outline:none}
+  .node:focus-visible .ndot{stroke:#fff;stroke-width:2.5}
+
+  /* MasteryLegend */
+  .legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-faint)}
+  .legend .lg{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+  .legend .scale{width:118px;height:8px;border-radius:999px;
+    background:linear-gradient(90deg,rgba(255,255,255,.30),rgba(255,255,255,.95));border:1px solid var(--border)}
+  .legend .lnum{font-family:var(--font-display);font-weight:700;font-size:11px;color:var(--text-2)}
+  .legend .smp{width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,.5);border:1px solid var(--border-strong)}
+  .legend .smp.human{background:none;border:1.4px dashed rgba(255,255,255,.55)}
+
+  /* Panel ConceptCard bên phải */
+  .cpanel{position:sticky;top:calc(var(--topbar-h) + 20px)}
+  .cp-top{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+  .cp-top .grow{flex:1}
+  .cp-name-row{display:flex;align-items:flex-start;gap:8px}
+  .cp-name{font-size:var(--fs-lg);font-weight:600;letter-spacing:-.01em;line-height:1.28;flex:1;min-width:0}
+  .mini-edit{width:30px;height:30px;flex-shrink:0;display:grid;place-items:center;border-radius:8px;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--muted);font-size:12px;
+    transition:background var(--dur-1),color var(--dur-1)}
+  .mini-edit:hover{background:var(--surface-3);color:var(--text)}
+  .cp-meta{margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .cp-desc{margin-top:14px;font-size:var(--fs-sm);color:var(--text-2);line-height:1.6}
+  .cp-mbar{margin-top:16px}
+  .cp-mbar .cap{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:7px}
+  .cp-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+  .cp-actions .tbtn{justify-content:center}
+  .cp-actions .danger{color:var(--muted)}
+  .cp-actions .danger:hover{color:#fff;border-color:var(--border-strong)}
+
+  /* input inline khi đổi tên/mô tả */
+  .inline-edit{width:100%;background:var(--surface-2);border:1px solid var(--accent-border);
+    border-radius:var(--r-md);color:var(--text);font-family:inherit;font-size:var(--fs-sm);
+    padding:9px 12px;line-height:1.5;outline:none;resize:vertical}
+  .inline-edit:focus{border-color:#fff}
+  .edit-btns{display:flex;gap:8px;margin-top:9px}
+
+
+
+  @media (max-width:980px){
+    .map-grid{grid-template-columns:1fr}
+    .cpanel{position:static}
+  }
+  @media (max-width:760px){
+    .toolbar{width:100%;margin-left:0}
+    .toolbar .tbtn{height:44px;flex:1;justify-content:center}
+    .cp-actions .tbtn{height:44px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item active" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Bản đồ kiến thức <small>Cơ sở dữ liệu · INT1234</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Bản đồ kiến thức</h1>
+        <p>Chương <b style="color:var(--text)">Chuẩn hóa CSDL</b> · 8 khái niệm, nối theo quan hệ tiên quyết. Độ sáng mỗi nút = mức thành thạo của bạn.</p>
+        <div class="map-filter">
+          <span class="chip on"><i class="fa-solid fa-book"></i> Cơ sở dữ liệu (INT1234)</span>
+          <span class="chip on"><i class="fa-solid fa-layer-group"></i> Chuẩn hóa CSDL</span>
+          <span class="grow"></span>
+          <a class="btn btn-primary btn-lg" href="app-diagnostic.html"><i class="fa-solid fa-clipboard-question"></i> Làm bài chẩn đoán</a>
+        </div>
+      </div>
+
+      <div class="map-grid">
+
+        <!-- ===== Đồ thị khái niệm ===== -->
+        <section class="card graph-card reveal" style="--d:.06s">
+          <div class="graph-head">
+            <div class="gt"><i class="fa-solid fa-diagram-project"></i> Đồ thị khái niệm</div>
+            <div class="toolbar">
+              <button class="tbtn" data-act="add"><i class="fa-solid fa-plus"></i> Thêm</button>
+              <button class="tbtn" data-act="link"><i class="fa-solid fa-arrows-turn-right"></i> Nối tiên quyết</button>
+              <button class="tbtn" data-act="merge"><i class="fa-solid fa-object-group"></i> Gộp</button>
+              <button class="tbtn danger" data-act="delete"><i class="fa-solid fa-trash-can"></i> Xóa</button>
+            </div>
+          </div>
+
+          <div class="graph-wrap">
+            <svg class="cgraph" viewBox="0 0 760 486" role="group" aria-label="Đồ thị 8 khái niệm chương Chuẩn hóa CSDL">
+              <defs>
+                <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="rgba(255,255,255,.55)"/>
+                </marker>
+              </defs>
+
+              <!-- cạnh tiên quyết -->
+              <g>
+                <line class="edge" x1="118.0" y1="216.1" x2="232.2" y2="118.1" marker-end="url(#arw)"/>
+                <line class="edge" x1="125.0" y1="235"   x2="224.0" y2="235"   marker-end="url(#arw)"/>
+                <line class="edge" x1="118.1" y1="253.7" x2="232.1" y2="350.1" marker-end="url(#arw)"/>
+                <line class="edge" x1="285.5" y1="105.2" x2="387.7" y2="139.3" marker-end="url(#arw)"/>
+                <line class="edge" x1="283.7" y1="248.5" x2="389.9" y2="304.2" marker-end="url(#arw)"/>
+                <line class="edge" x1="420"   y1="179"   x2="420"   y2="286"   marker-end="url(#arw)"/>
+                <path class="edge" d="M284.5,360.2 Q430,405 534.9,248.8" marker-end="url(#arw)"/>
+                <line class="edge" x1="445.1" y1="305.4" x2="536.6" y2="252.1" marker-end="url(#arw)"/>
+                <line class="edge" x1="595.0" y1="235"   x2="660.0" y2="235"   marker-end="url(#arw)"/>
+              </g>
+
+              <!-- nút khái niệm (fill/màu số tô bằng JS theo mastery) -->
+              <g class="node" data-k="k1" data-cx="96"  data-cy="235" data-score="30" tabindex="0" role="button" aria-label="Phụ thuộc hàm, thành thạo 30 trên 100">
+                <circle class="ndot" cx="96" cy="235" r="27"/>
+                <text class="nnum" x="96" y="235" text-anchor="middle" dominant-baseline="central">30</text>
+                <text class="nlabel" x="96" y="283" text-anchor="middle"><tspan x="96">Phụ thuộc hàm</tspan></text>
+                <text class="nsrc" x="96" y="298" text-anchor="middle">AI</text>
+              </g>
+              <g class="node human" data-k="k2" data-cx="258" data-cy="96" data-score="40" data-src="human" tabindex="0" role="button" aria-label="Khóa và khóa dự tuyển, thành thạo 40 trên 100, do người sửa">
+                <circle class="ring" cx="258" cy="96" r="33"/>
+                <circle class="ndot" cx="258" cy="96" r="27"/>
+                <text class="nnum" x="258" y="96" text-anchor="middle" dominant-baseline="central">40</text>
+                <text class="nlabel" x="258" y="140" text-anchor="middle"><tspan x="258">Khóa &amp; khóa</tspan><tspan x="258" dy="14">dự tuyển</tspan></text>
+                <text class="nsrc" x="258" y="169" text-anchor="middle">Người sửa</text>
+              </g>
+              <g class="node" data-k="k3" data-cx="258" data-cy="235" data-score="25" tabindex="0" role="button" aria-label="Phụ thuộc hàm đầy đủ, thành thạo 25 trên 100">
+                <circle class="ndot" cx="258" cy="235" r="27"/>
+                <text class="nnum" x="258" y="235" text-anchor="middle" dominant-baseline="central">25</text>
+                <text class="nlabel" x="258" y="283" text-anchor="middle"><tspan x="258">Phụ thuộc hàm</tspan><tspan x="258" dy="14">đầy đủ</tspan></text>
+                <text class="nsrc" x="258" y="312" text-anchor="middle">AI</text>
+              </g>
+              <g class="node" data-k="k4" data-cx="258" data-cy="372" data-score="20" tabindex="0" role="button" aria-label="Phụ thuộc bắc cầu, thành thạo 20 trên 100">
+                <circle class="ndot" cx="258" cy="372" r="27"/>
+                <text class="nnum" x="258" y="372" text-anchor="middle" dominant-baseline="central">20</text>
+                <text class="nlabel" x="258" y="420" text-anchor="middle"><tspan x="258">Phụ thuộc</tspan><tspan x="258" dy="14">bắc cầu</tspan></text>
+                <text class="nsrc" x="258" y="449" text-anchor="middle">AI</text>
+              </g>
+              <g class="node" data-k="k5" data-cx="420" data-cy="150" data-score="55" tabindex="0" role="button" aria-label="Dạng chuẩn 1 (1NF), thành thạo 55 trên 100">
+                <circle class="ndot" cx="420" cy="150" r="27"/>
+                <text class="nnum" x="420" y="150" text-anchor="middle" dominant-baseline="central">55</text>
+                <text class="nlabel" x="420" y="197" text-anchor="middle"><tspan x="420">Dạng chuẩn 1NF</tspan></text>
+                <text class="nsrc" x="420" y="212" text-anchor="middle">AI</text>
+              </g>
+              <g class="node" data-k="k6" data-cx="420" data-cy="320" data-score="35" tabindex="0" role="button" aria-label="Dạng chuẩn 2 (2NF), thành thạo 35 trên 100">
+                <circle class="ndot" cx="420" cy="320" r="27"/>
+                <text class="nnum" x="420" y="320" text-anchor="middle" dominant-baseline="central">35</text>
+                <text class="nlabel" x="420" y="367" text-anchor="middle"><tspan x="420">Dạng chuẩn 2NF</tspan></text>
+                <text class="nsrc" x="420" y="382" text-anchor="middle">AI</text>
+              </g>
+              <g class="node" data-k="k7" data-cx="566" data-cy="235" data-score="15" tabindex="0" role="button" aria-label="Dạng chuẩn 3 (3NF), thành thạo 15 trên 100">
+                <circle class="ndot" cx="566" cy="235" r="27"/>
+                <text class="nnum" x="566" y="235" text-anchor="middle" dominant-baseline="central">15</text>
+                <text class="nlabel" x="566" y="283" text-anchor="middle"><tspan x="566">Dạng chuẩn 3NF</tspan></text>
+                <text class="nsrc" x="566" y="298" text-anchor="middle">AI</text>
+              </g>
+              <g class="node" data-k="k8" data-cx="694" data-cy="235" data-score="10" tabindex="0" role="button" aria-label="Dạng chuẩn Boyce Codd (BCNF), thành thạo 10 trên 100">
+                <circle class="ndot" cx="694" cy="235" r="27"/>
+                <text class="nnum" x="694" y="235" text-anchor="middle" dominant-baseline="central">10</text>
+                <text class="nlabel" x="694" y="283" text-anchor="middle"><tspan x="694">Boyce–Codd</tspan><tspan x="694" dy="14">(BCNF)</tspan></text>
+                <text class="nsrc" x="694" y="312" text-anchor="middle">AI</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="legend">
+            <div class="lg"><span class="lnum">0</span><span class="scale"></span><span class="lnum">100</span> Độ thành thạo (mờ → sáng)</div>
+            <div class="lg"><span class="smp"></span> AI dựng</div>
+            <div class="lg"><span class="smp human"></span> Người sửa</div>
+          </div>
+        </section>
+
+        <!-- ===== Panel ConceptCard ===== -->
+        <aside class="card cpanel reveal" style="--d:.12s" aria-live="polite">
+          <div class="cp-top">
+            <span class="tag" id="cpSrc">AI dựng</span>
+            <span class="grow"></span>
+            <span class="mastery" id="cpPill"><span class="dot"></span><span class="n" id="cpScore">20</span></span>
+          </div>
+
+          <div class="cp-name-row" id="cpNameRow">
+            <h2 class="cp-name" id="cpName">Phụ thuộc bắc cầu</h2>
+            <button class="mini-edit" id="btnRename" aria-label="Đổi tên khái niệm"><i class="fa-solid fa-pen"></i></button>
+          </div>
+          <div class="cp-meta" id="cpMeta">Chương 4 · Chuẩn hóa CSDL · khái niệm k4</div>
+
+          <div class="cp-desc-row">
+            <p class="cp-desc" id="cpDesc">Khi A→B và B→C mà B không là khóa thì A→C là phụ thuộc bắc cầu. Đây là dạng phụ thuộc cần loại bỏ để đạt dạng chuẩn 3 (3NF).</p>
+            <div class="edit-btns"><button class="tbtn" id="btnEditDesc" style="height:32px"><i class="fa-solid fa-pen-to-square"></i> Sửa mô tả</button></div>
+          </div>
+
+          <div class="cp-mbar">
+            <div class="cap"><span>Mức thành thạo</span><span class="lnum" style="font-family:var(--font-display);font-weight:700;color:var(--text-2)" id="cpBarNum">20</span></div>
+            <div class="mbar"><i id="cpBar" data-w="20"></i></div>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="cp-actions">
+            <button class="tbtn" data-act="link"><i class="fa-solid fa-arrows-turn-right"></i> Nối tiên quyết</button>
+            <button class="tbtn" data-act="merge"><i class="fa-solid fa-object-group"></i> Gộp khái niệm</button>
+            <button class="tbtn" data-act="add"><i class="fa-solid fa-plus"></i> Thêm mới</button>
+            <button class="tbtn danger" data-act="delete"><i class="fa-solid fa-trash-can"></i> Xóa khái niệm</button>
+          </div>
+        </aside>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ConfirmDialog / menu mô phỏng -->
+<div class="scrim" id="modalBack">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="mtitle" id="mTitle"><span class="mi"><i class="fa-solid fa-circle-question" id="mIcon"></i></span> <span id="mTitleTxt">Xác nhận</span></div>
+    <div class="mbody" id="mBody">Nội dung.</div>
+    <div class="mactions">
+      <button class="btn btn-ghost btn-sm" id="mCancel">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="mOk">Đồng ý</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fa-solid fa-check"></i> <span id="toastTxt">Đã lưu</span></div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ----- mô hình dữ liệu khái niệm (bộ demo §6.3, sinh viên A) -----
+  const DATA = {
+    k1:{name:'Phụ thuộc hàm (FD)', score:30, src:'ai', meta:'Chương 1 · Chuẩn hóa CSDL · khái niệm k1',
+        desc:'Ràng buộc X→Y: giá trị của X xác định duy nhất giá trị của Y trong mọi bộ của quan hệ. Nền tảng để suy ra khóa và các dạng chuẩn.'},
+    k2:{name:'Khóa & khóa dự tuyển', score:40, src:'human', meta:'Chương 2 · Chuẩn hóa CSDL · khái niệm k2',
+        desc:'Khóa dự tuyển là siêu khóa tối thiểu — bỏ bất kỳ thuộc tính nào cũng mất tính xác định. Một quan hệ có thể có nhiều khóa dự tuyển; chọn một làm khóa chính.'},
+    k3:{name:'Phụ thuộc hàm đầy đủ', score:25, src:'ai', meta:'Chương 3 · Chuẩn hóa CSDL · khái niệm k3',
+        desc:'Thuộc tính phụ thuộc đầy đủ vào khóa khi nó phụ thuộc vào toàn bộ khóa và không phụ thuộc vào bất kỳ tập con thực sự nào của khóa.'},
+    k4:{name:'Phụ thuộc bắc cầu', score:20, src:'ai', meta:'Chương 4 · Chuẩn hóa CSDL · khái niệm k4',
+        desc:'Khi A→B và B→C mà B không là khóa thì A→C là phụ thuộc bắc cầu. Đây là dạng phụ thuộc cần loại bỏ để đạt dạng chuẩn 3 (3NF).'},
+    k5:{name:'Dạng chuẩn 1 (1NF)', score:55, src:'ai', meta:'Chương 5 · Chuẩn hóa CSDL · khái niệm k5',
+        desc:'Quan hệ ở 1NF khi mọi giá trị thuộc tính là nguyên tử — không có thuộc tính đa trị hay nhóm lặp. Là điều kiện xuất phát của chuẩn hóa.'},
+    k6:{name:'Dạng chuẩn 2 (2NF)', score:35, src:'ai', meta:'Chương 6 · Chuẩn hóa CSDL · khái niệm k6',
+        desc:'Quan hệ ở 2NF khi đã ở 1NF và mọi thuộc tính không khóa phụ thuộc đầy đủ vào khóa — loại bỏ phụ thuộc bộ phận vào khóa ghép.'},
+    k7:{name:'Dạng chuẩn 3 (3NF)', score:15, src:'ai', meta:'Chương 7 · Chuẩn hóa CSDL · khái niệm k7',
+        desc:'Quan hệ ở 3NF khi đã ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Mục tiêu ôn tập trọng tâm trước kỳ thi.'},
+    k8:{name:'Dạng chuẩn Boyce–Codd (BCNF)', score:10, src:'ai', meta:'Chương 8 · Chuẩn hóa CSDL · khái niệm k8',
+        desc:'BCNF chặt hơn 3NF: với mọi phụ thuộc hàm không tầm thường X→Y thì X phải là siêu khóa. Loại bỏ triệt để dị thường do khóa chồng lấn.'}
+  };
+
+  // độ sáng trắng theo điểm (đơn sắc, STYLE §3.8): điểm cao → sáng hơn
+  const alphaOf = s => 0.30 + s/100*0.65;
+  const light   = s => 'rgba(255,255,255,'+alphaOf(s).toFixed(3)+')';
+  // lớp mastery cho pill/thanh (đơn sắc theo ngưỡng)
+  const mclass  = s => s<40?'m-weak':s<60?'m-fair':s<80?'m-good':'m-strong';
+
+  // ----- tô độ sáng cho mọi nút -----
+  document.querySelectorAll('.node').forEach(g=>{
+    const s=+g.dataset.score;
+    g.querySelector('.ndot').setAttribute('fill', light(s));
+    // số Doto: nút sáng (>=50) dùng chữ tối để giữ tương phản AA
+    g.querySelector('.nnum').setAttribute('fill', s>=50 ? '#000' : '#ffffff');
+  });
+
+  // ----- chọn nút → đổ vào panel -----
+  let current='k4';
+  const el = id => document.getElementById(id);
+
+  function fillPanel(k){
+    const d=DATA[k]; if(!d) return;
+    el('cpName').textContent=d.name;
+    el('cpMeta').textContent=d.meta;
+    el('cpDesc').textContent=d.desc;
+    el('cpScore').textContent=d.score;
+    el('cpBarNum').textContent=d.score;
+    // nguồn
+    const srcEl=el('cpSrc');
+    if(d.src==='human'){srcEl.className='tag tag-ai';srcEl.innerHTML='<i class="fa-solid fa-user-pen" style="font-size:9px;margin-right:4px"></i>Người sửa';}
+    else{srcEl.className='tag tag-human';srcEl.textContent='AI dựng';}
+    // pill + thanh: độ sáng theo điểm
+    const pill=el('cpPill'); pill.className='mastery '+mclass(d.score)+(d.score<60?' weak-tag':'');
+    pill.querySelector('.dot').style.background=light(d.score);
+    const bar=el('cpBar'); bar.style.background=light(d.score);
+    if(reduce){bar.style.width=d.score+'%';}
+    else{bar.style.width='0';requestAnimationFrame(()=>setTimeout(()=>bar.style.width=d.score+'%',60));}
+  }
+
+  function select(k){
+    current=k;
+    document.querySelectorAll('.node').forEach(n=>n.classList.toggle('sel',n.dataset.k===k));
+    fillPanel(k);
+  }
+  document.querySelectorAll('.node').forEach(g=>{
+    g.addEventListener('click',()=>select(g.dataset.k));
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(g.dataset.k);}});
+  });
+
+  // cập nhật nhãn tên trên nút (bọc 2 dòng nếu dài)
+  function setNodeLabel(k,name){
+    const g=document.querySelector('.node[data-k="'+k+'"]'); if(!g) return;
+    const t=g.querySelector('.nlabel'), cx=g.dataset.cx;
+    t.innerHTML='';
+    let l1=name, l2='';
+    if(name.length>15){
+      const w=name.split(' '); let a=[],b=[],half=Math.ceil(name.length/2),c=0;
+      w.forEach(x=>{ if(c<half){a.push(x);c+=x.length+1;} else b.push(x); });
+      l1=a.join(' '); l2=b.join(' ');
+    }
+    const baseY=+t.getAttribute('y');   // baseline dòng nhãn đầu (giữ nguyên vị trí gốc)
+    const mk=(txt,dy)=>{const ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');
+      ts.setAttribute('x',cx); if(dy)ts.setAttribute('dy',dy); ts.textContent=txt; t.appendChild(ts);};
+    mk(l1,0); if(l2) mk(l2,14);
+    // đặt nhãn nguồn ngay dưới dòng nhãn cuối cùng
+    g.querySelector('.nsrc').setAttribute('y', baseY + (l2?14:0) + 15);
+  }
+
+  // ----- đổi tên (chạy thật) → source = human -----
+  function startEditName(){
+    const row=el('cpNameRow'); const cur=DATA[current].name;
+    row.innerHTML='<input class="inline-edit" id="nameInput" value="'+cur.replace(/"/g,'&quot;')+'" aria-label="Tên khái niệm">';
+    const inp=el('nameInput'); inp.focus(); inp.select();
+    let closed=false;                 // chống tái nhập: Enter/Escape gỡ input → blur bắn done() lần 2
+    const done=(save)=>{
+      if(closed) return; closed=true;
+      if(save){ const v=inp.value.trim(); if(v){ DATA[current].name=v; DATA[current].src='human';
+        setNodeLabel(current,v);
+        const g=document.querySelector('.node[data-k="'+current+'"]');
+        g.classList.add('human'); g.setAttribute('data-src','human');
+        // thêm vòng đứt nét nếu chưa có
+        if(!g.querySelector('.ring')){const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+          c.setAttribute('class','ring');c.setAttribute('cx',g.dataset.cx);c.setAttribute('cy',g.dataset.cy);c.setAttribute('r','33');
+          g.insertBefore(c,g.firstChild);}
+        g.querySelector('.nsrc').textContent='Người sửa';
+        toast('Đã đổi tên · nguồn chuyển sang “người sửa”');
+      }}
+      restoreNameRow();
+    };
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')done(true);if(e.key==='Escape')done(false);});
+    inp.addEventListener('blur',()=>done(true),{once:true});
+  }
+  function restoreNameRow(){
+    const row=el('cpNameRow');
+    row.innerHTML='<h2 class="cp-name" id="cpName">'+DATA[current].name+'</h2>'+
+      '<button class="mini-edit" id="btnRename" aria-label="Đổi tên khái niệm"><i class="fa-solid fa-pen"></i></button>';
+    el('btnRename').addEventListener('click',startEditName);
+    // đồng bộ lại nhãn nguồn panel
+    fillPanel(current);
+  }
+  el('btnRename').addEventListener('click',startEditName);
+
+  // ----- sửa mô tả (chạy thật) → source = human -----
+  el('btnEditDesc').addEventListener('click',()=>{
+    const p=el('cpDesc'); const cur=DATA[current].desc;
+    const box=document.createElement('div');
+    box.innerHTML='<textarea class="inline-edit" id="descInput" rows="4">'+cur+'</textarea>'+
+      '<div class="edit-btns"><button class="tbtn" id="descSave"><i class="fa-solid fa-check"></i> Lưu</button>'+
+      '<button class="tbtn" id="descCancel">Hủy</button></div>';
+    p.replaceWith(box);
+    el('btnEditDesc').style.display='none';
+    el('descInput').focus();
+    const restore=()=>{
+      const np=document.createElement('p'); np.className='cp-desc'; np.id='cpDesc'; np.textContent=DATA[current].desc;
+      box.replaceWith(np); el('btnEditDesc').style.display=''; };
+    el('descSave').addEventListener('click',()=>{ const v=el('descInput').value.trim(); if(v){DATA[current].desc=v;DATA[current].src='human';
+      const g=document.querySelector('.node[data-k="'+current+'"]'); g.classList.add('human'); g.querySelector('.nsrc').textContent='Người sửa';
+      if(!g.querySelector('.ring')){const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        c.setAttribute('class','ring');c.setAttribute('cx',g.dataset.cx);c.setAttribute('cy',g.dataset.cy);c.setAttribute('r','33');g.insertBefore(c,g.firstChild);}
+      toast('Đã sửa mô tả · nguồn chuyển sang “người sửa”'); }
+      restore(); fillPanel(current); });
+    el('descCancel').addEventListener('click',restore);
+  });
+
+  // ----- các thao tác cấu trúc: ConfirmDialog / menu mô phỏng -----
+  const M = {
+    add:   {icon:'fa-plus', title:'Thêm khái niệm', body:'Tạo một khái niệm mới trong chương Chuẩn hóa CSDL và nối tiên quyết cho nó. (Bản demo — thao tác được mô phỏng.)', ok:'Tạo khái niệm', done:'Đã thêm khái niệm mới (demo)'},
+    link:  {icon:'fa-arrows-turn-right', title:'Nối tiên quyết', body:'Chọn khái niệm nguồn rồi kéo tới khái niệm đích để tạo quan hệ tiên quyết. Sửa cấu trúc tiên quyết sẽ khiến hệ thống tính lại lộ trình. (Bản demo.)', ok:'Bắt đầu nối', done:'Sẵn sàng nối tiên quyết (demo)'},
+    merge: {icon:'fa-object-group', title:'Gộp hai khái niệm', body:'Gộp khái niệm đang chọn với một khái niệm khác thành một. Điểm thành thạo và tài liệu liên quan sẽ được hợp nhất. (Bản demo.)', ok:'Gộp', done:'Đã gộp khái niệm (demo)'},
+    delete:{icon:'fa-trash-can', title:'Xóa khái niệm', body:'Xóa khái niệm đang chọn khỏi bản đồ. Các cạnh tiên quyết liên quan cũng bị gỡ. Hành động này ảnh hưởng tới lộ trình học.', ok:'Xóa', done:'Đã xóa khái niệm (demo)'}
+  };
+  function toast(txt){const t=el('toast');el('toastTxt').textContent=txt;t.classList.add('show');
+    clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600);}
+
+  const back=el('modalBack');
+  function openModal(act){
+    const m=M[act]; if(!m) return;
+    el('mIcon').className='fa-solid '+m.icon;
+    el('mTitleTxt').textContent=m.title;
+    el('mBody').textContent=m.body;
+    el('mOk').textContent=m.ok;
+    back.classList.add('open');
+    el('mOk').onclick=()=>{back.classList.remove('open');toast(m.done);};
+  }
+  document.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>openModal(b.dataset.act)));
+  el('mCancel').addEventListener('click',()=>back.classList.remove('open'));
+  back.addEventListener('click',e=>{if(e.target===back)back.classList.remove('open');});
+  addEventListener('keydown',e=>{if(e.key==='Escape')back.classList.remove('open');});
+
+  // khởi tạo: chọn k4
+  select('k4');
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Người dùng · Quản trị Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ riêng trang Quản lý người dùng (A01) ============ */
+
+
+
+
+
+  /* toolbar + ô người dùng + badge trạng thái */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:var(--sp-5)}
+  .toolbar .input{flex:1;min-width:200px;max-width:320px}
+  .toolbar .grow{flex:1}
+
+  .ucell{display:flex;align-items:center;gap:11px;min-width:0}
+  .ucell .pfp{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+    font-weight:700;font-size:13px;color:#000;background:#fff}
+  .ucell .uname{font-size:var(--fs-sm);font-weight:600;white-space:nowrap}
+  .ucell .ucode{font-size:11px;color:var(--muted);font-family:var(--font-display);letter-spacing:.02em}
+  .uemail{color:var(--text-2)}
+
+  .sbadge{display:inline-flex;align-items:center;gap:7px;height:24px;padding:0 11px 0 9px;border-radius:999px;
+    font-size:11.5px;font-weight:600;background:var(--surface-2);border:1px solid var(--border);color:var(--muted)}
+  .sbadge .d{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+  .sbadge.active{color:var(--text)}
+  .sbadge.active .d{background:#fff}
+  .sbadge.locked{color:var(--muted-strong)}
+  .sbadge.locked .d{display:none}
+  .sbadge.locked i{font-size:10px}
+  .sbadge.pending{color:var(--muted);border-style:dashed}
+  .sbadge.pending .d{display:none}
+  .sbadge.pending i{font-size:10px}
+
+  .rowact{display:flex;justify-content:flex-end;gap:6px}
+  .iconbtn-sm{width:36px;height:36px;flex-shrink:0;display:grid;place-items:center;border-radius:9px;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);
+    transition:background var(--dur-1),color var(--dur-1),transform var(--dur-1)}
+  .iconbtn-sm:hover{background:var(--surface-3);color:var(--text);transform:translateY(-1px)}
+
+  .row-hidden{display:none}
+  .noresult{padding:40px 12px;text-align:center;color:var(--muted);font-size:var(--fs-sm)}
+
+  @media (max-width:760px){
+    .toolbar .input{max-width:none}
+    .toolbar .select{flex:1;min-width:calc(50% - 5px)}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR (QUẢN TRỊ) ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Quản trị</div>
+    <a class="nav-item active" href="admin-users.html" title="Người dùng"><i class="fa-solid fa-users"></i><span class="label">Người dùng</span></a>
+    <a class="nav-item" href="admin-config.html" title="Cấu hình AI"><i class="fa-solid fa-sliders"></i><span class="label">Cấu hình AI</span></a>
+    <a class="nav-item" href="admin-costs.html" title="Chi phí &amp; nhật ký"><i class="fa-solid fa-coins"></i><span class="label">Chi phí &amp; nhật ký</span></a>
+    <a class="nav-item" href="admin-prompt-tests.html" title="Kiểm thử prompt"><i class="fa-solid fa-flask"></i><span class="label">Kiểm thử prompt</span></a>
+    <a class="nav-item" href="admin-flagged.html" title="Bài bị báo sai"><i class="fa-solid fa-flag"></i><span class="label">Bài bị báo sai</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="admin-users.html" title="Quản trị viên">
+        <span class="pfp">Q</span>
+        <span class="who"><b>Quản trị viên</b><span>admin@utt.edu.vn</span></span>
+      </a>
+      <a class="nav-item" href="app-dashboard.html" title="Về trang sinh viên"><i class="fa-solid fa-arrow-left"></i><span class="label">Về trang sinh viên</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Người dùng</div>
+      <span class="chip"><i class="fa-solid fa-shield-halved"></i> Quản trị</span>
+      <div class="grow"></div>
+      <button class="avatar-btn">
+        <span class="pfp">Q</span>
+        <span class="who"><b>Quản trị viên</b><span>admin@utt.edu.vn</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Quản lý người dùng</h1>
+        <p><b style="color:var(--text)">6</b> tài khoản · 4 sinh viên, 1 giảng viên, 1 quản trị.</p>
+      </div>
+
+      <section class="card reveal" style="--d:.06s">
+        <div class="toolbar">
+          <label class="input"><i class="fa-solid fa-magnifying-glass"></i>
+            <input id="q" type="search" placeholder="Tìm theo tên hoặc email…" /></label>
+          <select class="select" id="fRole" aria-label="Lọc theo vai trò">
+            <option value="">Mọi vai trò</option>
+            <option value="sv">Sinh viên</option>
+            <option value="gv">Giảng viên</option>
+            <option value="qt">Quản trị</option>
+          </select>
+          <select class="select" id="fStatus" aria-label="Lọc theo trạng thái">
+            <option value="">Mọi trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="locked">Bị khóa</option>
+            <option value="pending">Chờ kích hoạt</option>
+          </select>
+        </div>
+
+        <div class="tablewrap">
+          <table class="dt" id="utable" style="min-width:760px">
+            <thead>
+              <tr><th>Người dùng</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Hoạt động cuối</th><th style="text-align:right">Hành động</th></tr>
+            </thead>
+            <tbody>
+              <tr data-name="nguyễn văn an" data-email="an.nv@utt.edu.vn" data-role="sv" data-status="active" data-label="Nguyễn Văn An">
+                <td><div class="ucell"><span class="pfp">A</span><div><div class="uname">Nguyễn Văn An</div><div class="ucode">UTT-CN-01</div></div></div></td>
+                <td class="uemail">an.nv@utt.edu.vn</td>
+                <td><select class="select select-sm role-sel" aria-label="Vai trò"><option selected>Sinh viên</option><option>Giảng viên</option><option>Quản trị</option></select></td>
+                <td><span class="sbadge active"><span class="d"></span>Hoạt động</span></td>
+                <td class="num">08/09 · 20:14</td>
+                <td><div class="rowact"><button class="iconbtn-sm act-lock" data-locked="0" title="Khóa tài khoản" aria-label="Khóa tài khoản"><i class="fa-solid fa-lock"></i></button></div></td>
+              </tr>
+              <tr data-name="trần thị bình" data-email="binh.tt@utt.edu.vn" data-role="sv" data-status="active" data-label="Trần Thị Bình">
+                <td><div class="ucell"><span class="pfp">B</span><div><div class="uname">Trần Thị Bình</div><div class="ucode">UTT-CN-02</div></div></div></td>
+                <td class="uemail">binh.tt@utt.edu.vn</td>
+                <td><select class="select select-sm role-sel" aria-label="Vai trò"><option selected>Sinh viên</option><option>Giảng viên</option><option>Quản trị</option></select></td>
+                <td><span class="sbadge active"><span class="d"></span>Hoạt động</span></td>
+                <td class="num">08/09 · 07:32</td>
+                <td><div class="rowact"><button class="iconbtn-sm act-lock" data-locked="0" title="Khóa tài khoản" aria-label="Khóa tài khoản"><i class="fa-solid fa-lock"></i></button></div></td>
+              </tr>
+              <tr data-name="lê văn c" data-email="c.lv@utt.edu.vn" data-role="gv" data-status="active" data-label="Lê Văn C">
+                <td><div class="ucell"><span class="pfp">C</span><div><div class="uname">TS. Lê Văn C</div><div class="ucode">UTT-GV-04</div></div></div></td>
+                <td class="uemail">c.lv@utt.edu.vn</td>
+                <td><select class="select select-sm role-sel" aria-label="Vai trò"><option>Sinh viên</option><option selected>Giảng viên</option><option>Quản trị</option></select></td>
+                <td><span class="sbadge active"><span class="d"></span>Hoạt động</span></td>
+                <td class="num">07/09 · 16:10</td>
+                <td><div class="rowact"><button class="iconbtn-sm act-lock" data-locked="0" title="Khóa tài khoản" aria-label="Khóa tài khoản"><i class="fa-solid fa-lock"></i></button></div></td>
+              </tr>
+              <tr data-name="phạm thị dung" data-email="dung.pt@utt.edu.vn" data-role="sv" data-status="locked" data-label="Phạm Thị Dung">
+                <td><div class="ucell"><span class="pfp">D</span><div><div class="uname">Phạm Thị Dung</div><div class="ucode">UTT-CN-07</div></div></div></td>
+                <td class="uemail">dung.pt@utt.edu.vn</td>
+                <td><select class="select select-sm role-sel" aria-label="Vai trò"><option selected>Sinh viên</option><option>Giảng viên</option><option>Quản trị</option></select></td>
+                <td><span class="sbadge locked"><i class="fa-solid fa-lock"></i>Bị khóa</span></td>
+                <td class="num">02/09 · 09:40</td>
+                <td><div class="rowact"><button class="iconbtn-sm act-lock" data-locked="1" title="Mở khóa tài khoản" aria-label="Mở khóa tài khoản"><i class="fa-solid fa-lock-open"></i></button></div></td>
+              </tr>
+              <tr data-name="hoàng văn em" data-email="em.hv@utt.edu.vn" data-role="sv" data-status="pending" data-label="Hoàng Văn Em">
+                <td><div class="ucell"><span class="pfp">E</span><div><div class="uname">Hoàng Văn Em</div><div class="ucode">UTT-CN-09</div></div></div></td>
+                <td class="uemail">em.hv@utt.edu.vn</td>
+                <td><select class="select select-sm role-sel" aria-label="Vai trò"><option selected>Sinh viên</option><option>Giảng viên</option><option>Quản trị</option></select></td>
+                <td><span class="sbadge pending"><i class="fa-regular fa-clock"></i>Chờ kích hoạt</span></td>
+                <td class="num">05/09 · 11:20</td>
+                <td><div class="rowact"><button class="iconbtn-sm act-lock" data-locked="0" title="Khóa tài khoản" aria-label="Khóa tài khoản"><i class="fa-solid fa-lock"></i></button></div></td>
+              </tr>
+              <tr data-name="quản trị viên admin" data-email="admin@utt.edu.vn" data-role="qt" data-status="active" data-label="Quản trị viên">
+                <td><div class="ucell"><span class="pfp">Q</span><div><div class="uname">Quản trị viên</div><div class="ucode">UTT-AD-00</div></div></div></td>
+                <td class="uemail">admin@utt.edu.vn</td>
+                <td><select class="select select-sm role-sel" aria-label="Vai trò"><option>Sinh viên</option><option>Giảng viên</option><option selected>Quản trị</option></select></td>
+                <td><span class="sbadge active"><span class="d"></span>Hoạt động</span></td>
+                <td class="num">08/09 · 21:00</td>
+                <td><div class="rowact"><button class="iconbtn-sm act-lock" data-locked="0" title="Khóa tài khoản" aria-label="Khóa tài khoản"><i class="fa-solid fa-lock"></i></button></div></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="noresult" id="noResult" hidden>Không có người dùng khớp bộ lọc.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ConfirmDialog: khóa/mở khóa -->
+<div class="scrim" id="lockScrim" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <div class="modal">
+    <div class="mtitle" id="lockTitle"><span class="mi"><i class="fa-solid fa-lock" id="lockIcon"></i></span> <span id="lockHead">Khóa tài khoản?</span></div>
+    <div class="mbody" id="lockBody">Người dùng sẽ không thể đăng nhập cho tới khi được mở khóa lại.</div>
+    <div class="mactions">
+      <button class="btn btn-ghost" id="lockCancel">Hủy</button>
+      <button class="btn btn-primary" id="lockConfirm">Khóa tài khoản</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fa-solid fa-check"></i> <span id="toastMsg"></span></div>
+
+<script>
+  // ---- Bộ lọc: tìm + vai trò + trạng thái ----
+  const rows=[...document.querySelectorAll('#utable tbody tr')];
+  const q=document.getElementById('q'), fRole=document.getElementById('fRole'), fStatus=document.getElementById('fStatus');
+  function applyFilter(){
+    const t=q.value.trim().toLowerCase(), r=fRole.value, s=fStatus.value; let shown=0;
+    rows.forEach(row=>{
+      const hit=(!t || row.dataset.name.includes(t) || row.dataset.email.includes(t))
+             && (!r || row.dataset.role===r) && (!s || row.dataset.status===s);
+      row.classList.toggle('row-hidden', !hit); if(hit) shown++;
+    });
+    document.getElementById('noResult').hidden = shown>0;
+  }
+  [q,fRole,fStatus].forEach(el=>el.addEventListener('input', applyFilter));
+
+  // ---- Toast ----
+  let toastTimer;
+  function toast(msg){
+    const el=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg;
+    el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+  }
+
+  // ---- Đặt vai trò ----
+  document.querySelectorAll('.role-sel').forEach(sel=>sel.addEventListener('change',()=>{
+    const name=sel.closest('tr').dataset.label;
+    toast('Đã đặt vai trò “'+sel.value+'” cho '+name);
+  }));
+
+  // ---- ConfirmDialog khóa/mở ----
+  const scrim=document.getElementById('lockScrim'); let pendingBtn=null;
+  function openLock(btn){
+    pendingBtn=btn; const locked=btn.dataset.locked==='1', name=btn.closest('tr').dataset.label;
+    document.getElementById('lockIcon').className = locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock';
+    document.getElementById('lockHead').textContent = locked ? 'Mở khóa tài khoản?' : 'Khóa tài khoản?';
+    document.getElementById('lockBody').innerHTML = locked
+      ? 'Mở khóa cho <b>'+name+'</b> — người dùng đăng nhập lại được ngay.'
+      : 'Khóa <b>'+name+'</b> — người dùng sẽ không thể đăng nhập cho tới khi được mở khóa lại.';
+    document.getElementById('lockConfirm').textContent = locked ? 'Mở khóa' : 'Khóa tài khoản';
+    scrim.classList.add('open');
+  }
+  const closeLock=()=>scrim.classList.remove('open');
+  document.querySelectorAll('.act-lock').forEach(b=>b.addEventListener('click',()=>openLock(b)));
+  document.getElementById('lockCancel').addEventListener('click', closeLock);
+  scrim.addEventListener('click', e=>{ if(e.target===scrim) closeLock(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && scrim.classList.contains('open')) closeLock(); });
+
+  document.getElementById('lockConfirm').addEventListener('click', ()=>{
+    if(!pendingBtn) return;
+    const tr=pendingBtn.closest('tr'), name=tr.dataset.label, wasLocked=pendingBtn.dataset.locked==='1';
+    const badge=tr.querySelector('.sbadge');
+    if(wasLocked){
+      tr.dataset.status='active'; badge.className='sbadge active'; badge.innerHTML='<span class="d"></span>Hoạt động';
+      pendingBtn.dataset.locked='0'; pendingBtn.title='Khóa tài khoản'; pendingBtn.innerHTML='<i class="fa-solid fa-lock"></i>';
+      toast('Đã mở khóa '+name);
+    }else{
+      tr.dataset.status='locked'; badge.className='sbadge locked'; badge.innerHTML='<i class="fa-solid fa-lock"></i>Bị khóa';
+      pendingBtn.dataset.locked='1'; pendingBtn.title='Mở khóa tài khoản'; pendingBtn.innerHTML='<i class="fa-solid fa-lock-open"></i>';
+      toast('Đã khóa '+name);
+    }
+    closeLock(); applyFilter();
+  });
+</script>
+</body>
+</html>

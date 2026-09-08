@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tiến độ · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ Tiến độ ============ */
+  /* phụ đề topbar dài → ẩn trên mobile để không ép topbar tràn ngang */
+
+  /* stat strip nhẹ dưới tiêu đề (không phải card) */
+  .stat-strip{display:flex;flex-wrap:wrap;gap:26px 34px;margin-top:18px;padding-bottom:2px}
+  .stat-strip .st{min-width:0}
+  .stat-strip .st .v{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1;
+    letter-spacing:-.02em;color:#fff}
+  .stat-strip .st .v small{font-size:15px;color:var(--muted);font-weight:500;margin-left:2px}
+  .stat-strip .st .l{font-size:12px;color:var(--muted);margin-top:7px}
+
+  /* AlertBanner — cảnh báo tụt tiến độ / sắp thi (đơn sắc, không đỏ) */
+  .alert-stack{display:flex;flex-direction:column;gap:12px;margin-bottom:var(--sp-8)}
+  .alert-banner{display:flex;align-items:center;gap:15px;padding:15px 18px;border-radius:16px;
+    background:var(--surface-1);border:1px solid var(--border)}
+  .alert-banner.urgent{border-color:var(--border-strong);background:var(--surface-2)}
+  .alert-banner .ab-i{width:42px;height:42px;flex-shrink:0;border-radius:12px;display:grid;place-items:center;
+    background:var(--surface-3);border:1px solid var(--border);color:var(--text);font-size:16px}
+  .alert-banner .ab-b{flex:1;min-width:0}
+  .alert-banner .ab-b b{display:block;font-size:var(--fs-sm);font-weight:600}
+  .alert-banner .ab-b p{font-size:12.5px;color:var(--muted-strong);margin-top:2px;line-height:1.5}
+  .alert-banner .ab-b .n{font-family:var(--font-display);font-weight:700;color:var(--text)}
+  .alert-banner .ab-act{flex-shrink:0}
+
+  .card-title .sub{margin-left:8px;font-weight:400;font-size:12px;color:var(--muted)}
+
+  /* ---------- MasteryGrid (.mgrid/.mtile đã ở app.css) ---------- */
+  .mlegend{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;padding-top:16px;
+    border-top:1px solid var(--border-faint)}
+  .mramp{display:flex;height:8px;width:150px;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+  .mramp span{flex:1}
+  .mlegend .lt{font-size:11.5px;color:var(--muted)}
+  .mlegend .lw{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted)}
+  .mlegend .lw b{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--muted);
+    border:1px solid var(--border-strong);border-radius:5px;padding:1px 5px}
+
+  /* ---------- Charts ---------- */
+  .chart svg{width:100%;height:auto;display:block;font-family:var(--font-sans)}
+  .chart .axis{fill:var(--muted);font-size:10px}
+  .chart .vlab{fill:var(--text-2);font-size:11px;font-family:var(--font-display);font-weight:700}
+  .chart .grid{stroke:var(--border-faint);stroke-width:1}
+  .chart .baseline{stroke:var(--border);stroke-width:1}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px}
+  .legend .li{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2)}
+  .legend .lk{width:22px;height:0;border-top-width:2px;border-top-style:solid;flex-shrink:0}
+  .legend .lk.solid{border-color:#fff}
+  .legend .lk.dash{border-color:var(--muted);border-top-style:dashed}
+
+  /* tooltip biểu đồ (phần tử nổi → được phép bóng) */
+  .ct-tip{position:fixed;z-index:70;pointer-events:none;background:var(--surface-pop);border:1px solid var(--border-strong);
+    border-radius:10px;box-shadow:var(--sh-pop);padding:9px 12px;font-size:12px;opacity:0;
+    transform:translateY(4px);transition:opacity var(--dur-1),transform var(--dur-1);white-space:nowrap}
+  .ct-tip.show{opacity:1;transform:none}
+  .ct-tip .tt{color:var(--muted);font-size:11px;margin-bottom:5px}
+  .ct-tip .tr{display:flex;align-items:center;gap:8px;line-height:1.5}
+  .ct-tip .tr .tk{width:12px;height:0;border-top-width:2px;border-top-style:solid}
+  .ct-tip .tr b{font-family:var(--font-display);font-weight:700;margin-left:2px}
+
+  @media (max-width:560px){
+    .stat-strip{gap:20px 28px}
+    .stat-strip .st .v{font-size:26px}
+    .alert-banner{flex-wrap:wrap}
+    .alert-banner .ab-act{width:100%}
+    .alert-banner .ab-act .btn{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item active" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Tiến độ <small>Cơ sở dữ liệu · Chuẩn hóa CSDL</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm, tài liệu, môn học…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Tiến độ học tập</h1>
+        <p>Chương <b style="color:var(--text)">Chuẩn hóa CSDL</b> · môn Cơ sở dữ liệu. Cập nhật hôm nay, 08/09/2026.</p>
+        <div class="stat-strip">
+          <div class="st"><div class="v" data-count="29">0</div><div class="l">Thành thạo trung bình / 100</div></div>
+          <div class="st"><div class="v" data-count="5">0</div><div class="l">Khái niệm còn yếu (&lt; 60)</div></div>
+          <div class="st"><div class="v" data-count="200" data-suffix=" phút">0</div><div class="l">Đã học trong 7 ngày</div></div>
+          <div class="st"><div class="v" data-count="12">0</div><div class="l">Ngày còn lại tới kỳ thi</div></div>
+        </div>
+      </div>
+
+      <!-- 2 cảnh báo -->
+      <div class="alert-stack reveal" style="--d:.06s">
+        <div class="alert-banner">
+          <span class="ab-i"><i class="fa-solid fa-arrow-trend-down"></i></span>
+          <div class="ab-b">
+            <b>Bạn đang tụt so với kế hoạch tuần</b>
+            <p>Thực tế học <span class="n">200</span>/<span class="n">210</span> phút và đã bỏ lỡ buổi tối 04/09. Điều chỉnh lộ trình để bắt kịp trước kỳ thi.</p>
+          </div>
+          <span class="ab-act"><a class="btn btn-ghost btn-sm" href="app-plan.html">Xem lộ trình <i class="fa-solid fa-arrow-right"></i></a></span>
+        </div>
+        <div class="alert-banner urgent">
+          <span class="ab-i"><i class="fa-solid fa-triangle-exclamation"></i></span>
+          <div class="ab-b">
+            <b>Sắp thi mà còn <span class="n">5</span> khái niệm yếu</b>
+            <p>Còn <span class="n">12</span> ngày tới kỳ thi 20/09 nhưng 3NF, BCNF, Phụ thuộc bắc cầu… vẫn dưới 60. Nên ưu tiên ôn ngay hôm nay.</p>
+          </div>
+          <span class="ab-act"><a class="btn btn-primary btn-sm" href="app-lesson.html">Ôn ngay <i class="fa-solid fa-play"></i></a></span>
+        </div>
+      </div>
+
+      <div class="bento">
+
+        <!-- MasteryGrid -->
+        <section class="card reveal col-7" style="--d:.12s">
+          <div class="card-title"><i class="fa-solid fa-table-cells-large"></i> Bản đồ thành thạo
+            <span class="sub">Cơ sở dữ liệu · Chuẩn hóa CSDL</span>
+            <a href="app-map.html" class="card-link" style="margin-left:auto;font-size:12px;color:var(--text-2);font-weight:500">Xem đồ thị →</a>
+          </div>
+          <div class="mgrid" id="mgrid"></div>
+          <div class="mlegend">
+            <span class="lt">Yếu</span>
+            <span class="mramp" id="mramp"></span>
+            <span class="lt">Thành thạo</span>
+            <span style="flex:1"></span>
+            <span class="lw"><b>yếu</b> khái niệm &lt; 60 điểm</span>
+          </div>
+        </section>
+
+        <!-- Biểu đồ thời gian học -->
+        <section class="card reveal col-5 chart" style="--d:.18s">
+          <div class="card-title"><i class="fa-solid fa-clock"></i> Thời gian học 7 ngày</div>
+          <svg id="barChart" viewBox="0 0 460 250" role="img" aria-label="Biểu đồ cột thời gian học theo ngày trong 7 ngày qua"></svg>
+          <p class="meta" style="margin-top:10px;text-align:center">Tổng <b style="color:var(--text);font-family:var(--font-display)">200</b> phút · trung bình <b style="color:var(--text);font-family:var(--font-display)">29</b> phút/ngày</p>
+        </section>
+
+        <!-- Tiến độ vs kế hoạch -->
+        <section class="card reveal col-12 chart" style="--d:.24s">
+          <div class="card-title"><i class="fa-solid fa-chart-line"></i> Tiến độ ôn tập so với kế hoạch
+            <span class="sub">phút tích lũy trong tuần</span>
+          </div>
+          <div class="legend">
+            <span class="li"><span class="lk dash"></span> Kế hoạch</span>
+            <span class="li"><span class="lk solid"></span> Thực tế</span>
+          </div>
+          <svg id="lineChart" viewBox="0 0 960 300" role="img" aria-label="Biểu đồ đường: phút học tích lũy thực tế so với kế hoạch trong 7 ngày"></svg>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="ct-tip" id="tip"></div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SVGNS='http://www.w3.org/2000/svg';
+  const el=(n,a)=>{const e=document.createElementNS(SVGNS,n);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  const tip=document.getElementById('tip');
+  function showTip(html,x,y){tip.innerHTML=html;tip.classList.add('show');
+    const r=tip.getBoundingClientRect();
+    tip.style.left=Math.max(8,Math.min(x-r.width/2,innerWidth-r.width-8))+'px';
+    tip.style.top=(y-r.height-12)+'px';}
+  function hideTip(){tip.classList.remove('show');}
+
+  /* độ sáng trắng theo điểm — đồng bộ công thức dashboard (đơn sắc, STYLE §3.8) */
+  const light = s => 'rgba(255,255,255,'+(0.30+s/100*0.65).toFixed(3)+')';
+
+  /* =========================================================
+     MasteryGrid — 8 khái niệm k1..k8 (mastery của A), nền sáng dần
+     ========================================================= */
+  const CONCEPTS=[
+    {k:'k1',n:'Phụ thuộc hàm (FD)',s:30},
+    {k:'k2',n:'Khóa & khóa dự tuyển',s:40},
+    {k:'k3',n:'Phụ thuộc hàm đầy đủ',s:25},
+    {k:'k4',n:'Phụ thuộc bắc cầu',s:20},
+    {k:'k5',n:'Dạng chuẩn 1 (1NF)',s:55},
+    {k:'k6',n:'Dạng chuẩn 2 (2NF)',s:35},
+    {k:'k7',n:'Dạng chuẩn 3 (3NF)',s:15},
+    {k:'k8',n:'Boyce–Codd (BCNF)',s:10}
+  ];
+  const mgrid=document.getElementById('mgrid');
+  CONCEPTS.forEach((c,idx)=>{
+    const cell=document.createElement('a');
+    cell.href='app-map.html';cell.className='mtile';cell.style.color='inherit';
+    cell.innerHTML=`<span class="lvl"></span>`
+      +`<div class="mk">${c.k.toUpperCase()}</div>`
+      +`<div class="mname">${c.n}</div>`
+      +`<div class="mfoot"><span class="mnum">${c.s}</span>`
+      +(c.s<60?`<span class="weak">yếu</span>`:'')+`</div>`
+      +`<div class="mbar"><i></i></div>`;
+    mgrid.appendChild(cell);
+    // nền ô: alpha nhẹ theo điểm (giữ chữ trắng luôn AA)
+    cell.querySelector('.lvl').style.opacity=(0.04+c.s/100*0.16).toFixed(3);
+    const bar=cell.querySelector('.mbar>i');
+    bar.style.background=light(c.s);
+    if(reduce)bar.style.width=c.s+'%';else setTimeout(()=>bar.style.width=c.s+'%',260+idx*40);
+  });
+  // ramp chú giải
+  const ramp=document.getElementById('mramp');
+  [10,30,50,70,90].forEach(s=>{const sp=document.createElement('span');sp.style.background=light(s);ramp.appendChild(sp);});
+
+  /* =========================================================
+     Biểu đồ cột — thời gian học 7 ngày (magnitude)
+     ========================================================= */
+  const DAYS=['02','03','04','05','06','07','Nay'];
+  const DATES=['02/09','03/09','04/09','05/09','06/09','07/09','08/09'];
+  const MIN=[25,40,0,30,20,50,35];
+  (function bars(){
+    const svg=document.getElementById('barChart');
+    const W=460,H=250,pl=32,pr=14,pt=20,pb=30;
+    const x0=pl,x1=W-pr,y0=pt,y1=H-pb, yMax=60;
+    const yOf=v=>y1-(v/yMax)*(y1-y0);
+    // lưới ngang + nhãn trục y
+    [0,20,40,60].forEach(t=>{
+      svg.appendChild(el('line',{x1:x0,y1:yOf(t),x2:x1,y2:yOf(t),class:t===0?'baseline':'grid'}));
+      const tx=el('text',{x:x0-7,y:yOf(t)+3,'text-anchor':'end',class:'axis'});tx.textContent=t;svg.appendChild(tx);
+    });
+    const n=MIN.length, slot=(x1-x0)/n, bw=Math.min(30,slot*0.5);
+    MIN.forEach((v,i)=>{
+      const cx=x0+slot*i+slot/2, h=(v/yMax)*(y1-y0), y=y1-h, last=i===n-1;
+      // nhãn ngày
+      const xl=el('text',{x:cx,y:y1+16,'text-anchor':'middle',class:'axis'});xl.textContent=DAYS[i];
+      if(last)xl.setAttribute('fill','#fff');svg.appendChild(xl);
+      if(v>0){
+        const rect=el('rect',{x:cx-bw/2,y:reduce?y:y1,width:bw,height:reduce?h:0,rx:3,
+          fill:last?'rgba(255,255,255,.9)':'rgba(255,255,255,.5)'});
+        svg.appendChild(rect);
+        if(!reduce){requestAnimationFrame(()=>{rect.style.transition='y .5s var(--ease), height .5s var(--ease)';
+          rect.setAttribute('y',y);rect.setAttribute('height',h);});}
+        // nhãn giá trị
+        const vl=el('text',{x:cx,y:y-7,'text-anchor':'middle',class:'vlab'});vl.textContent=v;
+        if(reduce)svg.appendChild(vl);else setTimeout(()=>svg.appendChild(vl),520);
+      }
+      // vùng hover
+      const hit=el('rect',{x:x0+slot*i,y:y0,width:slot,height:y1-y0,fill:'transparent',style:'cursor:pointer'});
+      hit.addEventListener('mousemove',e=>showTip(`<div class="tt">${DATES[i]}</div><div class="tr"><span class="tk" style="border-color:#fff"></span>Học <b>${v}</b> phút</div>`,e.clientX,e.clientY));
+      hit.addEventListener('mouseleave',hideTip);
+      svg.appendChild(hit);
+    });
+  })();
+
+  /* =========================================================
+     Biểu đồ đường — tiến độ thực tế vs kế hoạch (change over time, 1 trục)
+     phân biệt 2 chuỗi bằng NÉT (liền/đứt) + nhãn, không bằng màu
+     ========================================================= */
+  const PLAN  =[30,60,90,120,150,180,210];
+  const ACTUAL=[25,65,65,95,115,165,200];
+  (function lines(){
+    const svg=document.getElementById('lineChart');
+    const W=960,H=300,pl=40,pr=54,pt=16,pb=34;
+    const x0=pl,x1=W-pr,y0=pt,y1=H-pb, yMax=240, n=PLAN.length;
+    const xOf=i=>x0+(x1-x0)*i/(n-1), yOf=v=>y1-(v/yMax)*(y1-y0);
+    [0,60,120,180,240].forEach(t=>{
+      svg.appendChild(el('line',{x1:x0,y1:yOf(t),x2:x1,y2:yOf(t),class:t===0?'baseline':'grid'}));
+      const tx=el('text',{x:x0-8,y:yOf(t)+3,'text-anchor':'end',class:'axis'});tx.textContent=t;svg.appendChild(tx);
+    });
+    DAYS.forEach((d,i)=>{const tx=el('text',{x:xOf(i),y:y1+18,'text-anchor':'middle',class:'axis'});
+      tx.textContent=d;if(i===n-1)tx.setAttribute('fill','#fff');svg.appendChild(tx);});
+
+    const path=a=>a.map((v,i)=>(i?'L':'M')+xOf(i)+' '+yOf(v)).join(' ');
+    // vùng dưới thực tế — rất nhẹ
+    const area=el('path',{d:path(ACTUAL)+` L${xOf(n-1)} ${y1} L${xOf(0)} ${y1} Z`,fill:'rgba(255,255,255,.05)'});
+    svg.appendChild(area);
+    // kế hoạch: nét đứt xám
+    const pl2=el('path',{d:path(PLAN),fill:'none',stroke:'var(--muted)','stroke-width':2,
+      'stroke-dasharray':'6 5','stroke-linecap':'round','stroke-linejoin':'round'});
+    svg.appendChild(pl2);
+    // thực tế: nét liền trắng + marker
+    const ac=el('path',{d:path(ACTUAL),fill:'none',stroke:'#fff','stroke-width':2,
+      'stroke-linecap':'round','stroke-linejoin':'round'});
+    svg.appendChild(ac);
+    if(!reduce){const L=ac.getTotalLength();ac.style.strokeDasharray=L;ac.style.strokeDashoffset=L;
+      requestAnimationFrame(()=>{ac.style.transition='stroke-dashoffset .9s var(--ease)';ac.style.strokeDashoffset=0;});}
+    ACTUAL.forEach((v,i)=>svg.appendChild(el('circle',{cx:xOf(i),cy:yOf(v),r:3.5,fill:'#fff'})));
+    // nhãn cuối trực tiếp
+    const le1=el('text',{x:xOf(n-1)+8,y:yOf(ACTUAL[n-1])+4,class:'axis',fill:'#fff'});le1.textContent='200';svg.appendChild(le1);
+    const le2=el('text',{x:xOf(n-1)+8,y:yOf(PLAN[n-1])+4,class:'axis'});le2.textContent='210';svg.appendChild(le2);
+
+    // crosshair + hover
+    const cross=el('line',{x1:0,y1:y0,x2:0,y2:y1,stroke:'var(--border-strong)','stroke-width':1,opacity:0});
+    svg.appendChild(cross);
+    const overlay=el('rect',{x:x0,y:y0,width:x1-x0,height:y1-y0,fill:'transparent',style:'cursor:crosshair'});
+    svg.appendChild(overlay);
+    overlay.addEventListener('mousemove',e=>{
+      const box=svg.getBoundingClientRect(), sx=(e.clientX-box.left)/box.width*W;
+      let i=Math.round((sx-x0)/((x1-x0)/(n-1)));i=Math.max(0,Math.min(i,n-1));
+      cross.setAttribute('x1',xOf(i));cross.setAttribute('x2',xOf(i));cross.setAttribute('opacity',1);
+      showTip(`<div class="tt">Ngày ${DATES[i]}</div>`
+        +`<div class="tr"><span class="tk" style="border-color:#fff"></span>Thực tế <b>${ACTUAL[i]}</b> phút</div>`
+        +`<div class="tr"><span class="tk" style="border-color:var(--muted);border-top-style:dashed"></span>Kế hoạch <b>${PLAN[i]}</b> phút</div>`,
+        e.clientX,e.clientY);
+    });
+    overlay.addEventListener('mouseleave',()=>{cross.setAttribute('opacity',0);hideTip();});
+  })();
+
+  /* đếm số ở stat strip */
+  document.querySelectorAll('[data-count]').forEach(elm=>{
+    const target=parseFloat(elm.dataset.count), suf=elm.dataset.suffix||'';
+    if(reduce){elm.innerHTML=target+(suf?`<small>${suf}</small>`:'');return;}
+    const dur=1000,t0=performance.now(),ease=t=>1-Math.pow(1-t,3);
+    (function step(now){const p=Math.min((now-t0)/dur,1);
+      elm.innerHTML=Math.round(target*ease(p))+(suf?`<small>${suf}</small>`:'');
+      if(p<1)requestAnimationFrame(step);else elm.innerHTML=target+(suf?`<small>${suf}</small>`:'');})(t0);
+  });
+</script>
+</body>
+</html>

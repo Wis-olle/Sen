@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sen — Bài học soạn riêng cho bạn</title>
+<meta name="description" content="Hệ thống hỗ trợ học tập cá nhân hóa bằng AI cho sinh viên UTT: bản đồ kiến thức, mức thành thạo 0–100, bài học soạn riêng, mọi ý đều có trích dẫn." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<a class="skip-link" href="#hero-title">Tới nội dung chính</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="boil" x="-4%" y="-4%" width="108%" height="108%">
+    <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="1" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<!-- ===================== NAV ===================== -->
+<header class="site-nav">
+  <div class="container">
+    <nav class="nav-links" aria-label="Chính">
+      <a class="u-draw" href="#tinh-nang">Tính năng</a>
+      <a class="u-draw" href="#cach-hoat-dong">Cách hoạt động</a>
+      <a class="u-draw" href="#bai-hoc-mau">Bài học mẫu</a>
+    </nav>
+    <a class="brand" href="#" aria-label="Sen — trang chủ">
+      <svg viewBox="0 0 32 32" fill="none" stroke="#1d1d1d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M16 27c-6.5 0-10-4.2-10-9.5 0-3 1.4-5.4 3.2-7.3.6 2.4 1.9 4 3.6 4.9C12.5 11.6 14 8 16 5c2 3 3.5 6.6 3.2 10.1 1.7-.9 3-2.5 3.6-4.9C24.6 12.1 26 14.5 26 17.5 26 22.8 22.5 27 16 27Z" fill="#f8c365"/>
+        <path d="M16 27V15"/>
+      </svg>
+      <span>Sen</span>
+    </a>
+    <div class="nav-actions">
+      <a class="u-draw" href="login.html">Đăng nhập</a>
+      <a class="btn btn-dark btn-sm" href="#bat-dau">Bắt đầu miễn phí</a>
+      <button class="nav-burger" aria-label="Mở menu" aria-expanded="false"><span></span></button>
+    </div>
+  </div>
+  <div class="nav-mobile">
+    <a href="#tinh-nang">Tính năng</a>
+    <a href="#cach-hoat-dong">Cách hoạt động</a>
+    <a href="#bai-hoc-mau">Bài học mẫu</a>
+    <a href="login.html">Đăng nhập</a>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" aria-labelledby="hero-title">
+  <!-- blob hổ phách nhạt (trang trí) -->
+  <svg class="blob blob-l" viewBox="0 0 360 360" aria-hidden="true"><path d="M181 22c46-12 86 20 104 60 20 44 70 54 62 106-7 46-52 60-84 92-30 30-74 62-116 52C97 320 76 266 40 232 4 198-8 148 20 108 48 66 118 39 181 22Z"/></svg>
+  <svg class="blob blob-r" viewBox="0 0 300 300" aria-hidden="true"><path d="M150 14c40 0 60 34 92 52 36 20 58 52 46 92-10 34-46 44-68 72-22 30-48 66-90 60-40-6-50-52-82-74C14 192-4 150 14 112 34 70 100 14 150 14Z"/></svg>
+  <svg class="blob blob-c" viewBox="0 0 420 300" aria-hidden="true"><path d="M210 10c70 0 130 30 170 80 30 40 40 100 10 150-30 50-110 60-180 60S60 290 30 240C0 190 10 120 50 70 90 30 140 10 210 10Z"/></svg>
+
+  <div class="container hero-top">
+    <div class="hero-copy">
+      <!-- tia sáng vẽ tay (Iconoodle crispy doodles) -->
+      <svg class="mark mk-sparkle" viewBox="0 0 415 404" aria-hidden="true"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg>
+      <h1 id="hero-title" class="display">
+        <span class="w"><span>Bài</span></span> <span class="w"><span>học</span></span> <span class="w"><span>soạn</span></span><br>
+        <span class="w w--pill"><span class="pill">riêng</span></span> <span class="w"><span>cho</span></span> <span class="w"><span>bạn</span></span>
+      </h1>
+    </div>
+    <div class="hero-side">
+      <p class="lead">Tải tài liệu môn học của bạn. Hệ thống dựng bản đồ kiến thức, chấm mức thành thạo 0–100 và soạn bài học đúng chỗ bạn còn yếu — mọi ý đều có trích dẫn về nguồn.</p>
+      <div class="hero-cta">
+        <a class="btn btn-outline" href="#bat-dau">Bắt đầu học
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+        <a class="link-arrow u-draw" href="#bai-hoc-mau">Xem demo 5 phút</a>
+      </div>
+      <!-- mũi tên vẽ tay từ CTA trỏ xuống minh họa -->
+      <svg class="mark mk-arrow" viewBox="0 0 403 403" aria-hidden="true"><path d="M377.64 91.8589C377.64 91.8589 335.673 22.8108 290.96 11.7558C200.595 -10.5858 183.355 224.785 183.355 224.785C183.355 224.785 136.684 144.899 87.9383 144.15C1.44688 142.822 10.252 401.685 10.252 401.685M377.64 91.8589L393.051 1.68457M377.64 91.8589L287.621 76.4216"/></svg>
+    </div>
+  </div>
+
+  <p class="sr-only">Minh họa: hai sinh viên cùng học một chương nhưng nhận hai bài học khác nhau. Thẻ ví dụ: An — Chuẩn hóa 3NF, mức thành thạo 62/100, cần ôn; trích dẫn từ giáo trình Cơ sở dữ liệu, tài liệu D3 trang 14; bản đồ kiến thức chương 4 với 4 khái niệm; bài học hôm nay của Bình dài 25 phút.</p>
+
+  <div class="container hero-art" aria-hidden="true">
+    <!-- hai sinh viên (Open Doodles, CC0) — cùng chương, hai màu, hai bài học -->
+    <div class="figure fig-a"><picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/doodles/sitting-reading-blue.svg" type="image/svg+xml" /><img src="assets/anim/sitting-reading-blue.webp" data-static="assets/doodles/sitting-reading-blue.svg" alt="" width="800" height="600" /></picture></div>
+    <div class="figure fig-b"><picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/doodles/reading-side-green.svg" type="image/svg+xml" /><img src="assets/anim/reading-side-green.webp" data-static="assets/doodles/reading-side-green.svg" alt="" width="800" height="600" loading="lazy" /></picture></div>
+
+    <!-- thẻ UI thật của sản phẩm, lơ lửng -->
+    <div class="fcard fc-mastery">
+      <div class="who"><span class="av a">A</span><div class="t" style="margin:0">An · Chuẩn hóa 3NF</div></div>
+      <div class="s">Mức thành thạo</div>
+      <div class="bar"><i></i></div>
+      <div class="row"><div class="num"><b>62</b><small>/100</small></div><span class="chip">Cần ôn</span></div>
+      <!-- huy hiệu chữ xoay, neo vào góc thẻ -->
+      <div class="badge-rot">
+        <svg viewBox="0 0 112 112">
+          <defs><path id="ring" d="M56 56m-42 0a42 42 0 1 1 84 0a42 42 0 1 1 -84 0"/></defs>
+          <circle class="bg" cx="56" cy="56" r="54"/>
+          <g class="ring"><text><textPath href="#ring">SOẠN RIÊNG CHO BẠN • CÓ TRÍCH DẪN • </textPath></text></g>
+          <path class="core" d="M56 40l4.5 11.5L72 56l-11.5 4.5L56 72l-4.5-11.5L40 56l11.5-4.5Z"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="fcard fc-cite">
+      <div class="t">Trích dẫn từ tài liệu</div>
+      <p class="q">“Một quan hệ đạt 3NF khi không có phụ thuộc bắc cầu vào khóa chính.”</p>
+      <div class="row"><span class="chip">[D3] · tr. 14</span><span class="s">Giáo trình CSDL</span></div>
+    </div>
+
+    <div class="fcard fc-map">
+      <div class="t">Bản đồ kiến thức</div>
+      <div class="s">Chương 4 · 4 khái niệm</div>
+      <svg class="mini-map" viewBox="0 0 180 96">
+        <line x1="30" y1="24" x2="90" y2="24"/><line x1="90" y1="24" x2="140" y2="52"/><line x1="90" y1="24" x2="60" y2="72"/>
+        <circle cx="30" cy="24" r="9" fill="#1d1d1d"/><text x="30" y="46" text-anchor="middle">Khóa</text>
+        <circle cx="90" cy="24" r="9" fill="#f8c365"/><text x="90" y="46" text-anchor="middle">Phụ thuộc hàm</text>
+        <circle cx="140" cy="52" r="9" fill="#fff"/><text x="140" y="74" text-anchor="middle">3NF</text>
+        <circle cx="60" cy="72" r="9" fill="#fee7bb"/><text x="60" y="94" text-anchor="middle">BCNF</text>
+      </svg>
+    </div>
+
+    <div class="fcard fc-lesson">
+      <div class="who"><span class="av b">B</span><div class="t" style="margin:0">Bình · Bài học hôm nay</div></div>
+      <div class="row"><span class="s">Cùng chương với An</span><span class="chip soft">25 phút</span></div>
+      <ul>
+        <li><i>✓</i>Phụ thuộc hàm</li>
+        <li><i>✓</i>Khóa và siêu khóa</li>
+        <li class="todo"><i>✓</i>Chuẩn 3NF — đang học</li>
+      </ul>
+    </div>
+
+    <!-- máy bay giấy (Iconoodle) bay theo đường chấm từ bài của An sang bài của Bình -->
+    <svg class="flight" viewBox="0 0 1200 580" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs><mask id="routeMask"><path class="route-mask" d="M360 250C500 60 760 40 930 300"/></mask></defs>
+      <path class="route" d="M360 250C500 60 760 40 930 300" mask="url(#routeMask)"/>
+      <g class="plane" transform="translate(930 300) rotate(57)"><g transform="translate(-28,-18) scale(.5)"><path d="M3.00431 2C-4.98069 2 36.9406 58.9454 47.3211 72.9813C49.7164 73.7833 90.0409 48.5188 90.8394 48.5188M3.00431 2C10.9893 2 108.406 30.4727 112 37.2901L94.8319 44.5086M3.00431 2L94.8319 44.5086M3.00431 2L90.8394 48.5188M94.8319 44.5086C94.8319 45.578 94.8319 47.8772 94.8319 48.5188C94.8319 49.3209 91.6379 48.5188 90.8394 48.5188"/></g></g>
+    </svg>
+
+    <!-- nét vẽ tay (Iconoodle crispy doodles, MIT) -->
+    <svg class="mark mk-burst" viewBox="0 0 437 408" aria-hidden="true"><path d="M197.943 12.5169V77.6458M241.362 83.6159L274.469 3.83301M300.521 118.894L430.779 19.0298M326.03 173.711H430.779M326.03 222.015L384.646 244.267M300.521 272.49L411.24 357.7M116.532 108.582L29.6932 12.5169M88.3092 136.262L22.6375 108.582M77.4544 212.788H22.6375M88.3092 255.122L3.6416 288.229M134.985 300.712L88.3092 403.833M176.233 312.11L165.921 373.982M241.362 300.712L274.469 403.833"/></svg>
+    <svg class="mark mk-lines" viewBox="0 0 738 420" aria-hidden="true"><path d="M2.27338 370.738L294.595 409.738M27.9152 229.238L736.853 173.424M2.27338 123.559L489.836 9.73828"/></svg>
+    <svg class="mark mk-sparkle2" viewBox="0 0 402 405" aria-hidden="true"><path d="M240.224 162.153L204.945 2.15332L175.645 162.153L2.83704 213.281L175.645 240.95L215.11 402.153L240.224 240.95L398.681 189.608L240.224 162.153Z"/></svg>
+    <svg class="mark mk-arrow2" viewBox="0 0 370 414" aria-hidden="true"><path d="M9.19824 247.291L113.019 3.92383C113.019 3.92383 52.4567 403.924 197.5 403.924C278.578 403.924 283.508 208.516 283.508 208.516M283.508 208.516L194.745 287.606M283.508 208.516L362.399 297.502"/></svg>
+  </div>
+</section>
+
+<!-- ===================== STATS ===================== -->
+<section class="stats" aria-label="Số liệu">
+  <div class="container">
+    <div class="stat"><b>0–100</b><span>Thang thành thạo mỗi khái niệm</span></div>
+    <div class="stat"><b data-count="15" data-suffix=" câu">15 câu</b><span>Bài chẩn đoán đầu vào</span></div>
+    <div class="stat"><b data-count="1900" data-suffix="+">1.900+</b><span>Tài liệu thư viện số UTT</span></div>
+    <div class="stat"><b data-count="100" data-suffix="%">100%</b><span>Ý chính có trích dẫn số trang</span></div>
+  </div>
+</section>
+
+<!-- ===================== MARQUEE ===================== -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track"><span>Cơ sở dữ liệu</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Mạng máy tính</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Cấu trúc dữ liệu</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Kỹ thuật phần mềm</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Toán rời rạc</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Hệ điều hành</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Lập trình web</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Trí tuệ nhân tạo</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Cơ sở dữ liệu</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Mạng máy tính</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Cấu trúc dữ liệu</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Kỹ thuật phần mềm</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Toán rời rạc</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Hệ điều hành</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Lập trình web</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg><span>Trí tuệ nhân tạo</span><svg viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg></div>
+</div>
+
+<!-- ===================== VỀ SẢN PHẨM ===================== -->
+<section class="about" id="ve-san-pham" aria-labelledby="about-title">
+  <div class="container about-grid">
+    <div class="about-art" aria-hidden="true">
+      <svg class="blob blob-about" viewBox="0 0 420 380"><path d="M214 12c76-6 150 34 178 100 26 62 8 136-40 184-46 46-120 70-186 58C98 342 40 292 22 224 2 152 44 62 116 30c30-12 66-16 98-18Z"/></svg>
+      <div class="about-fig"><img class="boil" src="assets/doodles/meditating-amber.svg" alt="" width="1024" height="768" /></div>
+      <svg class="doodle dd-book" data-draw viewBox="0 0 257 255" aria-hidden="true"><path d="M163.947 49.7173L92.4468 197.217M92.4468 3.19774C88.4318 4.13296 84.8732 5.37501 81.9468 6.71739L2.44678 168.717C5.56222 168.615 8.59642 168.619 11.5492 168.717M92.4468 3.19774C113.356 -1.67282 146.642 1.77829 167.447 42.7174C186.579 41.1096 229.377 45.8605 252.487 76.7173M92.4468 3.19774L11.5492 168.717M11.5492 168.717C54.8488 170.167 80.6455 192.171 88.4468 203.717C139.499 201.56 170.409 227.786 182.556 245.217M252.487 76.7173C253.334 77.8486 254.155 79.0149 254.947 80.2174L185.947 250.717C185.053 249.031 183.923 247.18 182.556 245.217M252.487 76.7173L182.556 245.217M92.4468 24.2173C100.28 25.5507 118.147 31.1174 126.947 42.7174L106.947 80.2174L71.9468 65.7173L92.4468 24.2173ZM148.447 133.717L126.947 176.217C139.927 178.884 168.799 187.317 180.447 199.717L200.447 158.217C194.447 151.384 175.647 136.917 148.447 133.717Z"/>
+<path d="M37.9468 151.217C51.1134 152.384 80.2468 159.417 91.4468 178.217"/>
+<path d="M46.9468 133.717C60.1134 134.884 89.2468 141.917 100.447 160.717"/>
+<path d="M55.9468 112.717C69.1134 113.884 98.2468 120.917 109.447 139.717"/>
+<path d="M64.9468 92.7173C78.1134 93.884 107.247 100.917 118.447 119.717"/>
+<path d="M154.947 112.717C168.113 113.884 197.247 120.917 208.447 139.717"/>
+<path d="M162.947 92.7173C176.113 93.884 205.247 100.917 216.447 119.717"/>
+<path d="M171.947 70.7173C185.113 71.884 214.247 78.9173 225.447 97.7173"/></svg>
+      <svg class="doodle dd-globe" data-draw viewBox="0 0 239 325" aria-hidden="true"><path d="M85.9796 20.6772C-67.0044 60.7159 16.2344 234.902 120.48 217.177C293.98 187.677 213.979 -12.8226 85.9796 20.6772Z"/>
+<path d="M133.479 231.624C294.936 193.211 258.438 -21.8468 83.9795 4.17748L86.9795 19.6774M133.479 231.624C136.313 250.808 142.579 289.877 144.979 292.677C147.979 296.177 162.979 296.677 171.479 300.677C178.279 303.877 174.313 310.677 171.479 313.677L114.479 321.677C112.479 322.844 108.179 322.877 106.979 313.677C105.479 302.177 126.479 300.177 127.979 292.677C129.179 286.677 119.479 251.844 114.479 235.177C117.942 234.695 121.327 234.138 124.636 233.511M133.479 231.624C130.595 232.31 127.647 232.94 124.636 233.511M121.979 217.177L124.636 233.511"/>
+<path d="M105.979 89.1775C99.1795 84.7775 85.1462 87.3441 78.9795 89.1775L70.9795 91.1774L68.4795 97.6774C66.8128 99.5108 62.9795 103.177 60.9795 103.177C58.9795 103.177 57.1462 109.511 56.4795 112.677L63.4795 119.677C65.1462 122.677 69.3795 127.877 72.9795 124.677C77.4795 120.677 81.9795 123.677 85.9795 124.677C89.9795 125.677 90.9795 133.177 90.9795 136.177C90.9795 138.577 94.9795 141.177 96.9795 142.177V151.177L102.979 157.677L105.979 166.677C108.313 168.344 112.979 171.177 112.979 169.177C112.979 166.677 114.479 165.677 116.479 166.677C118.079 167.477 121.813 161.011 123.479 157.677V144.677V128.677C123.479 123.077 129.146 117.344 131.979 115.177C133.479 112.177 135.579 105.577 131.979 103.177C127.479 100.177 131.979 98.6774 131.979 94.1774V86.6774L123.479 89.1775C120.479 91.0108 112.779 93.5775 105.979 89.1775Z"/>
+<path d="M163.98 74.6774C161.18 73.4774 157.813 78.5107 156.48 81.1774C154.646 85.3441 150.48 93.7774 148.48 94.1774C145.98 94.6774 151.98 106.177 156.48 106.677C160.98 107.177 163.98 120.677 167.98 123.677C171.98 126.677 173.98 128.677 178.98 129.677C183.98 130.677 184.98 119.677 184.98 115.177C184.98 110.677 193.48 106.177 195.98 102.677C198.48 99.1774 195.48 87.6774 193.48 87.6774C191.48 87.6774 188.98 87.6774 184.98 81.1774C180.98 74.6774 172.98 81.1774 170.48 81.1774C167.98 81.1774 167.48 76.1774 163.98 74.6774Z"/>
+<path d="M77.9796 81.1774L66.4796 74.6774H59.4795L56.9795 66.6774C57.9795 63.5108 60.7795 57.7774 63.9795 60.1774C67.9795 63.1774 68.4796 51.1774 66.4796 48.1774C64.8796 45.7773 65.813 41.5107 66.4796 39.6774H74.9796C76.9796 37.6774 81.8796 32.9774 85.4796 30.1774C89.0796 27.3774 102.98 29.0107 109.48 30.1774C115.88 27.3774 121.48 31.344 123.48 33.6774L129.98 39.6774C141.18 38.4774 143.98 44.8441 143.98 48.1774L148.48 53.1774C148.48 54.8441 147.08 57.9774 141.48 57.1774C135.88 56.3774 131.48 61.1774 129.98 63.6774V69.1774H123.48C121.813 71.0107 117.38 74.1774 112.98 72.1774C107.48 69.6774 92.9796 74.6774 89.4796 74.6774C86.6796 74.6774 80.6463 79.0107 77.9796 81.1774Z"/>
+<path d="M35.4796 52.6775C31.8796 51.8775 28.6463 58.6775 27.4796 62.1775L22.9795 70.1774C21.4795 71.3441 17.6796 74.9774 14.4796 80.1774C10.4795 86.6774 18.9796 95.1774 18.4796 92.1774C18.0796 89.7774 24.3129 87.8441 27.4796 87.1774L35.4796 82.6774C36.8129 80.5108 39.2796 75.6774 38.4796 73.6774C37.6796 71.6774 43.1463 70.5108 45.9796 70.1774C47.6463 67.5108 50.7796 62.1775 49.9796 62.1775C49.1796 62.1775 52.6463 55.8441 54.4796 52.6775L61.4796 47.6774V37.6774H54.4796L45.9796 41.6774L42.4796 47.6774C41.6463 49.6774 39.0796 53.4775 35.4796 52.6775Z"/>
+<path d="M35.4796 124.177C33.0796 119.777 23.1463 117.011 18.4796 116.177L14.4796 124.177L20.4795 136.177C21.3128 141.677 22.9795 153.877 22.9795 158.677C22.9795 163.477 27.6462 169.011 29.9795 171.177L35.4796 168.177C36.4796 164.511 38.4796 156.277 38.4796 152.677C38.4796 148.177 45.9796 144.677 49.9796 137.177C53.1796 131.177 48.6463 126.011 45.9796 124.177C43.4796 126.011 37.8796 128.577 35.4796 124.177Z"/></svg>
+      <svg class="doodle dd-pencil" data-draw viewBox="0 0 212 144" aria-hidden="true"><path d="M181.844 142.149C209.185 135.724 211.5 109.055 209.24 96.5235M181.844 142.149C183.598 129.577 191.532 102.85 209.24 96.5235M181.844 142.149L158.798 128.204M31.0886 50.9249L10.2483 6.7895M31.0886 50.9249L158.798 128.204M31.0886 50.9249C31.4526 47.7294 32.1724 43.5774 33.3098 39.0551M10.2483 6.7895L54.4956 5.00798M10.2483 6.7895L0.639093 1.07433M54.4956 5.00798C90.8219 26.4912 152.731 63.104 186.173 82.8815M54.4956 5.00798C49.7702 7.25181 45.8702 11.296 42.6941 16.178M209.24 96.5235C209.24 96.5235 200.217 91.187 186.173 82.8815M186.173 82.8815C182.962 85.1605 178.629 88.8713 174.359 93.6187M158.798 128.204C158.777 123.497 159.711 118.918 161.276 114.578M161.276 114.578L33.3098 39.0551M161.276 114.578C162.758 110.466 164.806 106.567 167.141 102.974M33.3098 39.0551C34.2592 35.2803 35.4995 31.2474 37.0668 27.2976M167.141 102.974L37.0668 27.2976M167.141 102.974C169.366 99.5515 171.852 96.4064 174.359 93.6187M37.0668 27.2976C38.6129 23.4011 40.4771 19.5855 42.6941 16.178M174.359 93.6187L42.6941 16.178"/></svg>
+      <svg class="doodle dd-flask" data-draw viewBox="0 0 126 219" aria-hidden="true"><path d="M2.62492 17.538C3.6247 18.538 33.6247 23.938 43.6247 11.538C45.2373 9.53836 45.8097 7.87992 45.5749 6.53796M2.62492 17.538C1.62514 16.538 2.12492 15.038 2.12492 15.038C5.60888 2.84408 43.9895 -2.52214 45.5749 6.53796M2.62492 17.538C8.62495 43.3713 20.625 96.838 20.625 104.038C20.625 113.038 1.625 212.038 8.125 215.538C14.625 219.038 105.125 211.038 123.125 187.538L63.625 93.038L45.5749 6.53796"/>
+<path d="M17.125 132.038C19.125 132.038 23.725 132.038 26.125 132.038"/>
+<path d="M12.125 162.038C16.625 164.038 19.125 164.038 21.625 164.038"/>
+<path d="M15.1226 145.593C17.7932 146.583 27.0321 147.945 42.6223 145.483"/>
+<path d="M10.2261 177.909C12.8015 179.125 21.8883 181.28 37.6329 180.171"/></svg>
+      <svg class="mark mk-sp-about" data-draw viewBox="0 0 415 404"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg>
+    </div>
+    <div class="about-copy" data-reveal="stagger">
+      <h2 id="about-title" class="display">Cá nhân hóa <span class="pill pill--amber pill--tight">thật sự</span>,<br>không phải gợi ý chung</h2>
+      <p class="lead">Không phải một video giảng chung cho cả lớp. Sen đọc đúng tài liệu môn bạn học, dựng bản đồ khái niệm, đo mức thành thạo của riêng bạn rồi soạn bài đúng chỗ hổng — mỗi ý đều truy được về trang nguồn.</p>
+      <ul class="ticks">
+        <li><i></i>Cùng một chương, hai sinh viên nhận hai bài học khác nhau</li>
+        <li><i></i>Mọi ý chính đều có mã nguồn và số trang để đối chiếu</li>
+        <li><i></i>Điểm thành thạo tự cập nhật sau mỗi lần luyện tập</li>
+      </ul>
+      <a class="link-arrow u-draw" href="#cach-hoat-dong">Xem cách hoạt động
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TÍNH NĂNG (bento) ===================== -->
+<section class="features" id="tinh-nang" aria-labelledby="feat-title">
+  <div class="container">
+    <div class="bento" data-reveal="stagger">
+      <div class="bento-hero">
+        <svg class="mark mk-sp-feat" data-draw viewBox="0 0 415 404" aria-hidden="true"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg>
+        <h2 id="feat-title" class="display">Tính năng <span class="pill pill--amber">nổi bật</span><br>cho từng sinh viên</h2>
+        <p>Sáu mảnh ghép biến tài liệu môn học của bạn thành lộ trình học riêng — và mọi ý đều truy ngược được về nguồn.</p>
+        <a class="btn btn-amber" href="#cach-hoat-dong">Xem cách hoạt động
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+      </div>
+      <article class="feat" data-i="0">
+        <div class="feat-ic"><i></i><img src="assets/ico/cloud-upload.svg" alt="" width="64" height="64" data-anim="up" /></div>
+        <h3>Kho học liệu &amp; xử lý 4&nbsp;bước</h3>
+        <p>Tải PDF, text, markdown. Hệ thống chạy: đã tải → trích xuất → lập chỉ mục → dựng bản đồ.</p>
+      </article>
+      <article class="feat" data-i="1">
+        <div class="feat-ic"><i></i><img src="assets/ico/nodes.svg" alt="" width="64" height="64" data-anim="bounce" /></div>
+        <h3>Bản đồ kiến thức 0&#8209;100</h3>
+        <p>Tài liệu tách thành khái niệm; mỗi khái niệm có điểm thành thạo cập nhật theo thời gian.</p>
+      </article>
+      <article class="feat" data-i="2">
+        <div class="feat-ic"><i></i><img src="assets/ico/pencil-fat.svg" alt="" width="64" height="64" data-anim="write" /></div>
+        <h3>Bài học soạn riêng, có trích dẫn</h3>
+        <p>Soạn theo hồ sơ người học; mọi ý chính gắn mã đoạn nguồn <b>[D3] tr. 14</b> để kiểm chứng.</p>
+      </article>
+      <article class="feat" data-i="3">
+        <div class="feat-ic"><i></i><img src="assets/ico/rocket.svg" alt="" width="64" height="64" data-anim="fly" /></div>
+        <h3>Lộ trình tự tính lại</h3>
+        <p>Kế hoạch theo tuần từ lịch thi, giờ rảnh và điểm thành thạo — tự tính lại khi bạn trễ.</p>
+      </article>
+      <article class="feat" data-i="4">
+        <div class="feat-ic"><i></i><img src="assets/ico/bubble-lines.svg" alt="" width="64" height="64" data-anim="wobble" /></div>
+        <h3>Trợ giảng có trí nhớ</h3>
+        <p>Hỏi đáp bám đúng tài liệu; nhớ lỗi cũ và cách giải thích bạn hiểu tốt nhất.</p>
+      </article>
+      <article class="feat" data-i="5">
+        <div class="feat-ic"><i></i><img src="assets/ico/check-bold.svg" alt="" width="64" height="64" data-anim="pop" /></div>
+        <h3>Luyện tập &amp; tiến độ</h3>
+        <p>Quiz và flashcard sinh từ tài liệu; dashboard theo dõi tiến độ so với kế hoạch.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BÀI HỌC MẪU (nền tối) ===================== -->
+<section class="samples" id="bai-hoc-mau" aria-labelledby="samples-title">
+  <svg class="mark mk-sp-dark mk-sp-dark-1" data-draw viewBox="0 0 415 404" aria-hidden="true"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg>
+  <svg class="mark mk-sp-dark mk-sp-dark-2" data-draw viewBox="0 0 402 405" aria-hidden="true"><path d="M240.224 162.153L204.945 2.15332L175.645 162.153L2.83704 213.281L175.645 240.95L215.11 402.153L240.224 240.95L398.681 189.608L240.224 162.153Z"/></svg>
+  <div class="container">
+    <div class="samples-head" data-reveal="stagger">
+      <h2 id="samples-title" class="display">Xem thử bài học <span class="pill pill--outline">mẫu</span></h2>
+      <p>Ba bài học thật do hệ thống soạn từ tài liệu của sinh viên — mỗi bài một mức thành thạo, một lộ trình.</p>
+    </div>
+    <div class="lessons" data-reveal="stagger">
+      <article class="lesson">
+        <div class="lesson-art" style="--blob:var(--amber-light)">
+          <svg class="lesson-blob" viewBox="0 0 320 200" aria-hidden="true"><path d="M160 8c60-4 118 22 140 66 20 42 8 92-32 112-44 22-104 18-152 6C62 178 14 150 8 104 2 56 54 14 160 8Z"/></svg>
+          <img class="boil" src="assets/doodles/reading-amber.svg" alt="" width="1024" height="768" />
+        </div>
+        <div class="lesson-meta"><span class="chip"><i class="dot" style="--p:62"></i>62/100</span><span class="s">Cơ sở dữ liệu</span><span class="s time">25 phút</span></div>
+        <h3>Chuẩn hóa 3NF: từ phụ thuộc hàm đến khóa</h3>
+        <a class="btn btn-sm btn-outline" href="#bat-dau">Xem bài học
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+      </article>
+      <article class="lesson">
+        <div class="lesson-art" style="--blob:#dbe8fb">
+          <svg class="lesson-blob" viewBox="0 0 320 200" aria-hidden="true"><path d="M160 8c60-4 118 22 140 66 20 42 8 92-32 112-44 22-104 18-152 6C62 178 14 150 8 104 2 56 54 14 160 8Z"/></svg>
+          <img class="boil" src="assets/doodles/selfie-blue.svg" alt="" width="1024" height="768" />
+        </div>
+        <div class="lesson-meta"><span class="chip"><i class="dot" style="--p:41"></i>41/100</span><span class="s">Mạng máy tính</span><span class="s time">30 phút</span></div>
+        <h3>TCP: bắt tay ba bước và điều khiển tắc nghẽn</h3>
+        <a class="btn btn-sm btn-amber" href="#bat-dau">Xem bài học
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+      </article>
+      <article class="lesson">
+        <div class="lesson-art" style="--blob:#dff0e3">
+          <svg class="lesson-blob" viewBox="0 0 320 200" aria-hidden="true"><path d="M160 8c60-4 118 22 140 66 20 42 8 92-32 112-44 22-104 18-152 6C62 178 14 150 8 104 2 56 54 14 160 8Z"/></svg>
+          <img class="boil" src="assets/doodles/plant-green.svg" alt="" width="1024" height="768" />
+        </div>
+        <div class="lesson-meta"><span class="chip"><i class="dot" style="--p:78"></i>78/100</span><span class="s">Cấu trúc dữ liệu</span><span class="s time">20 phút</span></div>
+        <h3>Cây nhị phân tìm kiếm và ba cách duyệt cây</h3>
+        <a class="btn btn-sm btn-outline" href="#bat-dau">Xem bài học
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CÁCH HOẠT ĐỘNG ===================== -->
+<section class="how" id="cach-hoat-dong" aria-labelledby="how-title">
+  <div class="container how-grid">
+    <div class="how-copy">
+      <h2 id="how-title" class="display" data-reveal>Bắt đầu thật <span class="pill">dễ</span></h2>
+      <p class="lead" data-reveal>Từ tài liệu thô đến ngày thi, gọn trong bốn bước. Không cần chọn khóa học, không cần xem video chung — chỉ cần tài liệu bạn đang học.</p>
+      <ol class="steps" data-reveal="stagger">
+        <li class="step">
+          <svg class="step-num" data-draw viewBox="0 0 160 409" aria-hidden="true"><path d="M7.87906 186.992L149.212 6.15797L70.551 406.158"/></svg>
+          <div><h3>Tải tài liệu môn học</h3><p>PDF, text hay markdown — mỗi tài liệu gắn vào đúng môn trong học kỳ của bạn.</p></div>
+        </li>
+        <li class="step">
+          <svg class="step-num" data-draw viewBox="0 0 262 420" aria-hidden="true"><path d="M45.1593 188.44C45.1593 188.44 129.014 -40.9807 225.838 20.4528C343.19 94.9118 24.3459 410 24.3459 410H246.208"/></svg>
+          <div><h3>Làm bài chẩn đoán 15 câu</h3><p>Hệ thống tách khái niệm, dựng bản đồ tiên quyết và chấm mức thành thạo hiện tại.</p></div>
+        </li>
+        <li class="step">
+          <svg class="step-num" data-draw viewBox="0 0 266 420" aria-hidden="true"><path d="M35.2412 10H238.58L53.8473 166.195C53.8473 166.195 181.847 108.121 225.289 166.195C313.004 283.451 3.78796 410 3.78796 410"/></svg>
+          <div><h3>Nhận bài học soạn riêng</h3><p>Nội dung bám đúng hồ sơ người học; mọi ý chính đều có trích dẫn về trang nguồn.</p></div>
+        </li>
+        <li class="step">
+          <svg class="step-num" data-draw viewBox="0 0 275 408" aria-hidden="true"><path d="M240.65 5.95285L19.8539 303.983H274.721M186.668 405.953L229.588 113.174"/></svg>
+          <div><h3>Luyện tập, điểm tự cập nhật</h3><p>Quiz và flashcard sinh từ tài liệu; lộ trình tuần tự tính lại khi bạn trễ.</p></div>
+        </li>
+      </ol>
+    </div>
+    <div class="how-art" aria-hidden="true">
+      <svg class="blob blob-how" viewBox="0 0 420 380"><path d="M214 12c76-6 150 34 178 100 26 62 8 136-40 184-46 46-120 70-186 58C98 342 40 292 22 224 2 152 44 62 116 30c30-12 66-16 98-18Z"/></svg>
+      <div class="how-fig"><img class="boil" src="assets/doodles/unboxing-amber.svg" alt="" width="1024" height="768" /></div>
+      <div class="how-chip how-chip-1"><span class="ok">✓</span>Đã tải · giaotrinh-csdl.pdf</div>
+      <div class="how-chip how-chip-2"><span class="ok">✓</span>Trích xuất 42 khái niệm</div>
+      <div class="how-chip how-chip-3"><i class="spin"></i>Đang dựng bản đồ…</div>
+      <svg class="mark mk-how-arrow" data-draw viewBox="0 0 370 414" aria-hidden="true"><path d="M9.19824 247.291L113.019 3.92383C113.019 3.92383 52.4567 403.924 197.5 403.924C278.578 403.924 283.508 208.516 283.508 208.516M283.508 208.516L194.745 287.606M283.508 208.516L362.399 297.502"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="cta-wrap" id="bat-dau" aria-labelledby="cta-title">
+  <div class="container">
+    <div class="cta" data-reveal>
+      <svg class="mark mk-cta-lines" data-draw viewBox="0 0 738 420" aria-hidden="true"><path d="M2.27338 370.738L294.595 409.738M27.9152 229.238L736.853 173.424M2.27338 123.559L489.836 9.73828"/></svg>
+      <svg class="mark mk-cta-sp" data-draw viewBox="0 0 415 404" aria-hidden="true"><path d="M1.11401 210.795C170.76 191.777 183.072 136.278 204.942 1.60303C211.273 158.18 252.418 183.536 413.202 201.92C251.152 210.795 223.3 263.41 204.942 401.603C183.736 268.743 159.999 221.571 1.11401 210.795Z"/></svg>
+      <div class="cta-art" aria-hidden="true">
+        <svg class="cta-blob" viewBox="0 0 320 320"><path d="M160 10c60 0 120 30 140 80 22 54 4 120-40 160-46 42-120 62-176 40C30 268 4 208 10 148 18 78 90 10 160 10Z"/></svg>
+        <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/doodles/sleek-blue.svg" type="image/svg+xml" /><img src="assets/anim/sprinting-blue.webp" data-static="assets/doodles/sleek-blue.svg" alt="" width="900" height="640" loading="lazy" /></picture>
+      </div>
+      <div class="cta-copy">
+        <h2 id="cta-title" class="display">Sẵn sàng cho <span class="pill">kỳ thi</span> tới?</h2>
+        <p>Tải tài liệu môn học hôm nay, nhận bài học soạn riêng ngay tối nay. Miễn phí cho sinh viên UTT trong giai đoạn thử nghiệm.</p>
+        <div class="cta-actions">
+          <a class="btn btn-dark" href="login.html">Bắt đầu miễn phí <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+          <span class="cta-note">Không cần thẻ · Tài liệu của bạn là riêng tư</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== NỀN TẢNG ===================== -->
+<section class="platforms" aria-labelledby="pf-title">
+  <svg class="blob blob-pf-l" viewBox="0 0 300 300" aria-hidden="true"><path d="M150 14c40 0 60 34 92 52 36 20 58 52 46 92-10 34-46 44-68 72-22 30-48 66-90 60-40-6-50-52-82-74C14 192-4 150 14 112 34 70 100 14 150 14Z"/></svg>
+  <svg class="blob blob-pf-r" viewBox="0 0 360 360" aria-hidden="true"><path d="M181 22c46-12 86 20 104 60 20 44 70 54 62 106-7 46-52 60-84 92-30 30-74 62-116 52C97 320 76 266 40 232 4 198-8 148 20 108 48 66 118 39 181 22Z"/></svg>
+  <div class="container platforms-in" data-reveal="stagger">
+    <h2 id="pf-title" class="display">Dùng thử trên <span class="pill pill--amber">trình duyệt</span><br>và điện thoại</h2>
+    <p class="lead">Tiện ích Chrome đọc cổng đào tạo để đồng bộ môn học và lịch thi; ứng dụng di động cho ôn tập cách quãng mỗi ngày.</p>
+    <div class="store-row">
+      <a class="store" href="#" aria-label="Tiện ích Chrome — thêm vào trình duyệt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M21.17 8H12M3.95 6.06 8.54 14M10.88 21.94 15.46 14"/></svg>
+        <span><small>Tiện ích Chrome</small>Thêm vào trình duyệt</span>
+      </a>
+      <span class="store store--soon" aria-disabled="true" title="Đang phát triển">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        <span><small>Ứng dụng di động</small>Sắp ra mắt</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-grid" data-reveal="stagger">
+      <div class="footer-brand">
+        <a class="brand" href="#" aria-label="Sen — về đầu trang">
+          <svg viewBox="0 0 32 32" fill="none" stroke="#f8c365" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16 27c-6.5 0-10-4.2-10-9.5 0-3 1.4-5.4 3.2-7.3.6 2.4 1.9 4 3.6 4.9C12.5 11.6 14 8 16 5c2 3 3.5 6.6 3.2 10.1 1.7-.9 3-2.5 3.6-4.9C24.6 12.1 26 14.5 26 17.5 26 22.8 22.5 27 16 27Z" fill="#1d1d1d"/>
+            <path d="M16 27V15"/>
+          </svg>
+          <span>Sen</span>
+        </a>
+        <p>Bài học soạn riêng cho từng sinh viên, từ chính tài liệu môn học của bạn, mọi ý đều có trích dẫn.</p>
+      </div>
+      <nav class="footer-col" aria-label="Sản phẩm">
+        <h3>Sản phẩm</h3>
+        <a href="#tinh-nang">Tính năng</a>
+        <a href="#cach-hoat-dong">Cách hoạt động</a>
+        <a href="#bai-hoc-mau">Bài học mẫu</a>
+        <a href="login.html">Đăng nhập</a>
+      </nav>
+      <nav class="footer-col" aria-label="Tài liệu">
+        <h3>Tài liệu</h3>
+        <a href="../Proposal_HeThongHoTroHocTapCaNhanHoaAI.pdf">Bản đề xuất (PDF)</a>
+        <a href="../01-tom-tat-chuc-nang.md">Tóm tắt chức năng</a>
+        <a href="../02-ke-hoach-demo.md">Kế hoạch demo</a>
+        <a href="https://github.com/Wis-olle/DeepTutor">Mã nguồn (fork DeepTutor)</a>
+      </nav>
+      <nav class="footer-col" aria-label="Về đồ án">
+        <h3>Về đồ án</h3>
+        <a href="../Proposal_HeThongHoTroHocTapCaNhanHoaAI.pdf">Môn Hệ thống thông tin</a>
+        <a href="https://utt.edu.vn">Trường ĐH Công nghệ GTVT</a>
+        <a href="mailto:ngoquoctuan2743@gmail.com">Liên hệ nhóm</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sen · Đồ án môn Hệ thống thông tin · UTT</span>
+      <a class="u-draw" href="#">Điều khoản &amp; Quyền riêng tư</a>
+      <a class="to-top" href="#hero-title" aria-label="Về đầu trang" title="Về đầu trang"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M4 7l4-4 4 4"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/MotionPathPlugin.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

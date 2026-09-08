@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cấu hình AI · Quản trị Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ riêng trang Cấu hình hệ thống & AI (A02) ============ */
+
+
+
+
+  /* hàng cấu hình: nhãn + control */
+  .hrow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .fieldrow{display:grid;grid-template-columns:1fr 190px;gap:12px 18px;align-items:center;
+    padding:15px 0;border-bottom:1px solid var(--border-faint)}
+  .fieldrow:first-of-type{padding-top:2px}
+  .fieldrow:last-child{border-bottom:none;padding-bottom:2px}
+  .fieldrow .fl{min-width:0}
+  .fieldrow .flabel{font-size:var(--fs-sm);font-weight:500}
+  .fieldrow .fhint{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+  .cardnote{display:flex;align-items:flex-start;gap:8px;font-size:11.5px;color:var(--muted);
+    line-height:1.5;margin-top:16px;padding-top:14px;border-top:1px solid var(--border-faint)}
+  .cardnote i{margin-top:2px;font-size:11px}
+
+  @media (max-width:760px){
+    .hrow{flex-direction:column}
+    .hrow .btn{width:100%}
+    .fieldrow{grid-template-columns:1fr;gap:8px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR (QUẢN TRỊ) ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Quản trị</div>
+    <a class="nav-item" href="admin-users.html" title="Người dùng"><i class="fa-solid fa-users"></i><span class="label">Người dùng</span></a>
+    <a class="nav-item active" href="admin-config.html" title="Cấu hình AI"><i class="fa-solid fa-sliders"></i><span class="label">Cấu hình AI</span></a>
+    <a class="nav-item" href="admin-costs.html" title="Chi phí &amp; nhật ký"><i class="fa-solid fa-coins"></i><span class="label">Chi phí &amp; nhật ký</span></a>
+    <a class="nav-item" href="admin-prompt-tests.html" title="Kiểm thử prompt"><i class="fa-solid fa-flask"></i><span class="label">Kiểm thử prompt</span></a>
+    <a class="nav-item" href="admin-flagged.html" title="Bài bị báo sai"><i class="fa-solid fa-flag"></i><span class="label">Bài bị báo sai</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="admin-users.html" title="Quản trị viên">
+        <span class="pfp">Q</span>
+        <span class="who"><b>Quản trị viên</b><span>admin@utt.edu.vn</span></span>
+      </a>
+      <a class="nav-item" href="app-dashboard.html" title="Về trang sinh viên"><i class="fa-solid fa-arrow-left"></i><span class="label">Về trang sinh viên</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Cấu hình AI</div>
+      <span class="chip"><i class="fa-solid fa-shield-halved"></i> Quản trị</span>
+      <div class="grow"></div>
+      <button class="avatar-btn">
+        <span class="pfp">Q</span>
+        <span class="who"><b>Quản trị viên</b><span>admin@utt.edu.vn</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <div class="hrow">
+          <div>
+            <h1>Cấu hình hệ thống &amp; AI</h1>
+            <p>Chọn mô hình theo tác vụ, đặt hạn mức chi phí và tinh chỉnh thuật toán thành thạo.</p>
+          </div>
+          <button class="btn btn-primary" id="saveBtn"><i class="fa-solid fa-check"></i> Lưu thay đổi</button>
+        </div>
+      </div>
+
+      <div class="bento">
+
+        <!-- 1) Mô hình AI theo tác vụ -->
+        <section class="card reveal col-7" style="--d:.06s">
+          <div class="card-title"><i class="fa-solid fa-robot"></i> Mô hình AI theo tác vụ</div>
+
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Sinh bài học cá nhân hóa</div><div class="fhint">Chất lượng cao nhất, chạy nền</div></div>
+            <select class="select" aria-label="Mô hình sinh bài học">
+              <option selected>claude-opus-5</option><option>claude-sonnet-5</option><option>claude-haiku-4-5</option>
+            </select>
+          </div>
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Sinh quiz &amp; giải thích</div><div class="fhint">Cân bằng chất lượng và chi phí</div></div>
+            <select class="select" aria-label="Mô hình sinh quiz">
+              <option>claude-opus-5</option><option selected>claude-sonnet-5</option><option>claude-haiku-4-5</option>
+            </select>
+          </div>
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Trợ giảng (chat)</div><div class="fhint">Phản hồi nhanh, có trích dẫn</div></div>
+            <select class="select" aria-label="Mô hình trợ giảng">
+              <option>claude-opus-5</option><option selected>claude-sonnet-5</option><option>claude-haiku-4-5</option>
+            </select>
+          </div>
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Tác vụ nhẹ</div><div class="fhint">Tóm tắt, phân loại, trích khái niệm</div></div>
+            <select class="select" aria-label="Mô hình tác vụ nhẹ">
+              <option>claude-opus-5</option><option>claude-sonnet-5</option><option selected>claude-haiku-4-5</option>
+            </select>
+          </div>
+          <div class="cardnote"><i class="fa-solid fa-circle-info"></i>
+            <span>Mô hình đắt hơn cho tác vụ trọng yếu, mô hình nhẹ cho việc chạy nhiều — tối ưu chi phí mà giữ chất lượng bài học.</span></div>
+        </section>
+
+        <!-- 2) Hạn mức chi phí -->
+        <section class="card reveal col-5" style="--d:.12s">
+          <div class="card-title"><i class="fa-solid fa-coins"></i> Hạn mức chi phí</div>
+
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Toàn hệ thống / ngày</div><div class="fhint">Vượt mức sẽ tạm dừng gọi AI</div></div>
+            <div class="numinp"><span class="pre">$</span><input type="number" step="0.01" value="25.00" aria-label="Hạn mức toàn hệ mỗi ngày" /></div>
+          </div>
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Mỗi người / ngày</div><div class="fhint">Trần chi phí cho một sinh viên</div></div>
+            <div class="numinp"><span class="pre">$</span><input type="number" step="0.01" value="0.50" aria-label="Hạn mức mỗi người mỗi ngày" /></div>
+          </div>
+          <div class="cardnote"><i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Hôm nay đã dùng <b style="color:var(--text-2)">$8,74</b> / $25,00. Xem chi tiết ở <a href="admin-costs.html" style="color:var(--text-2);text-decoration:underline">Chi phí &amp; nhật ký</a>.</span></div>
+        </section>
+
+        <!-- 3) Tham số thuật toán -->
+        <section class="card reveal col-5" style="--d:.18s">
+          <div class="card-title"><i class="fa-solid fa-gauge-high"></i> Tham số thuật toán</div>
+
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Ngưỡng yếu</div><div class="fhint">Dưới mức này coi là khái niệm yếu</div></div>
+            <div class="numinp"><input type="number" min="0" max="100" value="60" aria-label="Ngưỡng yếu" /><span class="suf">/ 100</span></div>
+          </div>
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Hệ số thành thạo</div><div class="fhint">Mỗi lần trả lời đúng tăng</div></div>
+            <div class="numinp"><input type="number" step="0.01" min="0" max="1" value="0.25" aria-label="Hệ số thành thạo" /><span class="suf">điểm/đúng</span></div>
+          </div>
+          <div class="fieldrow">
+            <div class="fl"><div class="flabel">Hệ số suy giảm</div><div class="fhint">Mỗi tuần không ôn giảm</div></div>
+            <div class="numinp"><input type="number" step="0.01" min="0" max="1" value="0.05" aria-label="Hệ số suy giảm" /><span class="suf">/ tuần</span></div>
+          </div>
+        </section>
+
+        <!-- 4) Trang được phép cho extension -->
+        <section class="card reveal col-7" style="--d:.24s">
+          <div class="card-title"><i class="fa-solid fa-puzzle-piece"></i> Trang được phép cho extension</div>
+          <p class="meta" style="margin:-8px 0 16px">Cấu hình chung: tiện ích trình duyệt chỉ ghi nhận hoạt động trên các tên miền này.</p>
+
+          <div class="sitelist" id="siteList">
+            <div class="site"><span class="sdomain">daotao.utt.edu.vn</span>
+              <button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="site"><span class="sdomain">thuvien.utt.edu.vn:8080</span>
+              <button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="site"><span class="sdomain">lms.utt.edu.vn</span>
+              <button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="site"><span class="sdomain">elearning.utt.edu.vn</span>
+              <button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button></div>
+          </div>
+          <div class="siteadd">
+            <input class="input" id="siteInput" placeholder="Thêm tên miền, vd: sinhvien.utt.edu.vn" />
+            <button class="btn btn-ghost" id="siteAdd"><i class="fa-solid fa-plus"></i> Thêm</button>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fa-solid fa-check"></i> <span id="toastMsg"></span></div>
+
+<script>
+  let toastTimer;
+  function toast(msg){
+    const el=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg;
+    el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+  }
+  document.getElementById('saveBtn').addEventListener('click', ()=>toast('Đã lưu cấu hình'));
+
+  // SiteList thêm/bớt
+  const list=document.getElementById('siteList'), inp=document.getElementById('siteInput');
+  function addSite(){
+    const v=inp.value.trim(); if(!v) return;
+    const el=document.createElement('div'); el.className='site';
+    el.innerHTML='<span class="sdomain"></span><button class="srm" aria-label="Bỏ trang"><i class="fa-solid fa-xmark"></i></button>';
+    el.querySelector('.sdomain').textContent=v;   // textContent = chống chèn HTML
+    list.appendChild(el); inp.value='';
+  }
+  document.getElementById('siteAdd').addEventListener('click', addSite);
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addSite(); }});
+  list.addEventListener('click', e=>{ const b=e.target.closest('.srm'); if(b) b.closest('.site').remove(); });
+</script>
+</body>
+</html>

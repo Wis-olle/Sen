@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Luyện tập · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ Luyện tập — Quiz + Flashcard ============ */
+  /* phụ đề topbar dài → ẩn trên mobile để không ép topbar tràn ngang */
+  @media (max-width:760px){.topbar .page-title small{display:none}}
+
+
+  .panel{margin-top:var(--sp-8)}
+  .panel[hidden]{display:none}
+
+  /* ---------- Quiz ---------- */
+  .qbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+  .qbar .qsel{display:flex;gap:8px;flex-wrap:wrap}
+  .qprog{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .qprog .qn{font-size:var(--fs-sm);color:var(--muted-strong);font-variant-numeric:tabular-nums}
+  .qprog .qn b{color:var(--text);font-family:var(--font-display);font-weight:700}
+  .qprog-bar{width:150px;height:6px;border-radius:999px;background:var(--m-track);overflow:hidden}
+  .qprog-bar>i{display:block;height:100%;border-radius:999px;background:var(--text-2);
+    width:0;transition:width var(--dur-2) var(--ease)}
+
+  .qcard{position:relative}
+  .qkind{margin-bottom:14px}
+  .qtext{font-size:var(--fs-lg);font-weight:600;line-height:1.5;letter-spacing:-.01em}
+  .qtext .blank{display:inline-block;min-width:80px;border-bottom:2px dashed var(--border-strong);
+    vertical-align:2px}
+
+  .opts{display:grid;gap:10px;margin-top:20px}
+  .opt{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:14px 16px;
+    border-radius:14px;border:1px solid var(--border);background:var(--surface-1);color:var(--text);
+    font-family:inherit;font-size:var(--fs-base);cursor:pointer;
+    transition:background var(--dur-1),border var(--dur-1),transform var(--dur-1)}
+  .opt:hover{background:var(--surface-2);transform:translateY(-1px)}
+  .opt .mk{width:24px;height:24px;flex-shrink:0;border-radius:50%;border:1.5px solid var(--border-strong);
+    display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted);
+    font-family:var(--font-display)}
+  .opt.sel{border-color:var(--border-strong);background:var(--surface-2)}
+  .opt.sel .mk{border-color:#fff;color:#fff}
+  .opt.correct{border-color:var(--accent-border);background:var(--success-dim)}
+  .opt.correct .mk{background:#fff;color:#000;border-color:#fff}
+  .opt.wrong{border-color:var(--danger);background:var(--danger-dim)}
+  .opt.wrong .mk{border-color:var(--danger);color:var(--danger)}
+  .opt:disabled{cursor:default;transform:none}
+  .opt .mkr{margin-left:auto;font-size:14px}
+  .opt.correct .mkr{color:#fff}
+  .opt.wrong .mkr{color:var(--danger)}
+
+  .qfill{margin-top:20px}
+  .qfill input{width:100%;height:48px;padding:0 16px;border-radius:14px;background:var(--surface-1);
+    border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:var(--fs-md);
+    outline:none;transition:border var(--dur-1)}
+  .qfill input:focus{border-color:var(--accent-border)}
+  .qfill input.correct{border-color:var(--accent-border);background:var(--success-dim)}
+  .qfill input.wrong{border-color:var(--danger);background:var(--danger-dim)}
+
+  .qshort textarea{width:100%;min-height:96px;padding:14px 16px;border-radius:14px;
+    background:var(--surface-1);border:1px solid var(--border);color:var(--text);
+    font-family:inherit;font-size:var(--fs-base);line-height:1.55;resize:vertical;outline:none;margin-top:20px}
+  .qshort textarea:focus{border-color:var(--accent-border)}
+  .model-ans{margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--surface-1);
+    border:1px solid var(--border)}
+  .model-ans .mah{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;
+    font-weight:600;margin-bottom:6px}
+  .model-ans p{font-size:var(--fs-sm);line-height:1.55;color:var(--text-2)}
+  .self-rate{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+  /* kết quả + giải thích */
+  .verdict{display:flex;align-items:center;gap:11px;margin-top:20px;padding:13px 15px;border-radius:14px;
+    font-size:var(--fs-sm);font-weight:600}
+  .verdict .vi{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;font-size:12px}
+  .verdict.ok{background:var(--success-dim);border:1px solid var(--accent-border);color:var(--text)}
+  .verdict.ok .vi{background:#fff;color:#000}
+  .verdict.no{background:var(--danger-dim);border:1px solid var(--danger);color:var(--text)}
+  .verdict.no .vi{background:var(--danger);color:#000}
+  .explain{margin-top:14px;padding:16px 18px;border-radius:14px;background:var(--surface-1);
+    border:1px solid var(--border)}
+  .explain .eh{display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);font-weight:600;margin-bottom:8px}
+  .explain .eh i{color:var(--muted);font-size:12px}
+  .explain p{font-size:var(--fs-sm);line-height:1.6;color:var(--text-2)}
+  .qfoot{display:flex;align-items:center;gap:12px;margin-top:22px}
+  .qfoot .grow{flex:1}
+
+  /* tổng kết */
+  .qsummary{text-align:center;padding:38px 28px}
+  .qsummary .big{font-family:var(--font-display);font-weight:700;font-size:64px;line-height:.9;
+    letter-spacing:-.02em;color:#fff}
+  .qsummary .big small{font-size:26px;color:var(--muted)}
+  .qsummary .cap{color:var(--muted-strong);margin-top:10px;font-size:var(--fs-base)}
+  .mchange{max-width:400px;margin:26px auto 0;padding:18px;border-radius:16px;background:var(--surface-1);
+    border:1px solid var(--border);text-align:left}
+  .mchange .mcr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .mchange .mcr .cn{font-size:var(--fs-sm);font-weight:500}
+  .mchange .mcr .arrow{color:var(--muted);margin:0 2px}
+  .mchange .delta{margin-left:auto;font-size:var(--fs-sm);font-weight:700;color:var(--text);
+    font-variant-numeric:tabular-nums}
+  .sumbtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+
+  /* ---------- Flashcard ---------- */
+  .fc-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:var(--sp-8);align-items:start}
+  .fc-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .fc-head .fn{margin-left:auto;font-size:var(--fs-sm);color:var(--muted);font-variant-numeric:tabular-nums}
+  .fc-head .fn b{color:var(--text);font-family:var(--font-display);font-weight:700}
+
+  /* Flashcard3D — thẻ lật mặt trước/sau */
+  .fcard{perspective:1400px;cursor:pointer;outline:none}
+  .fcard-in{position:relative;min-height:300px;transform-style:preserve-3d;
+    transition:transform .55s var(--ease)}
+  .fcard.flip .fcard-in{transform:rotateY(180deg)}
+  .fface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    display:flex;flex-direction:column;justify-content:center;text-align:center;
+    border-radius:var(--r-card);border:1px solid var(--border);background:var(--surface-1);padding:38px 30px}
+  .fface .side{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;margin-bottom:14px}
+  .fface .q{font-size:var(--fs-xl);font-weight:600;line-height:1.4;letter-spacing:-.01em}
+  .fface .a{font-size:var(--fs-md);line-height:1.6;color:var(--text-2)}
+  .fface .hint{margin-top:18px;font-size:11.5px;color:var(--muted)}
+  .fback{transform:rotateY(180deg);background:var(--surface-2)}
+  @media (prefers-reduced-motion: reduce){.fcard-in{transition:none}}
+  .fcard:focus-visible .fface{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.4)}
+
+  .fc-actions{display:flex;gap:12px;margin-top:20px}
+  .fc-actions .btn{flex:1}
+  .fc-note{margin-top:14px;font-size:12px;color:var(--muted);text-align:center;line-height:1.5}
+
+  /* lịch ôn ngắt quãng */
+  .sched{padding:22px}
+  .sched .sh{font-size:var(--fs-sm);font-weight:600;margin-bottom:4px}
+  .sched .ss{font-size:11.5px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+  .sched-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border-faint)}
+  .sched-row:last-child{border-bottom:none}
+  .sched-row .st{flex:1;font-size:var(--fs-sm);min-width:0}
+  .sched-row .st span{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+  .ivl{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:999px;
+    font-size:11px;font-weight:600;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);
+    white-space:nowrap;flex-shrink:0}
+  .ivl i{font-size:9px;color:var(--muted)}
+  .ivl.now{background:var(--surface-3);color:var(--text);border-color:var(--border-strong)}
+
+  @media (max-width:820px){.fc-wrap{grid-template-columns:1fr}}
+  @media (max-width:560px){
+    .qbar{gap:8px}.qprog{width:100%;margin-left:0}
+    .qsummary .big{font-size:52px}
+    .seg button{padding:0 13px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item active" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Luyện tập <small>Cơ sở dữ liệu · Chuẩn hóa CSDL</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm, tài liệu, môn học…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <h1>Luyện tập</h1>
+        <p>Củng cố <b style="color:var(--text)">Dạng chuẩn 3 (3NF)</b> — khái niệm còn yếu, sắp thi sau 12 ngày.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="reveal" style="--d:.05s">
+        <div class="seg" role="tablist" aria-label="Chế độ luyện tập">
+          <button role="tab" aria-selected="true" class="on" data-tab="quiz"><i class="fa-solid fa-list-check"></i> Quiz <span class="tag tag-ai">Lõi</span></button>
+          <button role="tab" aria-selected="false" data-tab="flash"><i class="fa-solid fa-clone"></i> Flashcard <span class="tag tag-human">Phụ</span></button>
+        </div>
+      </div>
+
+      <!-- ============ QUIZ ============ -->
+      <section class="panel reveal" id="tab-quiz" style="--d:.1s">
+        <div class="qbar">
+          <div class="qsel">
+            <span class="chip"><i class="fa-solid fa-book"></i> Cơ sở dữ liệu</span>
+            <span class="chip on"><i class="fa-solid fa-cube"></i> Dạng chuẩn 3 (3NF)</span>
+          </div>
+          <div class="qprog">
+            <span class="qn">Câu <b id="qNow">1</b>/5</span>
+            <div class="qprog-bar"><i id="qProg"></i></div>
+          </div>
+        </div>
+
+        <div class="card qcard" id="quizRoot"><!-- runner render vào đây --></div>
+      </section>
+
+      <!-- ============ FLASHCARD ============ -->
+      <section class="panel reveal" id="tab-flash" style="--d:.1s" hidden>
+        <div class="fc-wrap">
+          <div>
+            <div class="fc-head">
+              <span class="chip on"><i class="fa-solid fa-clock"></i> Đến hạn ôn hôm nay</span>
+              <span class="fn">Thẻ <b id="fcNow">1</b>/<span id="fcTotal">4</span></span>
+            </div>
+
+            <div class="fcard" id="fcard" role="button" tabindex="0" aria-label="Thẻ ghi nhớ, bấm để lật">
+              <div class="fcard-in">
+                <div class="fface ffront">
+                  <div class="side">Mặt trước · Hỏi</div>
+                  <div class="q" id="fcFront">—</div>
+                  <div class="hint"><i class="fa-solid fa-hand-pointer"></i> Bấm để xem đáp án</div>
+                </div>
+                <div class="fface fback">
+                  <div class="side">Mặt sau · Đáp án</div>
+                  <div class="a" id="fcBack">—</div>
+                  <div class="hint">Bạn có nhớ được không?</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="fc-actions">
+              <button class="btn btn-ghost btn-lg" id="fcForgot"><i class="fa-solid fa-rotate-left"></i> Chưa nhớ</button>
+              <button class="btn btn-primary btn-lg" id="fcGot"><i class="fa-solid fa-check"></i> Đã nhớ</button>
+            </div>
+            <p class="fc-note">“Đã nhớ” đẩy thẻ sang lần ôn xa hơn (hôm nay → 3 ngày → 1 tuần). “Chưa nhớ” đưa thẻ về ôn lại trong hôm nay.</p>
+          </div>
+
+          <aside class="card sched">
+            <div class="sh">Lịch ôn ngắt quãng</div>
+            <div class="ss">Mỗi thẻ có lịch ôn riêng. Khoảng cách giãn dần khi bạn nhớ tốt.</div>
+            <div id="schedList"></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- chuyển tab ---------- */
+  document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.seg button').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-selected','false');});
+    b.classList.add('on');b.setAttribute('aria-selected','true');
+    document.getElementById('tab-quiz').hidden = b.dataset.tab!=='quiz';
+    document.getElementById('tab-flash').hidden = b.dataset.tab!=='flash';
+  }));
+
+  /* =========================================================
+     QUIZ ENGINE — 5 câu nhiều dạng, chấm ngay, giải thích có trích dẫn
+     ========================================================= */
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  console.assert(norm('Bắc Cầu')==='bac cau', 'norm() sai dấu tiếng Việt');
+
+  const QUESTIONS = [
+    { kind:'Trắc nghiệm',
+      q:'Một quan hệ đạt <b>dạng chuẩn 3 (3NF)</b> khi nào?',
+      opts:[
+        'Đã đạt 1NF và không còn thuộc tính đa trị',
+        'Đã đạt 2NF và không còn phụ thuộc bắc cầu của thuộc tính không khóa vào khóa',
+        'Mọi thuộc tính đều là khóa chính',
+        'Không còn phụ thuộc hàm nào trong quan hệ'
+      ],
+      answer:1,
+      cite:{code:'D7',page:'tr.17',src:'Chương 4 — Chuẩn hóa CSDL',snip:'Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.'},
+      why:'3NF = 2NF cộng thêm điều kiện loại bỏ phụ thuộc bắc cầu. Không liên quan tới đa trị (đó là 1NF).'
+    },
+    { kind:'Đúng / Sai',
+      q:'Một quan hệ đã đạt <b>2NF</b> thì luôn đạt <b>3NF</b>.',
+      opts:['Đúng','Sai'], answer:1,
+      cite:{code:'D7',page:'tr.17',src:'Chương 4 — Chuẩn hóa CSDL',snip:'Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.'},
+      why:'Sai. 2NF vẫn có thể còn phụ thuộc bắc cầu; 3NF mới loại chúng. Đây đúng là chỗ dễ nhầm.'
+    },
+    { kind:'Điền khuyết',
+      q:'3NF loại bỏ phụ thuộc <span class="blank"></span> của thuộc tính không khóa vào khóa chính.',
+      fill:['bac cau'], hintAnswer:'bắc cầu',
+      cite:{code:'D7',page:'tr.17',src:'Chương 4 — Chuẩn hóa CSDL',snip:'Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.'},
+      why:'Từ khóa cần điền là “bắc cầu” — loại phụ thuộc mà 3NF nhắm tới.'
+    },
+    { kind:'Tự luận ngắn',
+      q:'Nêu ngắn gọn <b>một ví dụ</b> về phụ thuộc bắc cầu.',
+      model:'Ví dụ: R(MãSV, Lớp, GVCN) với MãSV→Lớp và Lớp→GVCN. Khi đó MãSV→GVCN là phụ thuộc bắc cầu (đi qua Lớp).',
+      cite:{code:'D4',page:'tr.14',src:'Chương 4 — Chuẩn hóa CSDL',snip:'Cho X → Y và Y → Z, trong đó Y không phải là khóa: Z phụ thuộc bắc cầu vào X qua trung gian Y. Đây là nguồn gốc dư thừa mà dạng chuẩn 3 sinh ra để loại bỏ.'},
+      why:'Chỉ cần một chuỗi A→B→C với B, C là thuộc tính không khóa là đã minh họa được phụ thuộc bắc cầu.'
+    },
+    { kind:'Trắc nghiệm',
+      q:'Với <b>R(MãSV, Lớp, GVCN)</b>, khóa là MãSV, có MãSV→Lớp và Lớp→GVCN. Cách tách nào giúp đạt 3NF?',
+      opts:[
+        'Giữ nguyên, chỉ thêm ràng buộc khóa ngoại',
+        'Tách thành SV(MãSV, Lớp) và LOP(Lớp, GVCN)',
+        'Gộp cả ba thuộc tính vào một khóa chính tổng hợp',
+        'Xóa cột GVCN khỏi quan hệ'
+      ],
+      answer:1,
+      cite:{code:'D7',page:'tr.17',src:'Chương 4 — Chuẩn hóa CSDL',snip:'Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.'},
+      why:'Tách để mỗi thuộc tính không khóa phụ thuộc trực tiếp vào khóa của bảng chứa nó, xóa đường đi vòng qua Lớp.'
+    }
+  ];
+
+  let qi=0, correctCount=0, answered=false;
+  const root=document.getElementById('quizRoot');
+  const qNow=document.getElementById('qNow'), qProg=document.getElementById('qProg');
+
+  function citeHTML(c){
+    return `<button class="cite" data-code="${c.code}" data-page="${c.page}" data-src="${c.src}" data-snip="${c.snip}">${c.code}<span class="pg">${c.page}</span></button>`;
+  }
+  function updateProg(){qNow.textContent=qi+1;qProg.style.width=((qi)/QUESTIONS.length*100)+'%';}
+
+  function render(){
+    answered=false;updateProg();
+    const it=QUESTIONS[qi];
+    let body='';
+    if(it.opts){
+      body=`<div class="opts">`+it.opts.map((o,idx)=>
+        `<button class="opt" data-i="${idx}"><span class="mk">${it.kind==='Đúng / Sai'?(idx===0?'Đ':'S'):String.fromCharCode(65+idx)}</span><span>${o}</span><span class="mkr"></span></button>`).join('')+`</div>`;
+    }else if(it.fill){
+      body=`<div class="qfill"><input type="text" id="fillIn" placeholder="Gõ câu trả lời rồi bấm Kiểm tra…" autocomplete="off"></div>`;
+    }else if(it.model){
+      body=`<div class="qshort"><textarea id="shortIn" placeholder="Viết câu trả lời ngắn của bạn…"></textarea></div>`;
+    }
+    root.innerHTML=`<span class="tag tag-human qkind">${it.kind}</span>`
+      +`<div class="qtext">${it.q}</div>`+body
+      +`<div class="qfoot"><span class="grow"></span>`
+      +`<button class="btn btn-primary" id="checkBtn">Kiểm tra</button></div>`;
+
+    if(it.opts){
+      root.querySelectorAll('.opt').forEach(op=>op.addEventListener('click',()=>{
+        if(answered)return;
+        root.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
+        op.classList.add('sel');
+      }));
+    }
+    document.getElementById('checkBtn').addEventListener('click',check);
+  }
+
+  function check(){
+    const it=QUESTIONS[qi];
+    let ok=false, needSelf=false;
+    if(it.opts){
+      const sel=root.querySelector('.opt.sel');
+      if(!sel){shake();return;}
+      root.querySelectorAll('.opt').forEach((op,idx)=>{
+        op.disabled=true;
+        if(idx===it.answer){op.classList.add('correct');op.querySelector('.mkr').innerHTML='<i class="fa-solid fa-check"></i>';}
+        else if(op.classList.contains('sel')){op.classList.add('wrong');op.querySelector('.mkr').innerHTML='<i class="fa-solid fa-xmark"></i>';}
+      });
+      ok=+sel.dataset.i===it.answer;
+    }else if(it.fill){
+      const inp=document.getElementById('fillIn');
+      if(!inp.value.trim()){shake();return;}
+      ok=it.fill.some(a=>norm(inp.value).includes(a));
+      inp.disabled=true;inp.classList.add(ok?'correct':'wrong');
+    }else if(it.model){
+      const inp=document.getElementById('shortIn');
+      if(!inp.value.trim()){shake();return;}
+      inp.disabled=true;needSelf=true; // tự luận: người học tự đánh giá
+    }
+    answered=true;
+    finishQuestion(it,ok,needSelf);
+  }
+
+  function finishQuestion(it,ok,needSelf){
+    const foot=root.querySelector('.qfoot');
+    // kết quả
+    if(!needSelf){
+      const v=document.createElement('div');
+      v.className='verdict '+(ok?'ok':'no');
+      v.innerHTML=`<span class="vi"><i class="fa-solid fa-${ok?'check':'xmark'}"></i></span>`
+        +(ok?'Chính xác!':'Chưa đúng — xem giải thích bên dưới.');
+      foot.before(v);
+      if(ok)correctCount++;
+    }else{
+      const m=document.createElement('div');m.className='model-ans';
+      m.innerHTML=`<div class="mah">Đáp án tham khảo</div><p>${it.model}</p>`
+        +`<div class="self-rate"><button class="btn btn-ghost btn-sm" data-self="1"><i class="fa-solid fa-check"></i> Mình trả lời đúng</button>`
+        +`<button class="btn btn-ghost btn-sm" data-self="0"><i class="fa-solid fa-xmark"></i> Chưa đúng</button></div>`;
+      foot.before(m);
+    }
+    // giải thích + trích dẫn
+    const ex=document.createElement('div');ex.className='explain';
+    ex.innerHTML=`<div class="eh"><i class="fa-solid fa-circle-info"></i> Giải thích</div>`
+      +`<p>${it.why} ${citeHTML(it.cite)}</p>`;
+    foot.before(ex);
+
+    // nút tiếp
+    const btn=document.getElementById('checkBtn');
+    btn.outerHTML=`<button class="btn btn-primary" id="nextBtn">${qi<QUESTIONS.length-1?'Câu tiếp <i class=\"fa-solid fa-arrow-right\"></i>':'Xem kết quả <i class=\"fa-solid fa-flag-checkered\"></i>'}</button>`;
+
+    if(needSelf){
+      root.querySelectorAll('[data-self]').forEach(b=>b.addEventListener('click',()=>{
+        root.querySelectorAll('[data-self]').forEach(x=>x.disabled=true);
+        b.classList.remove('btn-ghost');b.classList.add(b.dataset.self==='1'?'btn-primary':'btn-accent');
+        if(b.dataset.self==='1')correctCount++;
+      }));
+    }
+    document.getElementById('nextBtn').addEventListener('click',next);
+    qProg.style.width=((qi+1)/QUESTIONS.length*100)+'%';
+  }
+
+  function next(){
+    if(qi<QUESTIONS.length-1){qi++;render();}
+    else summary();
+  }
+  function shake(){root.animate?root.animate([{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],{duration:220}):0;}
+
+  function summary(){
+    updateProg();qProg.style.width='100%';qNow.textContent=QUESTIONS.length;
+    const total=QUESTIONS.length;
+    const before=15, delta=Math.round(correctCount/total*18), after=Math.min(before+delta,100);
+    root.innerHTML=`<div class="qsummary">`
+      +`<div class="big" id="bigScore">0<small>/${total}</small></div>`
+      +`<div class="cap">Bạn trả lời đúng <b style="color:var(--text)">${correctCount}/${total}</b> câu về Dạng chuẩn 3.</div>`
+      +`<div class="mchange">`
+        +`<div class="mcr"><span class="cn">Dạng chuẩn 3 (3NF)</span>`
+          +`<span class="delta">+${delta}</span></div>`
+        +`<div style="display:flex;align-items:center;gap:10px">`
+          +`<span class="mastery ${cls(before)}"><span class="dot"></span><span class="n">${before}</span></span>`
+          +`<i class="fa-solid fa-arrow-right arrow"></i>`
+          +`<span class="mastery ${cls(after)}"><span class="dot"></span><span class="n">${after}</span></span></div>`
+        +`<div class="mbar ${cls(after)}" style="margin-top:14px"><i data-w="${after}"></i></div>`
+      +`</div>`
+      +`<div class="sumbtns">`
+        +`<a class="btn btn-primary btn-lg" href="app-lesson.html"><i class="fa-solid fa-book-open"></i> Ôn lại bài 3NF</a>`
+        +`<button class="btn btn-ghost btn-lg" id="retry"><i class="fa-solid fa-rotate-right"></i> Làm lại</button>`
+        +`<a class="btn btn-ghost btn-lg" href="app-progress.html"><i class="fa-solid fa-chart-line"></i> Xem tiến độ</a>`
+      +`</div></div>`;
+
+    // đếm điểm + đổ thanh mastery (độ sáng theo điểm — đơn sắc)
+    countUp(document.getElementById('bigScore'),correctCount,`<small>/${total}</small>`);
+    const bar=root.querySelector('.mbar>i');
+    const light='rgba(255,255,255,'+(0.30+after/100*0.65).toFixed(3)+')';
+    root.querySelectorAll('.mastery .dot').forEach((d,idx)=>{d.style.background='rgba(255,255,255,'+(0.30+(idx===0?before:after)/100*0.65).toFixed(3)+')';});
+    bar.style.background=light;
+    if(reduce)bar.style.width=after+'%';else setTimeout(()=>bar.style.width=after+'%',300);
+    document.getElementById('retry').addEventListener('click',()=>{qi=0;correctCount=0;render();});
+  }
+  function cls(s){return s<40?'m-weak':s<60?'m-fair':s<80?'m-good':'m-strong';}
+  function countUp(el,target,suffix){
+    if(reduce){el.innerHTML=target+suffix;return;}
+    const dur=800,t0=performance.now(),ease=t=>1-Math.pow(1-t,3);
+    (function step(now){const p=Math.min((now-t0)/dur,1);
+      el.innerHTML=Math.round(target*ease(p))+suffix;
+      if(p<1)requestAnimationFrame(step);else el.innerHTML=target+suffix;})(t0);
+  }
+  render();
+
+  /* =========================================================
+     FLASHCARD — lật 3D + lịch ôn ngắt quãng
+     ========================================================= */
+  const BOXES=['Hôm nay','3 ngày','1 tuần'];
+  const DECK=[
+    {q:'Phụ thuộc bắc cầu là gì?', a:'Khi A→B và B→C thì A→C là phụ thuộc bắc cầu (C phụ thuộc A gián tiếp qua B), với B, C là thuộc tính không khóa.', box:0},
+    {q:'Điều kiện để một quan hệ đạt 3NF?', a:'Đạt 2NF và không còn phụ thuộc bắc cầu của thuộc tính không khóa vào khóa chính.', box:0},
+    {q:'2NF loại bỏ loại phụ thuộc nào?', a:'Phụ thuộc hàm bộ phận — thuộc tính không khóa chỉ phụ thuộc một phần của khóa chính.', box:1},
+    {q:'Khóa dự tuyển (candidate key) là gì?', a:'Tập thuộc tính tối thiểu xác định duy nhất mỗi bộ; một quan hệ có thể có nhiều khóa dự tuyển.', box:0}
+  ];
+  let fi=0;
+  const fcard=document.getElementById('fcard');
+  const fcFront=document.getElementById('fcFront'), fcBack=document.getElementById('fcBack');
+  const fcNow=document.getElementById('fcNow');
+  document.getElementById('fcTotal').textContent=DECK.length;
+  const schedList=document.getElementById('schedList');
+
+  function loadCard(){
+    const c=DECK[fi];
+    fcard.classList.remove('flip');
+    fcFront.textContent=c.q;fcBack.textContent=c.a;
+    fcNow.textContent=fi+1;
+    renderSched();
+  }
+  function renderSched(){
+    schedList.innerHTML=DECK.map((c,idx)=>
+      `<div class="sched-row"><div class="st">${c.q.replace(/\?$/,'')}<span>${idx===fi?'Đang ôn':'Thẻ '+(idx+1)}</span></div>`
+      +`<span class="ivl ${c.box===0?'now':''}"><i class="fa-solid fa-clock"></i> ${BOXES[c.box]}</span></div>`).join('');
+  }
+  function flip(){fcard.classList.toggle('flip');}
+  fcard.addEventListener('click',flip);
+  fcard.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}});
+
+  function advance(remember){
+    const c=DECK[fi];
+    c.box = remember ? Math.min(c.box+1,BOXES.length-1) : 0;
+    fi=(fi+1)%DECK.length;
+    loadCard();
+  }
+  document.getElementById('fcGot').addEventListener('click',()=>advance(true));
+  document.getElementById('fcForgot').addEventListener('click',()=>advance(false));
+  loadCard();
+</script>
+</body>
+</html>

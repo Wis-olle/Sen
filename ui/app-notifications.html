@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Thông báo · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ riêng trang Thông báo (S14) ============ */
+
+  /* hàng tiêu đề trang + hành động */
+  .hrow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  /* NotificationCard — thẻ thông báo (đọc/chưa; chấm trắng) */
+  .daygroup{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);padding:14px 6px 6px}
+  .daygroup:first-child{padding-top:0}
+  .noti{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;
+    padding:15px 6px;border-bottom:1px solid var(--border-faint)}
+  .noti:last-child{border-bottom:none}
+  .noti .nicon{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+    background:var(--surface-3);border:1px solid var(--border);color:var(--text-2);font-size:15px}
+  .noti .nbody{min-width:0}
+  .noti .nt{font-size:var(--fs-sm);font-weight:600;letter-spacing:-.01em}
+  .noti .nd{font-size:12.5px;color:var(--muted-strong);margin-top:3px;line-height:1.5}
+  .noti .nmeta{display:flex;flex-direction:column;align-items:flex-end;gap:9px;flex-shrink:0;padding-top:2px}
+  .noti .nwhen{font-size:11px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .noti .ndot{width:9px;height:9px;border-radius:50%;background:#fff}
+  /* đã đọc: mờ đi bằng ĐỘ SÁNG (STYLE §3.8), không dùng màu */
+  .noti.read .nt{font-weight:500;color:var(--text-2)}
+  .noti.read .nicon{color:var(--muted);background:var(--surface-2)}
+  .noti.read .ndot{display:none}
+
+
+  /* SettingRow — dòng cài đặt (nhãn + control) */
+  .setrow{display:flex;align-items:center;gap:14px;min-height:52px;padding:9px 0;
+    border-bottom:1px solid var(--border-faint)}
+  .setrow:last-child{border-bottom:none}
+  .setrow .stext{flex:1;min-width:0}
+  .setrow .stitle{font-size:var(--fs-sm);font-weight:500}
+  .setrow .shint{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+
+  .subhead{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);margin:2px 0 6px}
+  .subhead + .setrow{border-top:1px solid var(--border-faint)}
+  .quiet{margin-top:22px}
+
+  /* khung giờ = 2 select 24h xếp dọc (chắc chắn, không phụ thuộc locale, hợp mọi bề rộng) */
+  .timefield{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .tsel{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;
+    border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--border);
+    transition:border var(--dur-1),background var(--dur-1)}
+  .tsel:focus-within{border-color:var(--accent-border);background:var(--surface-3)}
+  .tsel > i:first-child{font-size:13px;color:var(--muted);flex-shrink:0;width:16px;text-align:center}
+  .tsel .tlab{font-size:var(--fs-sm);color:var(--text-2);font-weight:500;flex-shrink:0}
+  .tsel select{flex:1;min-width:0;appearance:none;-webkit-appearance:none;background:none;border:none;
+    outline:none;color:var(--text);font-family:var(--font-display);font-weight:600;font-size:15px;
+    letter-spacing:.02em;cursor:pointer;text-align:right}
+  .tsel .caret{color:var(--muted);font-size:10px;flex-shrink:0}
+  .tsel select option{background:var(--surface-pop);color:var(--text);font-weight:500}
+
+  @media (max-width:760px){
+    .hrow{flex-direction:column}
+    .hrow .btn{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item active" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Thông báo <small>Thứ Hai, 08/09/2026</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm, tài liệu, môn học…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="page-head reveal" style="--d:0s">
+        <div class="hrow">
+          <div>
+            <h1>Thông báo</h1>
+            <p>Bạn có <b style="color:var(--text)" id="unreadTxt">3</b> thông báo chưa đọc.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="markAll"><i class="fa-solid fa-check-double"></i> Đánh dấu đã đọc tất cả</button>
+        </div>
+      </div>
+
+      <div class="bento">
+
+        <!-- 1) Dòng thông báo -->
+        <section class="card reveal col-8" style="--d:.06s">
+          <div class="card-title"><i class="fa-solid fa-inbox"></i> Dòng thông báo</div>
+
+          <div id="notiList">
+            <div class="daygroup">Hôm nay · 08/09</div>
+
+            <div class="noti">
+              <span class="nicon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+              <div class="nbody">
+                <div class="nt">Đến hạn ôn tập</div>
+                <div class="nd">Khái niệm <b>Phụ thuộc bắc cầu</b> cần ôn lại tối nay lúc 20:30 — bạn đang ở mức 20/100.</div>
+              </div>
+              <div class="nmeta"><span class="nwhen">19:00</span><span class="ndot"></span></div>
+            </div>
+
+            <div class="noti">
+              <span class="nicon"><i class="fa-solid fa-list-check"></i></span>
+              <div class="nbody">
+                <div class="nt">Kế hoạch hôm nay</div>
+                <div class="nd">3 việc trong lộ trình hôm nay: Phụ thuộc hàm (FD), Phụ thuộc bắc cầu và 5 câu quiz củng cố.</div>
+              </div>
+              <div class="nmeta"><span class="nwhen">08:00</span><span class="ndot"></span></div>
+            </div>
+
+            <div class="noti">
+              <span class="nicon"><i class="fa-solid fa-file-arrow-up"></i></span>
+              <div class="nbody">
+                <div class="nt">Sắp đến hạn nộp</div>
+                <div class="nd">Bài tập chương <b>Chuẩn hóa CSDL</b> hạn nộp 12/09 — còn 4 ngày.</div>
+              </div>
+              <div class="nmeta"><span class="nwhen">07:45</span><span class="ndot"></span></div>
+            </div>
+
+            <div class="noti read">
+              <span class="nicon"><i class="fa-solid fa-calendar-day"></i></span>
+              <div class="nbody">
+                <div class="nt">Lịch thi cập nhật</div>
+                <div class="nd">Thi <b>Cơ sở dữ liệu</b>: 20/09/2026, phòng A2-301. Còn 12 ngày.</div>
+              </div>
+              <div class="nmeta"><span class="nwhen">07:30</span><span class="ndot"></span></div>
+            </div>
+
+            <div class="daygroup">Trước đó</div>
+
+            <div class="noti read">
+              <span class="nicon"><i class="fa-solid fa-book-open"></i></span>
+              <div class="nbody">
+                <div class="nt">Bài học mới đã sẵn sàng</div>
+                <div class="nd">Bài <b>Phụ thuộc bắc cầu</b> đã được tạo riêng theo hồ sơ của bạn.</div>
+              </div>
+              <div class="nmeta"><span class="nwhen">Hôm qua</span><span class="ndot"></span></div>
+            </div>
+
+            <div class="noti read">
+              <span class="nicon"><i class="fa-solid fa-arrows-rotate"></i></span>
+              <div class="nbody">
+                <div class="nt">Lộ trình được tính lại</div>
+                <div class="nd">Kế hoạch tuần cập nhật lên <b>v2</b> sau khi bạn trả lời sai câu hỏi về 3NF.</div>
+              </div>
+              <div class="nmeta"><span class="nwhen">Hôm qua</span><span class="ndot"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2) Cài đặt -->
+        <section class="card reveal col-4" style="--d:.12s">
+          <div class="card-title"><i class="fa-solid fa-sliders"></i> Cài đặt thông báo</div>
+
+          <div class="subhead">Loại thông báo</div>
+
+          <div class="setrow">
+            <div class="stext"><div class="stitle">Đến hạn ôn tập</div><div class="shint">Nhắc khi khái niệm cần ôn lại</div></div>
+            <label class="switch"><input type="checkbox" checked aria-label="Đến hạn ôn tập"><span class="track"><span class="knob"></span></span></label>
+          </div>
+          <div class="setrow">
+            <div class="stext"><div class="stitle">Nhắc mục kế hoạch</div><div class="shint">Việc trong lộ trình hôm nay</div></div>
+            <label class="switch"><input type="checkbox" checked aria-label="Nhắc mục kế hoạch"><span class="track"><span class="knob"></span></span></label>
+          </div>
+          <div class="setrow">
+            <div class="stext"><div class="stitle">Deadline bài tập</div><div class="shint">Trước hạn nộp 3 ngày</div></div>
+            <label class="switch"><input type="checkbox" checked aria-label="Deadline bài tập"><span class="track"><span class="knob"></span></span></label>
+          </div>
+          <div class="setrow">
+            <div class="stext"><div class="stitle">Lịch thi &amp; thay đổi</div><div class="shint">Khi lịch thi đồng bộ mới</div></div>
+            <label class="switch"><input type="checkbox" checked aria-label="Lịch thi và thay đổi"><span class="track"><span class="knob"></span></span></label>
+          </div>
+          <div class="setrow">
+            <div class="stext"><div class="stitle">Bản tin tiến độ tuần</div><div class="shint">Tóm tắt mỗi Chủ nhật</div></div>
+            <label class="switch"><input type="checkbox" aria-label="Bản tin tiến độ tuần"><span class="track"><span class="knob"></span></span></label>
+          </div>
+
+          <div class="subhead quiet">Khung giờ nhận</div>
+          <div class="setrow" style="border-bottom:none">
+            <div class="stext"><div class="stitle">Chỉ nhận trong khung giờ</div><div class="shint">Ngoài giờ này sẽ giữ lại, không báo</div></div>
+            <label class="switch"><input type="checkbox" checked aria-label="Chỉ nhận trong khung giờ"><span class="track"><span class="knob"></span></span></label>
+          </div>
+          <div class="timefield">
+            <label class="tsel"><i class="fa-solid fa-sun"></i><span class="tlab">Từ</span><select id="fromT" aria-label="Từ giờ"></select><i class="fa-solid fa-chevron-down caret"></i></label>
+            <label class="tsel"><i class="fa-solid fa-moon"></i><span class="tlab">Đến</span><select id="toT" aria-label="Đến giờ"></select><i class="fa-solid fa-chevron-down caret"></i></label>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  // Đổ đầy 2 select khung giờ (24h, bước 30 phút)
+  function fillTimes(sel, val){
+    for(let m=0;m<24*60;m+=30){
+      const h=String(Math.floor(m/60)).padStart(2,'0'), mm=String(m%60).padStart(2,'0');
+      const o=document.createElement('option'); o.value=o.textContent=h+':'+mm;
+      if(o.value===val) o.selected=true; sel.appendChild(o);
+    }
+  }
+  fillTimes(document.getElementById('fromT'),'19:00');
+  fillTimes(document.getElementById('toT'),'22:00');
+
+  // Đánh dấu đã đọc tất cả — bỏ chấm trắng + làm mờ theo độ sáng
+  document.getElementById('markAll').addEventListener('click', ()=>{
+    document.querySelectorAll('#notiList .noti:not(.read)').forEach(n=>n.classList.add('read'));
+    document.getElementById('unreadTxt').textContent = '0';
+    document.querySelector('.topbar .dot-badge')?.remove();
+  });
+</script>
+</body>
+</html>

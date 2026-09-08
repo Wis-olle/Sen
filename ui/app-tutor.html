@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trợ giảng · Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ============ Trợ giảng AI — layout chat 3 cột ============ */
+  /* phụ đề topbar dài → ẩn trên mobile để không ép topbar tràn ngang */
+  @media (max-width:760px){.topbar .page-title small{display:none}}
+  /* Chat chiếm trọn khung: content cao đúng viewport, cuộn nội bộ từng cột. */
+  .content.chat{height:100dvh;overflow:hidden}
+  .tutor-main{max-width:none;margin:0;padding:0;flex:1;min-height:0;display:flex}
+  .tutor{flex:1;min-height:0;display:grid;
+    grid-template-columns:266px minmax(0,1fr) 316px}
+  .tutor>*{min-width:0;min-height:0}
+
+  /* ---------- Cột trái: lịch sử hội thoại ---------- */
+  .tcol-hist{display:flex;flex-direction:column;border-right:1px solid var(--border);
+    background:rgba(255,255,255,.012)}
+  .hist-head{padding:18px 14px 12px;flex-shrink:0}
+  .btn-newchat{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:42px;
+    border-radius:var(--r-pill);background:var(--surface-2);border:1px solid var(--border-strong);
+    color:var(--text);font-size:var(--fs-sm);font-weight:600;
+    transition:background var(--dur-1),transform var(--dur-1)}
+  .btn-newchat:hover{background:var(--surface-3);transform:translateY(-1px)}
+  .hist-group{padding:6px 12px 2px;font-size:10.5px;font-weight:600;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--muted)}
+  .hist-list{flex:1;overflow-y:auto;padding:2px 10px 18px}
+  .hist-item{display:block;padding:10px 12px;border-radius:12px;color:var(--text-2);
+    border:1px solid transparent;transition:background var(--dur-1),border var(--dur-1)}
+  .hist-item+.hist-item{margin-top:2px}
+  .hist-item:hover{background:var(--surface-1)}
+  .hist-item.active{background:var(--surface-2);border-color:var(--border)}
+  .hist-item .ht{display:block;font-size:var(--fs-sm);font-weight:500;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hist-item .hs{display:block;font-size:11px;color:var(--muted);margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ---------- Cột giữa: luồng tin nhắn ---------- */
+  .tcol-main{display:flex;flex-direction:column;min-height:0}
+  .thread{flex:1;overflow-y:auto;padding:26px clamp(16px,3vw,40px) 8px}
+  .thread-in{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+
+  /* ChatMessage — bong bóng chat có CitationChip + MemoryCard */
+  .msg{display:flex;gap:12px;align-items:flex-start}
+  .msg .av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+    font-weight:700;font-size:12px}
+  .msg.ai .av{background:#fff;color:#000}
+  .msg.ai .av svg{width:18px;height:18px}
+  .msg.me{flex-direction:row-reverse}
+  .msg.me .av{background:var(--surface-3);color:var(--text);border:1px solid var(--border)}
+  .msg .body{min-width:0}
+  .msg.ai .body{flex:1}
+  .msg .who{font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:6px}
+  .msg.me .who{text-align:right}
+  .bubble{border-radius:16px;padding:14px 16px;font-size:var(--fs-base);line-height:1.6;color:var(--text)}
+  .msg.ai .bubble{background:var(--surface-1);border:1px solid var(--border);border-top-left-radius:5px}
+  .msg.me .body{max-width:80%}
+  .msg.me .bubble{background:var(--surface-3);border:1px solid var(--border);border-top-right-radius:5px}
+  .bubble p+p{margin-top:10px}
+  .bubble strong{font-weight:600}
+  .msg.ai.sel .bubble{border-color:var(--border-strong)}
+
+  /* nhãn "Ngoài tài liệu môn học" — phần không nằm trong nguồn */
+  .outside{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border-strong)}
+  .outside .tag{margin-bottom:8px}
+
+  /* MemoryCard "nhớ bạn từng nhầm…" */
+
+  .typing::after{content:"▍";margin-left:1px;color:var(--muted);
+    animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  /* ô soạn tin */
+  .composer{flex-shrink:0;border-top:1px solid var(--border);padding:14px clamp(16px,3vw,40px) 18px;
+    background:rgba(10,10,11,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .composer-in{max-width:720px;margin:0 auto}
+  .composer-box{display:flex;gap:8px;align-items:flex-end;background:var(--surface-2);
+    border:1px solid var(--border);border-radius:22px;padding:7px 7px 7px 16px;
+    transition:border var(--dur-1)}
+  .composer-box:focus-within{border-color:var(--accent-border)}
+  .composer-box textarea{flex:1;min-width:0;background:none;border:none;color:var(--text);
+    font-family:inherit;font-size:var(--fs-base);line-height:1.5;resize:none;outline:none;
+    max-height:140px;padding:9px 0}
+  .composer-box textarea::placeholder{color:var(--muted)}
+  .send-btn{width:44px;height:44px;flex-shrink:0;border-radius:50%;background:#fff;color:#000;
+    display:grid;place-items:center;font-size:14px;border:none;
+    transition:transform var(--dur-1),box-shadow var(--dur-1)}
+  .send-btn:hover{transform:translateY(-1px);box-shadow:var(--glow-cta)}
+  .send-btn:disabled{opacity:.4;pointer-events:none;box-shadow:none}
+  .composer-hint{max-width:720px;margin:8px auto 0;font-size:11px;color:var(--muted);text-align:center}
+
+  /* ---------- Cột phải: ContextPicker + trích dẫn ---------- */
+  .tcol-ctx{display:flex;flex-direction:column;border-left:1px solid var(--border);overflow-y:auto}
+  .ctx-sec{padding:20px 18px;border-bottom:1px solid var(--border)}
+  .ctx-sec:last-child{border-bottom:none}
+  .ctx-h{display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);font-weight:600;margin-bottom:14px}
+  .ctx-h i{color:var(--muted);font-size:12px}
+  /* ContextPicker — chọn môn / khái niệm / tài liệu đang hỏi */
+  .ctx-field{margin-bottom:12px}
+  .ctx-field:last-child{margin-bottom:0}
+  .ctx-field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+  .ctx-select{position:relative}
+  .ctx-select select{appearance:none;-webkit-appearance:none;width:100%;height:40px;
+    padding:0 34px 0 13px;border-radius:var(--r-md);background:var(--surface-2);
+    border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:var(--fs-sm);
+    font-weight:500;outline:none;cursor:pointer;transition:border var(--dur-1),background var(--dur-1)}
+  .ctx-select select:hover{background:var(--surface-3)}
+  .ctx-select select:focus-visible{border-color:var(--accent-border)}
+  .ctx-select i{position:absolute;right:13px;top:50%;transform:translateY(-50%);
+    pointer-events:none;color:var(--muted);font-size:11px}
+
+  /* danh sách trích dẫn của câu trả lời đang chọn */
+  .cite-empty{font-size:var(--fs-sm);color:var(--muted);line-height:1.5}
+  .cite-card{display:block;width:100%;text-align:left;padding:13px 14px;border-radius:14px;
+    background:var(--surface-1);border:1px solid var(--border);cursor:pointer;
+    transition:background var(--dur-1),border var(--dur-1),transform var(--dur-1)}
+  .cite-card+.cite-card{margin-top:10px}
+  .cite-card:hover{background:var(--surface-2);border-color:var(--border-strong);transform:translateY(-1px)}
+  .cite-card .cc-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .cite-card .cc-code{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:6px;
+    background:var(--cite-bg);border:1px solid var(--cite-border);color:var(--cite-text);
+    font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+  .cite-card .cc-pg{font-size:11px;color:var(--muted);font-weight:500}
+  .cite-card .cc-src{margin-left:auto;font-size:11px;color:var(--muted);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:11ch}
+  .cite-card .cc-snip{font-size:var(--fs-sm);line-height:1.5;color:var(--text-2)}
+
+
+  /* mobile: 1 cột; lịch sử + ngữ cảnh thành sheet trượt lên */
+  .chat-mtabs{display:none}
+  .sheet-scrim{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.5);opacity:0;
+    pointer-events:none;transition:opacity var(--dur-1)}
+  .sheet-scrim.show{opacity:1;pointer-events:auto}
+  @media (max-width:920px){
+    .tutor{grid-template-columns:1fr}
+    .chat-mtabs{display:flex;gap:8px;flex-shrink:0;padding:10px clamp(14px,4vw,20px);
+      border-bottom:1px solid var(--border);background:rgba(10,10,11,.5)}
+    .chat-mtabs button{flex:1;height:40px;border-radius:var(--r-pill);background:var(--surface-2);
+      border:1px solid var(--border);color:var(--text-2);font-size:var(--fs-sm);font-weight:600;
+      display:inline-flex;align-items:center;justify-content:center;gap:7px}
+    .tcol-hist,.tcol-ctx{position:fixed;left:0;right:0;bottom:0;z-index:70;max-height:78dvh;
+      border:none;border-radius:var(--r-lg) var(--r-lg) 0 0;background:var(--surface-pop);
+      box-shadow:var(--sh-pop);transform:translateY(102%);transition:transform var(--dur-2) var(--ease)}
+    .tcol-hist.open,.tcol-ctx.open{transform:none}
+    .sheet-grip{display:flex;align-items:center;justify-content:space-between;
+      padding:14px 16px 6px;flex-shrink:0}
+    .sheet-grip b{font-size:var(--fs-md);font-weight:600}
+    .sheet-grip button{width:36px;height:36px;border-radius:50%;background:var(--surface-2);
+      border:1px solid var(--border);color:var(--text-2);display:grid;place-items:center}
+  }
+  @media (min-width:921px){.sheet-grip{display:none}}
+  @media (max-width:560px){
+    .msg.me .body{max-width:88%}
+    .thread{padding:20px 14px 4px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <a class="side-brand" href="index.html">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+      <span class="wordmark">Sen</span>
+    </a>
+
+    <div class="side-section">Học tập</div>
+    <a class="nav-item" href="app-dashboard.html" title="Trang chủ"><i class="fa-solid fa-house"></i><span class="label">Trang chủ</span></a>
+    <a class="nav-item" href="app-semester.html" title="Học kỳ của tôi"><i class="fa-solid fa-calendar-days"></i><span class="label">Học kỳ của tôi</span></a>
+    <a class="nav-item" href="app-library.html" title="Kho học liệu"><i class="fa-solid fa-folder-open"></i><span class="label">Kho học liệu</span></a>
+    <a class="nav-item" href="app-map.html" title="Bản đồ kiến thức"><i class="fa-solid fa-diagram-project"></i><span class="label">Bản đồ kiến thức</span></a>
+    <a class="nav-item" href="app-plan.html" title="Lộ trình"><i class="fa-solid fa-route"></i><span class="label">Lộ trình</span></a>
+    <a class="nav-item" href="app-lesson.html" title="Bài học hôm nay"><i class="fa-solid fa-book-open"></i><span class="label">Bài học hôm nay</span><span class="badge">1</span></a>
+    <a class="nav-item active" href="app-tutor.html" title="Trợ giảng"><i class="fa-solid fa-comments"></i><span class="label">Trợ giảng</span></a>
+    <a class="nav-item" href="app-practice.html" title="Luyện tập"><i class="fa-solid fa-dumbbell"></i><span class="label">Luyện tập</span></a>
+    <a class="nav-item" href="app-progress.html" title="Tiến độ"><i class="fa-solid fa-chart-line"></i><span class="label">Tiến độ</span></a>
+
+    <div class="side-section">Tài khoản</div>
+    <a class="nav-item" href="app-notifications.html" title="Thông báo"><i class="fa-solid fa-bell"></i><span class="label">Thông báo</span></a>
+    <a class="nav-item" href="app-data.html" title="Dữ liệu của tôi"><i class="fa-solid fa-shield-halved"></i><span class="label">Dữ liệu của tôi</span></a>
+    <a class="nav-item" href="app-profile.html" title="Hồ sơ"><i class="fa-solid fa-user"></i><span class="label">Hồ sơ</span></a>
+
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <a class="side-user" href="app-profile.html" title="Nguyễn Văn An — Hồ sơ">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+      </a>
+      <a class="nav-item" href="admin-users.html" title="Quản trị (demo)"><i class="fa-solid fa-user-shield"></i><span class="label">Quản trị</span></a>
+      <a class="nav-item" href="index.html" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="label">Đăng xuất</span></a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENT ===================== -->
+  <div class="content chat">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">Trợ giảng AI <small>Cơ sở dữ liệu · Chuẩn hóa CSDL</small></div>
+      <div class="grow"></div>
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" placeholder="Tìm khái niệm, tài liệu, môn học…" />
+      </label>
+      <button class="icon-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="dot-badge"></span></button>
+      <button class="avatar-btn">
+        <span class="pfp">A</span>
+        <span class="who"><b>Nguyễn Văn An</b><span>CNTT · K64</span></span>
+        <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </button>
+    </header>
+
+    <!-- Main = workspace chat 3 cột -->
+    <main class="main tutor-main">
+      <div class="tutor">
+
+        <!-- Cột trái: lịch sử hội thoại -->
+        <aside class="tcol-hist" id="colHist" aria-label="Lịch sử hội thoại">
+          <div class="sheet-grip"><b>Lịch sử</b><button data-close-sheet aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button></div>
+          <div class="hist-head">
+            <button class="btn-newchat" id="btnNew"><i class="fa-solid fa-pen-to-square"></i> Cuộc trò chuyện mới</button>
+          </div>
+          <div class="hist-group">Hôm nay</div>
+          <nav class="hist-list">
+            <a class="hist-item active" href="#" data-restore="1">
+              <span class="ht">3NF khác 2NF ở điểm nào?</span>
+              <span class="hs">Cơ sở dữ liệu · Dạng chuẩn 3</span>
+            </a>
+            <a class="hist-item" href="#" data-restore="1">
+              <span class="ht">Phụ thuộc bắc cầu là gì?</span>
+              <span class="hs">Chuẩn hóa CSDL · 10:24</span>
+            </a>
+            <div class="hist-group">Hôm qua</div>
+            <a class="hist-item" href="#" data-restore="1">
+              <span class="ht">Cách tìm khóa dự tuyển</span>
+              <span class="hs">Cơ sở dữ liệu · Khóa &amp; khóa dự tuyển</span>
+            </a>
+            <a class="hist-item" href="#" data-restore="1">
+              <span class="ht">Ôn nhanh trước buổi thi 20/09</span>
+              <span class="hs">Cơ sở dữ liệu · 21:05</span>
+            </a>
+          </nav>
+        </aside>
+
+        <!-- Cột giữa: luồng tin nhắn + ô soạn -->
+        <section class="tcol-main">
+          <div class="chat-mtabs">
+            <button data-open-sheet="colHist"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử</button>
+            <button data-open-sheet="colCtx"><i class="fa-solid fa-layer-group"></i> Ngữ cảnh</button>
+          </div>
+
+          <div class="thread" id="thread">
+            <div class="thread-in" id="threadIn">
+
+              <!-- Lượt 1 -->
+              <div class="msg me">
+                <span class="av">A</span>
+                <div class="body">
+                  <div class="who">Bạn · 10:31</div>
+                  <div class="bubble"><p>3NF khác 2NF ở điểm nào vậy? Mình hay nhầm hai cái này.</p></div>
+                </div>
+              </div>
+
+              <div class="msg ai" tabindex="0">
+                <span class="av"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+                <div class="body">
+                  <div class="who">Trợ giảng Sen</div>
+                  <div class="bubble">
+                    <p>Điểm khác nhau cốt lõi nằm ở loại phụ thuộc bị loại bỏ:</p>
+                    <p><strong>2NF</strong> loại các <strong>phụ thuộc hàm bộ phận</strong> — thuộc tính không khóa chỉ phụ thuộc một phần của khóa chính. <strong>3NF</strong> đi thêm một bước: loại các <strong>phụ thuộc bắc cầu</strong>, tức thuộc tính không khóa phụ thuộc vào một thuộc tính không khóa khác chứ không trực tiếp vào khóa<button class="cite" data-code="D7" data-page="tr.17" data-src="Chương 4 — Chuẩn hóa CSDL" data-snip="Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.">D7<span class="pg">tr.17</span></button>.</p>
+                    <p>Nói gọn: đạt 3NF thì chắc chắn đã đạt 2NF, nhưng ngược lại thì không<button class="cite" data-code="D7" data-page="tr.17" data-src="Chương 4 — Chuẩn hóa CSDL" data-snip="Một quan hệ ở dạng chuẩn 3 (3NF) nếu nó ở 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa. Ví dụ: tách TenKhoa ra bảng Khoa, chỉ giữ MaKhoa trong bảng Sinh viên.">D7<span class="pg">tr.17</span></button>.</p>
+
+                    <div class="memory-card sm" style="margin-top:14px">
+                      <span class="mi"><i class="fa-solid fa-lightbulb"></i></span>
+                      <div>
+                        <div class="mlabel"><i class="fa-solid fa-bookmark" style="font-size:10px"></i> Nhớ về bạn</div>
+                        <div class="mtext">Mình nhớ bạn từng nhầm <strong>“2NF là đủ cho 3NF”</strong> — đây đúng là chỗ hay vướng. Sự khác biệt duy nhất còn lại chính là phụ thuộc bắc cầu.</div>
+                        <div class="mevidence">Ghi nhận: sai 2 lần ở quiz 3NF</div>
+                      </div>
+                    </div>
+
+                    <div class="outside">
+                      <span class="tag tag-out"><i class="fa-solid fa-circle-info" style="font-size:9px"></i> Ngoài tài liệu môn học</span>
+                      <p>Một mẹo nhớ nhanh: cụm “<em>nothing but the key</em>” thường được dùng để mô tả 3NF — mọi thuộc tính không khóa phải phụ thuộc vào khóa, chỉ khóa, và không gì khác.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lượt 2 -->
+              <div class="msg me">
+                <span class="av">A</span>
+                <div class="body">
+                  <div class="who">Bạn · 10:33</div>
+                  <div class="bubble"><p>Cho mình một ví dụ bảng cụ thể vi phạm 3NF được không?</p></div>
+                </div>
+              </div>
+
+              <div class="msg ai sel" tabindex="0">
+                <span class="av"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>
+                <div class="body">
+                  <div class="who">Trợ giảng Sen</div>
+                  <div class="bubble">
+                    <p>Rồi, mình lấy đúng kiểu bảng dữ liệu cụ thể cho dễ hình dung nhé:</p>
+                    <p>Xét quan hệ <strong>R(MãSV, Lớp, GVCN)</strong> với khóa chính là <strong>MãSV</strong>. Ta có <strong>MãSV → Lớp</strong> và <strong>Lớp → GVCN</strong>. Khi đó GVCN phụ thuộc bắc cầu vào MãSV thông qua Lớp: <strong>MãSV → Lớp → GVCN</strong> — vi phạm 3NF<button class="cite" data-code="D4" data-page="tr.14" data-src="Chương 4 — Chuẩn hóa CSDL" data-snip="Cho X → Y và Y → Z, trong đó Y không phải là khóa: Z phụ thuộc bắc cầu vào X qua trung gian Y. Đây là nguồn gốc dư thừa mà dạng chuẩn 3 sinh ra để loại bỏ.">D4<span class="pg">tr.14</span></button>.</p>
+                    <p>Cách sửa: tách thành <strong>SV(MãSV, Lớp)</strong> và <strong>LOP(Lớp, GVCN)</strong>. Lúc này không còn thuộc tính không khóa nào đi vòng qua thuộc tính khác nữa.</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="composer">
+            <div class="composer-in">
+              <form class="composer-box" id="composer">
+                <textarea id="ta" rows="1" placeholder="Hỏi trợ giảng về Chuẩn hóa CSDL…" aria-label="Nhập câu hỏi"></textarea>
+                <button class="send-btn" type="submit" aria-label="Gửi"><i class="fa-solid fa-arrow-up"></i></button>
+              </form>
+            </div>
+            <p class="composer-hint">Câu trả lời trích từ tài liệu môn học và có thể tham khảo thêm nguồn ngoài (được ghi rõ).</p>
+          </div>
+        </section>
+
+        <!-- Cột phải: ContextPicker + trích dẫn -->
+        <aside class="tcol-ctx" id="colCtx" aria-label="Ngữ cảnh và trích dẫn">
+          <div class="sheet-grip"><b>Ngữ cảnh</b><button data-close-sheet aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button></div>
+
+          <div class="ctx-sec">
+            <div class="ctx-h"><i class="fa-solid fa-crosshairs"></i> Đang hỏi trong ngữ cảnh</div>
+            <div class="ctx-field">
+              <label for="cx-course">Môn học</label>
+              <div class="ctx-select">
+                <select id="cx-course">
+                  <option>Cơ sở dữ liệu</option>
+                  <option>Cấu trúc dữ liệu &amp; giải thuật</option>
+                  <option>Mạng máy tính</option>
+                </select>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+            </div>
+            <div class="ctx-field">
+              <label for="cx-concept">Khái niệm</label>
+              <div class="ctx-select">
+                <select id="cx-concept">
+                  <option>Dạng chuẩn 3 (3NF)</option>
+                  <option>Phụ thuộc bắc cầu</option>
+                  <option>Dạng chuẩn 2 (2NF)</option>
+                  <option>Toàn bộ chương Chuẩn hóa CSDL</option>
+                </select>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+            </div>
+            <div class="ctx-field">
+              <label for="cx-mat">Tài liệu</label>
+              <div class="ctx-select">
+                <select id="cx-mat">
+                  <option>Chương 4 — Chuẩn hóa cơ sở dữ liệu</option>
+                  <option>Tất cả tài liệu môn Cơ sở dữ liệu</option>
+                </select>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="ctx-sec">
+            <div class="ctx-h"><i class="fa-solid fa-quote-left"></i> Trích dẫn trong câu trả lời</div>
+            <div id="citeList"><!-- đổ động theo câu trả lời đang chọn --></div>
+          </div>
+        </aside>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- popover đoạn nguồn (phần tử nổi) -->
+<div class="cite-pop" id="citePop" role="dialog" aria-label="Đoạn nguồn trích dẫn">
+  <div class="cp-top">
+    <span class="cp-code" id="cpCode">D3</span>
+    <span class="cp-src" id="cpSrc"></span>
+    <span class="cp-pg" id="cpPg"></span>
+  </div>
+  <div class="cp-snip" id="cpSnip"></div>
+  <div class="cp-arrow" id="cpArrow"></div>
+</div>
+<div class="sheet-scrim" id="scrim"></div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const threadIn = document.getElementById('threadIn');
+  const thread   = document.getElementById('thread');
+  const sample   = threadIn.innerHTML; // ảnh chụp thread mẫu để khôi phục
+
+  /* ---------- Danh sách trích dẫn cột phải theo câu trả lời đang chọn ---------- */
+  const citeList = document.getElementById('citeList');
+  function renderCites(aiMsg){
+    citeList.innerHTML='';
+    const chips = aiMsg ? aiMsg.querySelectorAll('.cite') : [];
+    if(!chips.length){
+      citeList.innerHTML='<p class="cite-empty">Chọn một câu trả lời để xem các đoạn nguồn nó dựa vào.</p>';
+      return;
+    }
+    chips.forEach(c=>{
+      const el=document.createElement('button');
+      el.className='cite-card';
+      el.innerHTML=`<div class="cc-top"><span class="cc-code">${c.dataset.code}</span>`
+        +`<span class="cc-pg">${c.dataset.page}</span>`
+        +`<span class="cc-src">${c.dataset.src}</span></div>`
+        +`<div class="cc-snip">${c.dataset.snip}</div>`;
+      el.addEventListener('click',()=>openPop(c));
+      citeList.appendChild(el);
+    });
+  }
+  function selectAi(aiMsg){
+    threadIn.querySelectorAll('.msg.ai.sel').forEach(m=>m.classList.remove('sel'));
+    if(aiMsg){aiMsg.classList.add('sel');}
+    renderCites(aiMsg);
+  }
+  // chọn câu trả lời AI cuối làm mặc định
+  function defaultSelect(){
+    const ais=threadIn.querySelectorAll('.msg.ai');
+    selectAi(ais[ais.length-1]||null);
+  }
+  threadIn.addEventListener('click',e=>{
+    const ai=e.target.closest('.msg.ai');
+    if(ai && !e.target.closest('.cite')) selectAi(ai);
+  });
+  defaultSelect();
+
+  /* ---------- Popover đoạn nguồn ---------- */
+  const pop=document.getElementById('citePop'), arrow=document.getElementById('cpArrow');
+  let popFor=null;
+  function openPop(chip){
+    popFor=chip;
+    document.getElementById('cpCode').textContent=chip.dataset.code;
+    document.getElementById('cpSrc').textContent=chip.dataset.src;
+    document.getElementById('cpPg').textContent=chip.dataset.page;
+    document.getElementById('cpSnip').textContent=chip.dataset.snip;
+    pop.classList.add('show');
+    positionPop(chip);
+  }
+  function positionPop(chip){
+    const r=chip.getBoundingClientRect(), pr=pop.getBoundingClientRect();
+    const gap=10, margin=12;
+    let left=r.left+r.width/2-pr.width/2;
+    left=Math.max(margin,Math.min(left,innerWidth-pr.width-margin));
+    let top=r.top-pr.height-gap, below=false;
+    if(top<margin){top=r.bottom+gap;below=true;}
+    pop.style.left=left+'px'; pop.style.top=top+'px';
+    // mũi tên trỏ về chip
+    let ax=r.left+r.width/2-left-5;
+    ax=Math.max(12,Math.min(ax,pr.width-22));
+    arrow.style.left=ax+'px';
+    if(below){arrow.style.top='-6px';arrow.style.bottom='auto';arrow.style.transform='rotate(45deg)';}
+    else{arrow.style.top='auto';arrow.style.bottom='-6px';arrow.style.transform='rotate(225deg)';}
+  }
+  function closePop(){pop.classList.remove('show');popFor=null;}
+  document.addEventListener('click',e=>{
+    const chip=e.target.closest('.cite');
+    if(chip){e.preventDefault();openPop(chip);return;}
+    if(!e.target.closest('.cite-pop')&&!e.target.closest('.cite-card')) closePop();
+  });
+  addEventListener('keydown',e=>{if(e.key==='Escape'){closePop();closeSheets();}});
+  addEventListener('scroll',()=>{if(popFor)positionPop(popFor);},true);
+  addEventListener('resize',()=>{if(popFor)positionPop(popFor);});
+
+  /* ---------- Gửi tin: bong bóng người dùng + trả lời gõ dần ---------- */
+  const form=document.getElementById('composer'), ta=document.getElementById('ta');
+  ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,140)+'px';});
+  const canned="Trong chương Chuẩn hóa CSDL, ý bạn hỏi liên quan trực tiếp tới phụ thuộc bắc cầu — chỗ tách 3NF. Mình gợi ý ôn lại định nghĩa rồi làm 2 câu quiz để chắc phần này nhé.";
+  function scrollBottom(){thread.scrollTop=thread.scrollHeight;}
+  function addUser(text){
+    const el=document.createElement('div');el.className='msg me';
+    el.innerHTML=`<span class="av">A</span><div class="body"><div class="who">Bạn</div>`
+      +`<div class="bubble"><p></p></div></div>`;
+    el.querySelector('p').textContent=text;
+    threadIn.appendChild(el);scrollBottom();
+  }
+  function addAi(){
+    const el=document.createElement('div');el.className='msg ai';el.tabIndex=0;
+    el.innerHTML=`<span class="av"><svg viewBox="0 0 24 24" fill="#000"><path d="M12 2l1.6 6.4a4 4 0 0 0 2 2L22 12l-6.4 1.6a4 4 0 0 0-2 2L12 22l-1.6-6.4a4 4 0 0 0-2-2L2 12l6.4-1.6a4 4 0 0 0 2-2L12 2z"/></svg></span>`
+      +`<div class="body"><div class="who">Trợ giảng Sen</div><div class="bubble"><p class="typing"></p></div></div>`;
+    threadIn.appendChild(el);
+    const p=el.querySelector('p');
+    if(reduce){p.classList.remove('typing');p.textContent=canned;selectAi(el);scrollBottom();return;}
+    let i=0;
+    (function type(){
+      if(i<=canned.length){p.textContent=canned.slice(0,i++);scrollBottom();
+        setTimeout(type,12+Math.random()*22);}
+      else{p.classList.remove('typing');selectAi(el);}
+    })();
+  }
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    const text=ta.value.trim();if(!text)return;
+    closePop();
+    addUser(text);ta.value='';ta.style.height='auto';
+    setTimeout(addAi,reduce?0:420);
+  });
+
+  /* ---------- Cuộc trò chuyện mới / khôi phục mẫu ---------- */
+  const emptyHTML=`<div class="empty" style="margin:auto;max-width:420px">`
+    +`<div class="ei"><i class="fa-solid fa-comments"></i></div>`
+    +`<h3>Bắt đầu một câu hỏi mới</h3>`
+    +`<p>Hỏi trợ giảng về bất kỳ khái niệm nào trong Chuẩn hóa CSDL. Câu trả lời sẽ kèm trích dẫn từ tài liệu.</p>`
+    +`<div class="quick-suggest" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px">`
+    +`<button class="chip sug">3NF là gì?</button>`
+    +`<button class="chip sug">Khi nào cần tách bảng?</button>`
+    +`<button class="chip sug">Phân biệt 2NF và 3NF</button></div></div>`;
+  document.getElementById('btnNew').addEventListener('click',()=>{
+    threadIn.innerHTML=emptyHTML;
+    threadIn.querySelectorAll('.sug').forEach(b=>b.addEventListener('click',()=>{ta.value=b.textContent;ta.focus();ta.dispatchEvent(new Event('input'));}));
+    document.querySelectorAll('.hist-item').forEach(h=>h.classList.remove('active'));
+    selectAi(null);closePop();closeSheets();
+  });
+  document.querySelectorAll('.hist-item').forEach(h=>h.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelectorAll('.hist-item').forEach(x=>x.classList.remove('active'));
+    h.classList.add('active');
+    threadIn.innerHTML=sample;defaultSelect();closePop();closeSheets();scrollBottom();
+  }));
+
+  /* ---------- Sheet mobile (lịch sử / ngữ cảnh) ---------- */
+  const scrim=document.getElementById('scrim');
+  function closeSheets(){document.querySelectorAll('.tcol-hist.open,.tcol-ctx.open').forEach(s=>s.classList.remove('open'));scrim.classList.remove('show');}
+  document.querySelectorAll('[data-open-sheet]').forEach(b=>b.addEventListener('click',()=>{
+    closeSheets();document.getElementById(b.dataset.openSheet).classList.add('open');scrim.classList.add('show');
+  }));
+  document.querySelectorAll('[data-close-sheet]').forEach(b=>b.addEventListener('click',closeSheets));
+  scrim.addEventListener('click',closeSheets);
+</script>
+</body>
+</html>

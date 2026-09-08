@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Thử 3 biến thể hero theo mẫu hổ phách</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Fraunces:ital,wght@1,500&family=Playfair+Display:ital@1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --amber:#fac363; --amber-2:#fbd37a; --cream:#fef5e4; --paper:#fffdf8; --ink:#1e1e1e; --ink-2:#3b3b3f; --muted:#6b645a; --line:#e8dfcf;
+    --sans:"Be Vietnam Pro","Inter",system-ui,sans-serif; --serif:"Fraunces","Playfair Display",serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#2b2926;color:var(--ink);font-family:var(--sans);padding:28px 24px 60px}
+  h2.lbl{color:#cfc6b8;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin:34px 0 12px}
+  h2.lbl small{font-weight:400;text-transform:none;letter-spacing:0;color:#9c9385;margin-left:10px}
+  .page{background:var(--paper);border-radius:22px;padding:18px 22px 26px;max-width:1240px;margin:0 auto;overflow:hidden}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:6px 6px 18px}
+  nav .links{display:flex;gap:22px;font-size:14px;font-weight:500;color:var(--ink-2)}
+  nav .brand{font-weight:800;letter-spacing:-.02em;font-size:18px}
+  nav .cta{display:flex;gap:10px;align-items:center;font-size:14px;font-weight:600}
+  nav .cta .btn{background:var(--ink);color:#fff;border-radius:999px;padding:9px 16px}
+  .hero{position:relative;border-radius:22px;overflow:hidden;min-height:440px;display:grid;grid-template-columns:1.05fr .95fr;gap:24px;padding:44px 48px}
+  .hero h1{font-size:54px;line-height:1.08;letter-spacing:-.025em;font-weight:800;color:var(--ink)}
+  .hero h1 .pill{display:inline-block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:.98em;background:var(--cream);border-radius:999px;padding:0 .35em .06em;line-height:1.15;color:var(--ink)}
+  .hero p{max-width:420px;color:var(--ink-2);font-size:15.5px;line-height:1.6;margin-top:18px}
+  .hero .go{display:inline-flex;align-items:center;gap:8px;margin-top:22px;background:#fff;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:12px 20px;font-weight:700;font-size:14.5px}
+  .hero .art{position:relative;border-radius:18px;overflow:hidden;min-height:360px}
+  .hero .art .ph{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--ink-2);font-size:13px;line-height:1.5;padding:20px}
+  .squig{position:absolute;pointer-events:none;opacity:.9}
+  /* V1: khối hổ phách như mẫu */
+  .v1 .hero{background:var(--amber)}
+  .v1 .art{background:rgba(255,255,255,.35);border:1.5px dashed rgba(30,30,30,.35)}
+  /* V2: video đụn cát nhuộm vàng, đặt trong khối bo góc */
+  .v2 .hero{background:#000;color:#fff}
+  .v2 .hero h1,.v2 .hero p{color:#fff}
+  .v2 .hero p{color:rgba(255,255,255,.85)}
+  .v2 .hero .pill{background:var(--amber);color:var(--ink)}
+  .v2 .hero .go{background:var(--amber);border-color:var(--amber);color:var(--ink)}
+  .v2 video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:sepia(.75) saturate(1.7) hue-rotate(-8deg) brightness(1.08) contrast(1.05)}
+  .v2 .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,14,6,.72) 0%,rgba(20,14,6,.35) 55%,rgba(20,14,6,0) 100%)}
+  .v2 .hero>*{position:relative}
+  /* V2b: cùng video nhưng nền trang kem, chữ than trên vùng sáng hóa */
+  .v2b .hero{background:var(--amber)}
+  .v2b video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:sepia(.9) saturate(1.5) hue-rotate(-6deg) brightness(1.55) contrast(.85);opacity:.9}
+  .v2b .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(250,195,99,.92) 0%,rgba(250,195,99,.55) 50%,rgba(250,195,99,.05) 100%)}
+  .v2b .hero>*{position:relative}
+  /* V3: hero tối cũ + chrome hổ phách (để thấy độ lệch) */
+  .v3 .hero{background:#000;color:#fff}
+  .v3 .hero h1,.v3 .hero p{color:#fff}
+  .v3 video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .v3 .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.55))}
+  .v3 .hero>*{position:relative}
+  .v3 .hero .pill{background:var(--amber);color:var(--ink)}
+  .v3 .hero .go{background:var(--amber);border-color:var(--amber);color:var(--ink)}
+  .v2 video,.v2b video,.v3 video,.v2 .shade,.v2b .shade,.v3 .shade{position:absolute!important}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:22px;padding:0 10px}
+  .stats div{text-align:center;padding:12px 0;border-left:1px solid var(--line)}
+  .stats div:first-child{border-left:0}
+  .stats b{display:block;font-size:30px;font-weight:800;letter-spacing:-.02em}
+  .stats span{font-size:12.5px;color:var(--muted)}
+  @media (max-width:900px){.hero{grid-template-columns:1fr;padding:30px 24px}.hero h1{font-size:38px}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<h2 class="lbl">V1 · Bám mẫu: khối hổ phách + minh họa <small>(minh họa SVG vẽ tạm để thấy hướng; bản thật dùng bộ minh họa có giấy phép)</small></h2>
+<div class="page v1">
+  <nav><div class="links"><span>Trang chủ</span><span>Tính năng</span><span>Cách hoạt động</span></div><div class="brand">✦ Sen</div><div class="cta"><span>Đăng nhập</span><span class="btn">Bắt đầu</span></div></nav>
+  <section class="hero">
+    <div>
+      <h1>Đúng tài liệu.<br>Đúng <span class="pill">người học</span>.</h1>
+      <p>Tải tài liệu môn học của bạn, hệ thống dựng bản đồ kiến thức, chấm mức thành thạo 0–100 và soạn bài học riêng cho từng người, mọi ý đều có trích dẫn.</p>
+      <a class="go" href="#">Bắt đầu học →</a>
+    </div>
+    <div class="art"><svg viewBox="0 0 520 380" width="100%" height="100%" role="img" aria-label="Minh họa: sinh viên học với laptop, sách và cây" style="position:absolute;inset:0" fill="none" stroke="#1e1e1e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M40 330 C120 322 200 336 300 326 S470 330 500 322" stroke-width="3.5"/>
+  <path d="M70 140 c40 -60 130 -70 180 -30 c60 -40 150 -20 170 40" stroke="#fff" stroke-width="4" opacity=".7"/>
+  <path d="M440 70 l8 -14 M462 82 l14 -8 M428 60 l-2 -16" />
+  <circle cx="452" cy="86" r="14" fill="#fff"/>
+  <rect x="120" y="250" width="270" height="14" rx="6" fill="#3b3b3f"/>
+  <path d="M135 264 v60 M375 264 v60" stroke-width="4"/>
+  <path d="M150 250 l-16 -96 h190 l16 96 Z" fill="#fff"/>
+  <path d="M158 246 l-13 -82 h170 l13 82 Z" fill="#8fbcd8"/>
+  <path d="M188 190 h60 M188 206 h90 M188 222 h40" stroke="#1e1e1e" stroke-width="3" opacity=".7"/>
+  <rect x="330" y="212" width="52" height="38" rx="6" fill="#fef5e4"/>
+  <path d="M334 232 h44 M334 222 h44 M334 242 h30" stroke-width="2.5"/>
+  <circle cx="262" cy="118" r="30" fill="#f6d5b8"/>
+  <path d="M232 112 c-6 -34 60 -44 62 -6 c-8 -12 -24 -18 -36 -12 c-10 6 -16 12 -26 18Z" fill="#3b3b3f"/>
+  <path d="M256 128 c4 4 10 4 14 0" />
+  <circle cx="252" cy="118" r="2.2" fill="#1e1e1e"/><circle cx="272" cy="118" r="2.2" fill="#1e1e1e"/>
+  <path d="M224 250 c-4 -46 8 -84 38 -100 c30 16 42 54 38 100Z" fill="#4c86c8"/>
+  <path d="M240 168 c-30 10 -46 38 -50 60 c10 6 18 6 26 4 M284 168 c30 12 48 40 52 62 c-10 6 -18 4 -26 2"/>
+  <path d="M212 226 c-6 10 -2 20 8 22 M312 226 c6 10 2 20 -8 22"/>
+  <path d="M210 250 c0 26 -6 50 -4 78 M314 250 c0 26 6 50 4 78" stroke="#3b3b3f" stroke-width="4"/>
+  <path d="M60 262 c-14 -30 -12 -70 20 -92 c22 20 26 62 6 92Z" fill="#7bb37a"/>
+  <path d="M84 250 c10 -40 30 -60 60 -70 c-4 32 -24 60 -60 70Z" fill="#7bb37a"/>
+  <path d="M70 262 v40" /><rect x="46" y="300" width="50" height="30" rx="8" fill="#fac363"/>
+  <rect x="404" y="150" width="88" height="62" rx="12" fill="#fff"/>
+  <path d="M418 176 l12 12 l24 -26" stroke="#3b3b3f" stroke-width="4"/>
+  <path d="M418 200 h60" stroke="#c9c2b4" stroke-width="3"/>
+  <rect x="26" y="62" width="120" height="58" rx="12" fill="#fff"/>
+  <text x="44" y="98" font-family="Be Vietnam Pro, Inter, sans-serif" font-size="22" font-weight="800" fill="#1e1e1e" stroke="none">3NF</text>
+  <rect x="106" y="74" width="30" height="22" rx="11" fill="#fac363" stroke="none"/>
+  <path d="M120 46 c6 -10 16 -10 22 0" />
+  <path d="M400 300 c10 -8 22 -8 32 0 c10 8 22 8 32 0" />
+</svg></div>
+  </section>
+  <div class="stats"><div><b>0–100</b><span>Thang thành thạo</span></div><div><b>10–15</b><span>Câu chẩn đoán</span></div><div><b>1.900+</b><span>Tài liệu thư viện số</span></div><div><b>[D3]</b><span>Trích dẫn có số trang</span></div></div>
+</div>
+
+<h2 class="lbl">V1b · Cùng bố cục, minh họa vẽ tay từ bộ có giấy phép (Doodle Ipsum, kiểu hand-drawn) <small>(ảnh ngẫu nhiên mỗi lần tải, chỉ để thấy chất liệu)</small></h2>
+<div class="page v1 v1b">
+  <nav><div class="links"><span>Trang chủ</span><span>Tính năng</span><span>Cách hoạt động</span></div><div class="brand">✦ Sen</div><div class="cta"><span>Đăng nhập</span><span class="btn">Bắt đầu</span></div></nav>
+  <section class="hero">
+    <div>
+      <h1>Đúng tài liệu.<br>Đúng <span class="pill">người học</span>.</h1>
+      <p>Tải tài liệu môn học của bạn, hệ thống dựng bản đồ kiến thức, chấm mức thành thạo 0–100 và soạn bài học riêng cho từng người, mọi ý đều có trích dẫn.</p>
+      <a class="go" href="#">Bắt đầu học →</a>
+    </div>
+    <div class="art" style="background:rgba(255,255,255,.35);border:0"><img src="https://doodleipsum.com/900x640/hand-drawn?bg=fac363" alt="Minh họa vẽ tay" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain"></div>
+  </section>
+  <div class="stats"><div><b>0–100</b><span>Thang thành thạo</span></div><div><b>10–15</b><span>Câu chẩn đoán</span></div><div><b>1.900+</b><span>Tài liệu thư viện số</span></div><div><b>[D3]</b><span>Trích dẫn có số trang</span></div></div>
+</div>
+
+<h2 class="lbl">V2 · Giữ video đụn cát, nhuộm vàng hoàng hôn, đặt trong khối bo góc</h2>
+<div class="page v2">
+  <nav><div class="links"><span>Trang chủ</span><span>Tính năng</span><span>Cách hoạt động</span></div><div class="brand">✦ Sen</div><div class="cta"><span>Đăng nhập</span><span class="btn">Bắt đầu</span></div></nav>
+  <section class="hero">
+    <video autoplay muted loop playsinline poster="assets/bg-dune.jpg" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
+    <div class="shade"></div>
+    <div>
+      <h1>Đúng tài liệu.<br>Đúng <span class="pill">người học</span>.</h1>
+      <p>Tải tài liệu môn học của bạn, hệ thống dựng bản đồ kiến thức, chấm mức thành thạo 0–100 và soạn bài học riêng cho từng người, mọi ý đều có trích dẫn.</p>
+      <a class="go" href="#">Bắt đầu học →</a>
+    </div>
+    <div></div>
+  </section>
+  <div class="stats"><div><b>0–100</b><span>Thang thành thạo</span></div><div><b>10–15</b><span>Câu chẩn đoán</span></div><div><b>1.900+</b><span>Tài liệu thư viện số</span></div><div><b>[D3]</b><span>Trích dẫn có số trang</span></div></div>
+</div>
+
+<h2 class="lbl">V2b · Video nhuộm sáng hơn, hòa vào khối hổ phách, chữ than</h2>
+<div class="page v2b">
+  <nav><div class="links"><span>Trang chủ</span><span>Tính năng</span><span>Cách hoạt động</span></div><div class="brand">✦ Sen</div><div class="cta"><span>Đăng nhập</span><span class="btn">Bắt đầu</span></div></nav>
+  <section class="hero">
+    <video autoplay muted loop playsinline poster="assets/bg-dune.jpg" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
+    <div class="shade"></div>
+    <div>
+      <h1>Đúng tài liệu.<br>Đúng <span class="pill">người học</span>.</h1>
+      <p>Tải tài liệu môn học của bạn, hệ thống dựng bản đồ kiến thức, chấm mức thành thạo 0–100 và soạn bài học riêng cho từng người, mọi ý đều có trích dẫn.</p>
+      <a class="go" href="#">Bắt đầu học →</a>
+    </div>
+    <div></div>
+  </section>
+  <div class="stats"><div><b>0–100</b><span>Thang thành thạo</span></div><div><b>10–15</b><span>Câu chẩn đoán</span></div><div><b>1.900+</b><span>Tài liệu thư viện số</span></div><div><b>[D3]</b><span>Trích dẫn có số trang</span></div></div>
+</div>
+
+<h2 class="lbl">V3 · Hero tối như hiện tại, chỉ đổi nút sang hổ phách <small>(để thấy độ lệch mà bạn cảm nhận)</small></h2>
+<div class="page v3">
+  <nav><div class="links"><span>Trang chủ</span><span>Tính năng</span><span>Cách hoạt động</span></div><div class="brand">✦ Sen</div><div class="cta"><span>Đăng nhập</span><span class="btn">Bắt đầu</span></div></nav>
+  <section class="hero">
+    <video autoplay muted loop playsinline poster="assets/bg-dune.jpg" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
+    <div class="shade"></div>
+    <div>
+      <h1>Đúng tài liệu.<br>Đúng <span class="pill">người học</span>.</h1>
+      <p>Tải tài liệu môn học của bạn, hệ thống dựng bản đồ kiến thức, chấm mức thành thạo 0–100 và soạn bài học riêng cho từng người, mọi ý đều có trích dẫn.</p>
+      <a class="go" href="#">Bắt đầu học →</a>
+    </div>
+    <div></div>
+  </section>
+  <div class="stats"><div><b>0–100</b><span>Thang thành thạo</span></div><div><b>10–15</b><span>Câu chẩn đoán</span></div><div><b>1.900+</b><span>Tài liệu thư viện số</span></div><div><b>[D3]</b><span>Trích dẫn có số trang</span></div></div>
+</div>
+
+</body>
+</html>
