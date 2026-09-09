@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bản đồ kiến thức — Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng Bản đồ kiến thức ---- */
+  .pick{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px 0 14px;border-radius:12px;background:var(--cream);font-size:13.5px;font-weight:600}
+  .pick .ic{width:15px;height:15px;color:var(--amber-deep)}.pick .chev{width:13px;height:13px;color:var(--muted)}
+  /* dải 5 bậc (F4) */
+  .lvls{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:16px}
+  .lv{border-radius:16px;padding:12px 14px;display:grid;gap:2px;border:2px solid transparent}
+  .lv .n{font-family:var(--num);font-weight:700;font-size:26px;line-height:1}
+  .lv .n small{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink-2);margin-left:3px}
+  .lv .l{font-size:12px;font-weight:700}
+  .lv .r{font-size:11px;color:var(--ink-2)}
+  .lv.m-1{background:var(--m1);border-color:var(--m1a)}.lv.m-2{background:var(--m2);border-color:var(--m2a)}.lv.m-3{background:var(--m3);border-color:var(--m3a)}.lv.m-4{background:var(--m4);border-color:var(--m4a)}.lv.m-5{background:var(--m5);border-color:var(--m5a)}
+  /* canvas */
+  .graph-card{padding:0;overflow:hidden;background:var(--white);border:1px solid var(--line-2)}
+  .graph-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+  .graph-bar .sp{flex:1}
+  .tools{display:flex;gap:4px;background:var(--cream);border-radius:999px;padding:4px;flex-wrap:wrap}
+  .tools button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;transition:background .2s,color .2s}
+  .tools button:hover{background:var(--white);color:var(--ink)}
+  .tools button .ic{width:15px;height:15px}
+  .tools button.danger:hover{color:var(--danger)}
+  .zoom{display:flex;gap:2px}
+  .zoom .ibtn{width:32px;height:32px;border-radius:10px}
+  .zoom .ibtn .ic{width:15px;height:15px}
+  .canvas{position:relative;display:grid;place-items:center;background-color:var(--white);background-image:radial-gradient(var(--line-2) 1.2px,transparent 1.3px);background-size:24px 24px;min-height:480px;padding:22px 16px 48px;overflow:hidden}
+  .canvas svg:not(.inl){display:block;width:100%;height:auto;overflow:visible} /* :not(.inl): minh hoạ explore nội tuyến không được ăn rule của SVG đồ thị */
+  .edge{fill:none;stroke:var(--ink);stroke-width:1.8;opacity:.55;transition:opacity .25s,stroke-width .25s}
+  .edge.is-hot{opacity:1;stroke-width:2.4}
+  .edge.is-dim{opacity:.15}
+  .node{cursor:pointer}
+  .node .box{stroke-width:2.5}
+  .node .lbl{font-family:var(--sans);font-size:14px;font-weight:600;fill:var(--ink)}
+  .node .val{font-family:var(--num);font-size:12.5px;font-weight:700;fill:var(--ink)}
+  .node .valbg{fill:rgba(255,255,255,.75)}
+  .node.m-1 .box{fill:var(--m1);stroke:var(--m1a)}.node.m-2 .box{fill:var(--m2);stroke:var(--m2a)}.node.m-3 .box{fill:var(--m3);stroke:var(--m3a)}.node.m-4 .box{fill:var(--m4);stroke:var(--m4a)}.node.m-5 .box{fill:var(--m5);stroke:var(--m5a)}
+  .node .sel{fill:none;stroke:var(--ink);stroke-width:2;opacity:0}
+  .node.is-selected .sel{opacity:1}
+  .node .human{opacity:0}
+  .node.is-human .human{opacity:1}
+  .node .human circle{fill:var(--ink)}
+  .node .human path{fill:none;stroke:var(--amber);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .canvas-hint{position:absolute;left:14px;bottom:12px;font-size:12px;color:var(--muted);background:rgba(255,255,255,.9);border:1px solid var(--line-2);border-radius:999px;padding:6px 12px}
+  .canvas-fig{position:absolute;right:14px;top:10px;width:104px;pointer-events:none;opacity:.95}
+  /* rail chi tiết khái niệm */
+  .sel-head{display:flex;align-items:flex-start;gap:8px}
+  .sel-head h2{font-size:19px;font-weight:800;letter-spacing:-.015em;line-height:1.2;flex:1;min-width:0;display:block}
+  .sel-head h2 .in{height:40px;font-size:16px;font-weight:700}
+  .src{display:inline-flex;align-items:center;gap:6px}
+  .mastery-big{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:var(--ink);color:var(--white)}
+  .mastery-big .ring{width:46px;height:46px;background:conic-gradient(var(--amber) calc(var(--p)*1%),rgba(255,255,255,.16) 0);box-shadow:none}
+  .mastery-big .big{font-size:34px;color:var(--amber)}
+  .mastery-big .big small{font-size:13px;margin-left:3px;color:rgba(255,255,255,.6)}
+  .mastery-big .lvl{margin-left:auto}
+  .desc{font-size:14px;line-height:1.55;color:var(--ink-2)}
+  .kv{display:grid;gap:8px;font-size:13.5px}
+  .kv>div{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .kv b{color:var(--muted);font-weight:600;min-width:74px}
+  .kv .tag{cursor:pointer}
+  .sel-acts{display:grid;gap:8px}
+  .sel-acts .row2{display:flex;gap:8px}
+  .sel-acts .row2 .btn{flex:1;justify-content:center}
+  @media (max-width:1100px){.lvls{grid-template-columns:repeat(5,minmax(0,1fr))}.lv{padding:10px}.lv .n{font-size:22px}}
+  @media (max-width:900px){.canvas{min-height:0;display:block;place-items:start;overflow-x:auto;padding:16px 12px 48px}.canvas svg:not(.inl){min-width:720px}.canvas-hint,.canvas-fig{display:none}.lvls{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body data-page="map" data-role="student" data-title="Bản đồ kiến thức" data-promo="lesson">
+<div class="app">
+  <aside class="sb" id="sb"></aside>
+  <main class="main" id="main">
+    <header class="tb" id="tb"></header>
+    <div class="content">
+      <div class="ph">
+        <div><p class="eyebrow">Cơ sở dữ liệu · Chương 4 · <span id="ovConcepts">8</span> khái niệm · <span id="ovEdges">9</span> tiên quyết · <span id="ovAi">7</span> AI sinh · <span id="ovHuman">1</span> người sửa</p><p class="sub">Mỗi nút tô theo mức thành thạo 0–100. Bạn sửa được mọi thứ — <b style="font-family:var(--sans)">người sửa luôn thắng</b>.</p></div>
+        <div class="ph-actions">
+          <button class="pick" type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-book-open"/></svg>Chương 4 · Chuẩn hóa<svg class="ic chev" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
+          <a class="btn btn-dark btn-sm" href="app-diagnostic.html">Làm bài chẩn đoán<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+        </div>
+      </div>
+
+      <div class="lvls" data-reveal data-pop-row aria-label="Số khái niệm theo bậc">
+        <div class="lv m-1"><span class="n"><span data-count="2">2</span></span><span class="l">Rất yếu</span><span class="r">0–19 · 3NF, BCNF</span></div>
+        <div class="lv m-2"><span class="n"><span data-count="4" data-mark="circle">4</span></span><span class="l">Yếu</span><span class="r">20–39 · FD, bắc cầu, đầy đủ, 2NF</span></div>
+        <div class="lv m-3"><span class="n"><span data-count="2">2</span></span><span class="l">Cần ôn</span><span class="r">40–59 · Khóa, 1NF</span></div>
+        <div class="lv m-4"><span class="n">0</span><span class="l">Khá</span><span class="r">60–79</span></div>
+        <div class="lv m-5"><span class="n">0</span><span class="l">Vững</span><span class="r">80–100</span></div>
+      </div>
+
+      <article class="card graph-card" data-reveal>
+        <div class="graph-bar">
+          <span class="tag tag--soft"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Chương 4 — Chuẩn hóa CSDL.pdf</span>
+          <span class="sp"></span>
+          <div class="tools" role="toolbar" aria-label="Sửa bản đồ">
+            <button type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Thêm</button>
+            <button type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-git-merge"/></svg>Nối tiên quyết</button>
+            <button type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-split"/></svg>Gộp</button>
+            <button type="button" class="danger" id="tDelete"><svg class="ic" aria-hidden="true"><use href="#i-trash-2"/></svg>Xóa</button>
+          </div>
+          <div class="zoom" aria-label="Thu phóng">
+            <button class="ibtn" type="button" data-zoom="-" aria-label="Thu nhỏ"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg></button>
+            <button class="ibtn" type="button" data-zoom="+" aria-label="Phóng to"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+          </div>
+        </div>
+        <div class="canvas" id="canvas">
+          <svg id="graph" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Đồ thị 8 khái niệm chương 4 với mũi tên tiên quyết"></svg>
+          <div class="canvas-hint">Bấm một nút để xem &amp; sửa · mũi tên = cần học trước</div>
+          <img class="canvas-fig spot" src="assets/spot/explore.svg" alt="" width="500" height="500" data-float />
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <aside class="rail" aria-label="Khái niệm đang chọn" id="panel">
+    <div class="sel-head">
+      <h2 id="selName">Dạng chuẩn 3 (3NF)</h2>
+      <button class="ibtn ibtn-sm" type="button" id="btnRename" aria-label="Đổi tên khái niệm" title="Đổi tên"><svg class="ic" aria-hidden="true"><use href="#i-pencil"/></svg></button>
+    </div>
+    <span class="src tag" id="selSrc"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>AI sinh</span>
+    <div class="mastery-big" data-reveal>
+      <span class="ring" id="selRing" style="--p:15"></span>
+      <div class="big"><span id="selScore">15</span><small>/100</small></div>
+      <span class="lvl lvl-1" id="selLvl">Rất yếu</span>
+    </div>
+    <p class="desc" id="selDesc">Đạt 2NF và không có phụ thuộc bắc cầu của thuộc tính không khóa vào khóa chính.</p>
+    <div class="kv">
+      <div><b>Cần trước</b><span id="selPre"></span></div>
+      <div><b>Dẫn tới</b><span id="selNext"></span></div>
+      <div><b>Nguồn</b><span id="selSrcs"></span></div>
+      <div><b>Lịch sử</b><span class="small muted" id="selHist">Sai 2 lần ở quiz 3NF · lịch học 14/09</span></div>
+    </div>
+    <div class="sel-acts">
+      <a class="btn btn-dark btn-sm btn-block" href="app-lesson.html" id="selLearn">Học khái niệm này<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+      <div class="row2">
+        <button class="btn btn-ghost btn-xs" type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-split"/></svg>Gộp với…</button>
+        <button class="btn btn-ghost btn-xs" type="button" id="btnDelete"><svg class="ic" aria-hidden="true"><use href="#i-trash-2"/></svg>Xóa</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<dialog class="dlg" id="dlgDelete">
+  <form method="dialog" class="dlg-in">
+    <h2>Xóa khái niệm “<span id="dlgName"></span>”?</h2>
+    <p>Các mũi tên tiên quyết nối tới nó sẽ bị gỡ. Bài học và câu hỏi đã sinh cho khái niệm này vẫn được giữ trong lịch sử. Thao tác này ghi <b>source = human</b>.</p>
+    <div class="dlg-acts"><button class="btn btn-ghost btn-sm" value="cancel">Giữ lại</button><button class="btn btn-danger btn-sm" value="ok">Xóa khái niệm</button></div>
+  </form>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="icons.js"></script>
+<script src="shell.js"></script>
+<script src="motion.js"></script>
+<script src="motion-assets.js"></script>
+<script>
+/* Đồ thị khái niệm (05 §6.3, mastery của An). Dựng bằng JS để sửa/xóa/đổi tên cập nhật ngay. */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rm = SEN.rm, NS = 'http://www.w3.org/2000/svg';
+  const C = {
+    k1: { n: 'Phụ thuộc hàm (FD)', a: 'Phụ thuộc hàm', x: 95, y: 230, m: 30, src: 'ai', d: 'X xác định Y (X→Y) khi hai bộ trùng nhau trên X thì trùng nhau trên Y. Đây là gốc của cả chương.', s: [['D1', 12]], h: 'Học hôm qua · đánh giá “dễ hiểu”' },
+    k2: { n: 'Khóa & khóa dự tuyển', a: 'Khóa dự tuyển', x: 270, y: 80, m: 40, src: 'human', d: 'Tập thuộc tính tối thiểu xác định mọi thuộc tính còn lại của quan hệ; có thể có nhiều khóa dự tuyển.', s: [['D2', 13]], h: 'Bạn đổi tên từ “Khóa chính” (08/09)' },
+    k3: { n: 'Phụ thuộc hàm đầy đủ', a: 'FD đầy đủ', x: 270, y: 230, m: 25, src: 'ai', d: 'Y phụ thuộc đầy đủ vào X khi Y không phụ thuộc vào bất kỳ tập con thực sự nào của X.', s: [['D3', 13]], h: 'Lịch học 10/09' },
+    k4: { n: 'Phụ thuộc bắc cầu', a: 'PT bắc cầu', x: 270, y: 380, m: 20, src: 'ai', d: 'Nếu X→Y và Y→Z với Y không phải khóa thì Z phụ thuộc bắc cầu vào X qua Y.', s: [['D4', 14]], h: 'Đang học · sai câu chẩn đoán' },
+    k5: { n: 'Dạng chuẩn 1 (1NF)', a: '1NF', x: 445, y: 80, m: 55, src: 'ai', d: 'Mọi thuộc tính đều nguyên tử; không có nhóm lặp hay thuộc tính đa trị.', s: [['D5', 15]], h: 'Sát ngưỡng 60' },
+    k6: { n: 'Dạng chuẩn 2 (2NF)', a: '2NF', x: 445, y: 230, m: 35, src: 'ai', d: 'Đạt 1NF và mọi thuộc tính không khóa phụ thuộc đầy đủ vào khóa chính.', s: [['D6', 16]], h: 'Lịch học 12/09' },
+    k7: { n: 'Dạng chuẩn 3 (3NF)', a: '3NF', x: 640, y: 300, m: 15, src: 'ai', d: 'Đạt 2NF và không có phụ thuộc bắc cầu của thuộc tính không khóa vào khóa chính.', s: [['D7', 17], ['D7', 18]], h: 'Sai 2 lần ở quiz 3NF · lịch học 14/09' },
+    k8: { n: 'Dạng chuẩn Boyce–Codd (BCNF)', a: 'BCNF', x: 640, y: 410, m: 10, src: 'ai', d: 'Mọi phụ thuộc hàm không tầm thường X→Y đều có X là siêu khóa.', s: [['D8', 18]], h: 'Chưa học · lịch 18/09' },
+  };
+  let E = [['k1', 'k2'], ['k1', 'k3'], ['k1', 'k4'], ['k2', 'k5'], ['k3', 'k6'], ['k5', 'k6'], ['k4', 'k7'], ['k6', 'k7'], ['k7', 'k8']];
+  const H = 46, lvl = m => m < 20 ? 1 : m < 40 ? 2 : m < 60 ? 3 : m < 80 ? 4 : 5, LBL = ['', 'Rất yếu', 'Yếu', 'Cần ôn', 'Khá', 'Vững'];
+  const svg = $('#graph'), el = (t, a = {}) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  const defs = el('defs'); defs.innerHTML = '<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="#1d1d1d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>'; svg.appendChild(defs);
+  const gE = el('g', { class: 'edges' }), gN = el('g', { class: 'nodes' }); svg.append(gE, gN);
+  const short = c => c.a || c.n;
+  const route = (A, B) => { const ax2 = A.x + A.w / 2, bx1 = B.x - B.w / 2;
+    if (bx1 - ax2 >= 24) { const mx = (ax2 + bx1) / 2; return `M${ax2} ${A.y} C${mx} ${A.y}, ${mx} ${B.y}, ${bx1 - 2} ${B.y}`; }
+    const ay = A.y + H / 2, by = B.y - H / 2, my = (ay + by) / 2; return `M${A.x} ${ay} C${A.x} ${my}, ${B.x} ${my}, ${B.x} ${by - 2}`; };
+  function draw() {
+    gE.innerHTML = ''; gN.innerHTML = '';
+    Object.entries(C).forEach(([id, c]) => {
+      const g = el('g', { class: `node m-${lvl(c.m)}${c.src === 'human' ? ' is-human' : ''}${id === sel ? ' is-selected' : ''}`, 'data-id': id, tabindex: 0, role: 'button', 'aria-label': `${c.n}, thành thạo ${c.m} trên 100` });
+      g.innerHTML = `<title>${c.n} · ${c.m}/100</title><g class="lift"><rect class="sel" rx="19"/><rect class="box" rx="14" height="${H}"/><text class="lbl" x="14" y="${H / 2 + 5}">${short(c)}</text><rect class="valbg" y="${H / 2 - 11}" width="30" height="22" rx="8"/><text class="val" y="${H / 2 + 4.5}" text-anchor="middle">${c.m}</text><g class="human"><circle r="10"/><path d="M-3.5 3.5l6-6 1.5 1.5-6 6H-3.5z M1.5 -1.5l1.5 1.5"/></g></g>`;
+      gN.appendChild(g);
+      const W = c.w = Math.max(96, Math.ceil($('.lbl', g).getComputedTextLength()) + 62);
+      g.setAttribute('transform', `translate(${c.x - W / 2} ${c.y - H / 2})`);
+      $('.box', g).setAttribute('width', W); $('.sel', g).setAttribute('x', -5); $('.sel', g).setAttribute('y', -5); $('.sel', g).setAttribute('width', W + 10); $('.sel', g).setAttribute('height', H + 10);
+      $('.valbg', g).setAttribute('x', W - 40); $('.val', g).setAttribute('x', W - 25); $('.human', g).setAttribute('transform', `translate(${W - 10} -8)`);
+    });
+    E.forEach(([a, b]) => { const A = C[a], B = C[b]; if (!A || !B) return; gE.appendChild(el('path', { class: 'edge', d: route(A, B), 'marker-end': 'url(#arr)', 'data-a': a, 'data-b': b })); });
+    $('#ovConcepts').textContent = Object.keys(C).length; $('#ovHuman').textContent = Object.values(C).filter(c => c.src === 'human').length; $('#ovAi').textContent = Object.values(C).filter(c => c.src === 'ai').length; $('#ovEdges').textContent = E.filter(e => C[e[0]] && C[e[1]]).length;
+  }
+  let sel = 'k7';
+  function show(id, animate) {
+    const c = C[id]; if (!c) return; sel = id;
+    $$('.node', gN).forEach(g => g.classList.toggle('is-selected', g.dataset.id === id));
+    if (animate) document.dispatchEvent(new CustomEvent('sen:select', { detail: { id } })); // motion.js C5: cạnh chảy vào nút vừa chọn (không phát lúc khởi tạo — REVIEW-27 P1)
+    $('#selName').textContent = c.n; $('#selDesc').textContent = c.d; $('#selHist').textContent = c.h;
+    $('#selSrc').innerHTML = c.src === 'human' ? SEN.ic('pen-line') + 'Người sửa' : SEN.ic('sparkles') + 'AI sinh';
+    $('#selSrc').className = 'src tag' + (c.src === 'human' ? ' tag--ink' : '');
+    $('#selScore').textContent = c.m; $('#selLvl').textContent = LBL[lvl(c.m)]; $('#selLvl').className = 'lvl lvl-' + lvl(c.m);
+    const chip = k => `<button class="tag tag--white" type="button" data-go="${k}">${short(C[k])}</button>`;
+    $('#selPre').innerHTML = E.filter(e => e[1] === id).map(e => chip(e[0])).join('') || '<span class="muted">— (gốc)</span>';
+    $('#selNext').innerHTML = E.filter(e => e[0] === id).map(e => chip(e[1])).join('') || '<span class="muted">— (lá)</span>';
+    $('#selSrcs').innerHTML = c.s.map(([d, p]) => `<button class="cite" type="button" data-soon>[${d}] tr. ${p}</button>`).join(' ');
+    if (rm) { $('#selRing').style.setProperty('--p', c.m); return; }
+    gsap.to($('#selRing'), { '--p': c.m, duration: .6, ease: 'power3.out', overwrite: 'auto' });
+    if (animate) gsap.from('#panel > *:not(.sel-head)', { y: 8, opacity: 0, duration: .35, stagger: .04, ease: 'power2.out', overwrite: 'auto' });
+  }
+  draw(); show(sel, false);
+  gN.addEventListener('click', e => { const g = e.target.closest('.node'); if (g) show(g.dataset.id, true); });
+  gN.addEventListener('keydown', e => { const g = e.target.closest('.node'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); show(g.dataset.id, true); } });
+  $('#panel').addEventListener('click', e => { const t = e.target.closest('[data-go]'); if (t) show(t.dataset.go, true); });
+  gN.addEventListener('mouseover', e => { const g = e.target.closest('.node'); if (!g) return; const id = g.dataset.id;
+    $$('.edge', gE).forEach(p => { const hot = p.dataset.a === id || p.dataset.b === id; p.classList.toggle('is-hot', hot); p.classList.toggle('is-dim', !hot); });
+    if (!rm) gsap.to($('.lift', g), { y: -3, duration: .3, ease: 'power2.out', overwrite: 'auto' }); }); // nhấc lớp trong, không đụng translate định vị của nút
+  gN.addEventListener('mouseout', e => { const g = e.target.closest('.node'); if (!g || g.contains(e.relatedTarget)) return;
+    $$('.edge', gE).forEach(p => p.classList.remove('is-hot', 'is-dim')); if (!rm) gsap.to($('.lift', g), { y: 0, duration: .4, ease: 'power2.out', overwrite: 'auto' }); });
+  const nameEl = $('#selName');
+  $('#btnRename').addEventListener('click', () => {
+    if ($('input', nameEl)) return;
+    const old = C[sel].n, inp = document.createElement('input'); inp.className = 'in'; inp.value = old; inp.setAttribute('aria-label', 'Tên khái niệm');
+    nameEl.textContent = ''; nameEl.appendChild(inp); inp.focus(); inp.select();
+    const done = (save) => { const v = inp.value.trim(); nameEl.textContent = save && v ? v : old;
+      if (save && v && v !== old) { C[sel].n = v; C[sel].a = v.length > 16 ? v.replace(/\s*\(.*\)$/, '').slice(0, 18) : v; C[sel].src = 'human'; C[sel].h = 'Bạn vừa đổi tên từ “' + old + '”'; draw(); show(sel, false);
+        const g = $(`.node[data-id="${sel}"]`, gN); if (!rm && g) gsap.from($('.human', g), { scale: 0, transformOrigin: '50% 50%', duration: .6, ease: 'back.out(2.5)' });
+        SEN.toast('Đã đổi tên — người sửa luôn thắng (source = human)', 'pen-line'); } };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); done(true); } if (e.key === 'Escape') done(false); });
+    inp.addEventListener('blur', () => done(true));
+  });
+  const dlg = $('#dlgDelete');
+  const askDelete = () => { $('#dlgName').textContent = C[sel].n; dlg.showModal(); };
+  $('#btnDelete').addEventListener('click', askDelete); $('#tDelete').addEventListener('click', askDelete);
+  dlg.addEventListener('close', () => { if (dlg.returnValue !== 'ok') return;
+    const id = sel, g = $(`.node[data-id="${id}"]`, gN), es = $$('.edge', gE).filter(p => p.dataset.a === id || p.dataset.b === id);
+    const finish = () => { delete C[id]; E = E.filter(e => e[0] !== id && e[1] !== id); draw(); show(Object.keys(C)[0], true); SEN.toast('Đã xóa khái niệm (ghi source = human)', 'trash-2'); };
+    if (rm) return finish();
+    gsap.to(es, { opacity: 0, duration: .3 }); gsap.to(g, { scale: .6, opacity: 0, transformOrigin: '50% 50%', duration: .4, ease: 'power2.in', onComplete: finish });
+  });
+  let z = 1; $$('[data-zoom]').forEach(b => b.addEventListener('click', () => { z = Math.min(1.6, Math.max(.7, z + (b.dataset.zoom === '+' ? .15 : -.15)));
+    if (rm) svg.style.transform = `scale(${z})`; else gsap.to(svg, { scale: z, transformOrigin: '50% 50%', duration: .35, ease: 'power2.out' }); }));
+  if (rm) return;
+  const paths = $$('.edge', gE); paths.forEach(p => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });
+  gsap.timeline({ delay: .6 })
+    .from($$('.node', gN), { opacity: 0, scale: .85, transformOrigin: '50% 50%', duration: .5, stagger: .05, ease: 'power2.out' }, 0)
+    .to(paths, { strokeDashoffset: 0, duration: .7, stagger: .05, ease: 'power2.out' }, .25);
+})();
+</script>
+</body>
+</html>

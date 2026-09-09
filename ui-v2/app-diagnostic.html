@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bài chẩn đoán — Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng Bài chẩn đoán ---- */
+  .timer{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:12px;background:var(--cream);font-family:var(--num);font-weight:700;font-size:15px}
+  .timer .ic{width:16px;height:16px;color:var(--amber-deep)}
+  /* dải than: câu hiện tại (số lớn) + 10 ô trạng thái — khối nhấn duy nhất */
+  .band{display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:18px 22px;margin-bottom:16px}
+  .band .big{color:var(--amber);font-size:46px}
+  .band .big small{font-size:14px;color:rgba(255,255,255,.6)}
+  .band .lbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:700;margin-bottom:4px}
+  .band .concept{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:var(--white);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
+  .band .concept .ic{width:14px;height:14px;color:var(--amber)}
+  .sq{margin-left:auto;display:grid;grid-template-columns:repeat(10,32px);gap:6px}
+  .sq button{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-family:var(--num);font-size:12px;font-weight:700;background-image:repeating-linear-gradient(-45deg,transparent 0 4px,rgba(255,255,255,.08) 4px 8px);transition:background .2s,transform .2s}
+  .sq button:hover{transform:translateY(-2px)}
+  .sq button.is-done{background:var(--amber);color:var(--ink);background-image:none}
+  .sq button.is-cur{background:transparent;background-image:none;box-shadow:inset 0 0 0 2px var(--amber);color:var(--amber)}
+  /* thẻ câu hỏi */
+  .quiz{padding:24px 26px}
+  .q-text{font-size:clamp(18px,1.5vw,22px);font-weight:700;letter-spacing:-.015em;line-height:1.35;margin:0 0 20px;max-width:60ch}
+  .q-text code{font-family:var(--num);font-weight:700;background:var(--cream);border-radius:6px;padding:1px 6px;font-size:.9em}
+  .opts{display:grid;gap:10px}
+  .opt{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:14px;border:1.5px solid var(--line-2);background:var(--white);cursor:pointer;text-align:left;font-size:15px;line-height:1.4;transition:border-color .2s,background .2s}
+  .opt:hover{border-color:var(--amber-soft);background:#fffdf8}
+  .opt .k{width:30px;height:30px;border-radius:50%;background:var(--cream);display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:13px;flex:none;transition:background .2s,color .2s}
+  .opt.is-on{border-color:var(--ink);background:var(--cream)}
+  .opt.is-on .k{background:var(--ink);color:var(--amber)}
+  .opt code{font-family:var(--num);font-weight:700}
+  .q-nav{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}
+  .q-nav .sp{flex:1}
+  .q-nav .hint{font-size:13px;color:var(--muted)}
+  /* rail */
+  .think{display:grid;place-items:center;text-align:center;gap:6px;padding:8px 6px 4px}
+  .think :is(img,svg.inl){width:150px}
+  .think b{font-size:15px}
+  .think p{font-size:13px;color:var(--ink-2);line-height:1.5}
+  /* kết quả */
+  .result{display:none}
+  .res-head{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:20px}
+  .res-ring{position:relative;width:96px;height:96px;flex:none}
+  .res-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .res-ring circle{fill:none;stroke-width:10;stroke-linecap:round}
+  .res-ring .bg{stroke:var(--cream-deep)}.res-ring .fg{stroke:var(--amber)}
+  .res-ring b{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--num);font-size:24px;font-weight:700;line-height:1}
+  .res-ring b small{font-family:var(--sans);font-size:11px;font-weight:600;color:var(--muted);margin-top:4px}
+  .res-head h2{font-size:21px;font-weight:800;letter-spacing:-.015em;margin-bottom:6px}
+  .res-head p{color:var(--ink-2);font-size:14.5px;max-width:52ch}
+  .res-weak{margin-top:18px;padding:14px 16px;border-radius:16px;background:var(--cream);display:flex;gap:12px;align-items:flex-start;font-size:14px}
+  .res-weak .ic{width:18px;height:18px;color:var(--amber-deep);flex:none;margin-top:2px}
+  .res-acts{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:center}
+  .plan-state{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted)}
+  .spin{width:14px;height:14px;border-radius:50%;border:2.5px solid var(--cream-deep);border-top-color:var(--amber-deep);animation:spin 1s linear infinite;flex:none}
+  .is-static .spin{animation:none}
+  @media (max-width:900px){.sq{margin-left:0;grid-template-columns:repeat(10,1fr);width:100%}.sq button{width:auto;height:36px}.q-nav .btn{min-height:44px}#btnDemo{min-height:44px}}
+  @media (max-width:600px){.quiz{padding:18px 16px}.q-text{font-size:18px}}
+</style>
+</head>
+<body data-page="map" data-role="student" data-title="Bài chẩn đoán" data-promo="lesson">
+<div class="app">
+  <aside class="sb" id="sb"></aside>
+  <main class="main" id="main">
+    <header class="tb" id="tb"></header>
+    <div class="content">
+      <div class="ph">
+        <div><p class="eyebrow">Chẩn đoán đầu vào · Cơ sở dữ liệu · Chương 4</p><p class="sub"><b>10</b> câu trải đều 8 khái niệm, khoảng <b>12</b> phút. Kết quả chỉ để khởi tạo mức thành thạo và lập kế hoạch — không tính điểm môn.</p></div>
+        <div class="ph-actions"><span class="timer" aria-live="off"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg><span id="clock">12:00</span></span><button class="btn btn-ghost btn-sm" type="button" data-soon>Lưu &amp; thoát</button></div>
+      </div>
+
+      <!-- dải than -->
+      <div class="card card--ink band" id="band" data-reveal>
+        <div><div class="lbl">Câu hỏi</div><div class="big" data-mark="circle" data-nocount><span id="qNum">1</span><small>/10</small></div></div>
+        <div><div class="lbl">Khái niệm</div><span class="concept" id="qConcept"></span></div>
+        <div class="sq" id="sq" aria-label="Chuyển tới câu"></div>
+      </div>
+
+      <!-- làm bài -->
+      <article class="card card--white quiz" data-reveal id="quiz">
+        <p class="q-text" id="qText"></p>
+        <div class="opts" id="opts" role="radiogroup" aria-label="Phương án"></div>
+        <div class="q-nav">
+          <button class="btn btn-ghost btn-sm" type="button" id="btnPrev"><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>Câu trước</button>
+          <span class="sp"></span>
+          <span class="hint" id="qHint">Chọn một phương án để tiếp tục</span>
+          <button class="btn btn-dark btn-sm" type="button" id="btnNext" disabled>Câu tiếp<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+        </div>
+      </article>
+
+      <!-- kết quả -->
+      <article class="card card--white quiz result" id="result" aria-live="polite">
+        <div class="res-head">
+          <div class="res-ring" data-pop><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="42"/><circle class="fg" id="resArc" cx="50" cy="50" r="42" stroke-dasharray="263.9" stroke-dashoffset="263.9"/></svg><b><span><span id="resScore">0</span>/10</span><small>câu đúng</small></b></div>
+          <div><h2>Đã khởi tạo mức thành thạo cho 8 khái niệm</h2><p>Điểm 0–100 tính từ câu đúng/sai, độ khó và quan hệ tiên quyết. Hai khái niệm đã chạm ngưỡng “cần ôn”, sáu khái niệm còn lại cần học từ đầu.</p></div>
+        </div>
+        <div class="mgrid" id="mgrid"></div>
+        <div class="res-weak"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg><div><b>Cả 8 khái niệm đều dưới ngưỡng 60.</b> Chuỗi cần dồn sức: Phụ thuộc hàm → Phụ thuộc bắc cầu → 3NF. Kế hoạch tuần sẽ xếp các bài này vào khung giờ tối của bạn trước kỳ thi 20/09.</div></div>
+        <div class="res-acts">
+          <a class="btn btn-dark btn-sm" href="app-plan.html" id="btnPlan">Xem lộ trình<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+          <a class="btn btn-ghost btn-sm" href="app-map.html">Xem bản đồ</a>
+          <span class="plan-state" id="planState"><span class="spin" aria-hidden="true"></span>Đang lập kế hoạch tuần…</span>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <aside class="rail" aria-label="Hướng dẫn">
+    <div class="card card--tint-sky think" data-reveal>
+      <img class="spot" src="assets/spot/thinker.svg" alt="" width="500" height="500" data-float />
+      <b>Trả lời thật</b>
+      <p>Hệ thống dùng kết quả để soạn bài đúng chỗ bạn còn yếu. Đoán đúng chỉ làm bài học bỏ qua phần bạn cần.</p>
+      <button class="btn btn-white btn-xs btn-block" type="button" id="btnDemo" style="margin-top:6px"><svg class="ic" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Điền nhanh theo hồ sơ An (demo)</button>
+    </div>
+    <div class="rh" data-reveal>
+      <h2>Sau khi nộp</h2>
+      <div class="lib" style="display:grid;gap:10px;font-size:13.5px;color:var(--ink-2)">
+        <div style="display:flex;gap:10px;align-items:center"><span class="tile" style="background:var(--tint-amber)"><img src="assets/ico/bar-chart.svg" alt="" /></span><span>Mỗi khái niệm nhận mức <b>0–100</b> và một bậc (Rất yếu → Vững).</span></div>
+        <div style="display:flex;gap:10px;align-items:center"><span class="tile" style="background:var(--tint-mint)"><img src="assets/ico/timeline.svg" alt="" /></span><span>Kế hoạch tuần <b>v1</b> tự lập từ ngày thi, giờ rảnh và mức thành thạo.</span></div>
+        <div style="display:flex;gap:10px;align-items:center"><span class="tile" style="background:var(--tint-peach)"><img src="assets/ico/target.svg" alt="" /></span><span>Câu sai được ghi nhớ để bài học nhắm đúng chỗ.</span></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="icons.js"></script>
+<script src="shell.js"></script>
+<script src="motion.js"></script>
+<script src="motion-assets.js"></script>
+<script>
+/* QuizRunner chẩn đoán: 10 câu trải k1–k8; nộp → khởi tạo Mastery (05 §6.3, An) → lưới màu → kích planner (05 §4.4). */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rm = SEN.rm;
+  const Q = [
+    { k: 'Phụ thuộc hàm', t: 'Trong quan hệ <code>R(A, B, C)</code>, phụ thuộc hàm <code>A → B</code> có nghĩa là gì?', o: ['Mỗi giá trị của A tương ứng với đúng một giá trị của B', 'Mỗi giá trị của B tương ứng với đúng một giá trị của A', 'A và B không bao giờ có giá trị trùng nhau', 'A là khóa chính của R'], a: 0 },
+    { k: 'Phụ thuộc hàm', t: 'Phụ thuộc hàm nào sau đây là <b>tầm thường</b>?', o: ['<code>A → B</code>', '<code>AB → A</code>', '<code>B → AB</code>', '<code>A → C</code>'], a: 1 },
+    { k: 'Khóa & khóa dự tuyển', t: 'Khóa dự tuyển (candidate key) là…', o: ['Bất kỳ siêu khóa nào của quan hệ', 'Siêu khóa tối thiểu — bỏ bớt thuộc tính nào cũng mất tính xác định', 'Thuộc tính có giá trị không lặp trong dữ liệu hiện tại', 'Thuộc tính tham chiếu sang bảng khác'], a: 1 },
+    { k: 'Phụ thuộc hàm đầy đủ', t: 'Khóa là <code>{MaSV, MaMon}</code>, nhưng <code>TenSV</code> chỉ phụ thuộc vào <code>MaSV</code>. Đây là loại phụ thuộc nào?', o: ['Phụ thuộc đầy đủ', 'Phụ thuộc bắc cầu', 'Phụ thuộc bộ phận (không đầy đủ)', 'Phụ thuộc đa trị'], a: 2 },
+    { k: 'Phụ thuộc bắc cầu', t: 'Có <code>MaSV → MaKhoa</code> và <code>MaKhoa → TenKhoa</code>. <code>TenKhoa</code> phụ thuộc bắc cầu vào thuộc tính nào?', o: ['MaKhoa', 'TenKhoa', 'Không có phụ thuộc bắc cầu', 'MaSV'], a: 3 },
+    { k: 'Dạng chuẩn 1 (1NF)', t: 'Quan hệ <b>vi phạm</b> 1NF khi…', o: ['Có thuộc tính đa trị hoặc nhóm lặp', 'Có phụ thuộc bộ phận vào khóa', 'Có phụ thuộc bắc cầu vào khóa', 'Không có khóa ngoại'], a: 0 },
+    { k: 'Dạng chuẩn 2 (2NF)', t: 'Quan hệ đạt 2NF khi đạt 1NF và…', o: ['Không có phụ thuộc bắc cầu', 'Mọi thuộc tính không khóa phụ thuộc đầy đủ vào khóa', 'Mọi phụ thuộc hàm có vế trái là siêu khóa', 'Không có thuộc tính đa trị'], a: 1 },
+    { k: 'Dạng chuẩn 3 (3NF)', t: 'Điều kiện <b>thêm</b> của 3NF so với 2NF là gì?', o: ['Không có phụ thuộc bộ phận vào khóa', 'Có đúng một khóa dự tuyển', 'Không có phụ thuộc bắc cầu của thuộc tính không khóa vào khóa', 'Mọi thuộc tính đều nguyên tử'], a: 2 },
+    { k: 'Dạng chuẩn 3 (3NF)', t: 'Quan hệ <code>SV(MaSV, MaKhoa, TenKhoa)</code> với <code>MaSV → MaKhoa → TenKhoa</code> đạt dạng chuẩn cao nhất nào?', o: ['1NF', '2NF', '3NF', 'BCNF'], a: 1 },
+    { k: 'Dạng chuẩn Boyce–Codd (BCNF)', t: 'BCNF khác 3NF ở điểm nào?', o: ['Cho phép phụ thuộc bắc cầu', 'Không yêu cầu 1NF', 'Mọi phụ thuộc hàm không tầm thường đều có vế trái là siêu khóa', 'Chỉ áp dụng khi quan hệ có một khóa'], a: 2 },
+  ];
+  const DEMO = [0, 1, 1, 0, 0, 0, 0, 0, 2, 1];
+  const MASTERY = [['Phụ thuộc hàm', 30], ['Khóa & khóa dự tuyển', 40], ['Phụ thuộc hàm đầy đủ', 25], ['Phụ thuộc bắc cầu', 20], ['Dạng chuẩn 1 (1NF)', 55], ['Dạng chuẩn 2 (2NF)', 35], ['Dạng chuẩn 3 (3NF)', 15], ['Dạng chuẩn Boyce–Codd (BCNF)', 10]];
+  const lvl = m => m < 20 ? 1 : m < 40 ? 2 : m < 60 ? 3 : m < 80 ? 4 : 5, LBL = ['', 'Rất yếu', 'Yếu', 'Cần ôn', 'Khá', 'Vững'];
+  const ans = Array(Q.length).fill(null); let cur = 0;
+  const sq = $('#sq'), opts = $('#opts');
+  sq.innerHTML = Q.map((_, i) => `<button type="button" data-i="${i}" aria-label="Câu ${i + 1}">${i + 1}</button>`).join('');
+  function render(dir) {
+    const q = Q[cur];
+    $('#qNum').textContent = cur + 1; $('#qConcept').innerHTML = SEN.ic('waypoints') + q.k; $('#qText').innerHTML = q.t;
+    opts.innerHTML = q.o.map((o, i) => `<button class="opt${ans[cur] === i ? ' is-on' : ''}" type="button" role="radio" aria-checked="${ans[cur] === i}" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span>${o}</span></button>`).join('');
+    $$('#sq button').forEach((d, i) => { d.classList.toggle('is-done', ans[i] !== null); d.classList.toggle('is-cur', i === cur); d.toggleAttribute('aria-current', i === cur); });
+    const done = ans.filter(a => a !== null).length;
+    $('#btnPrev').disabled = cur === 0;
+    const last = cur === Q.length - 1, nb = $('#btnNext');
+    nb.innerHTML = last ? 'Nộp bài' + SEN.ic('check') : 'Câu tiếp' + SEN.ic('arrow-right'); nb.disabled = last ? done < Q.length : ans[cur] === null;
+    nb.classList.toggle('btn-amber', last); nb.classList.toggle('btn-dark', !last);
+    $('#qHint').textContent = last ? (done < Q.length ? `Còn ${Q.length - done} câu chưa trả lời` : 'Sẵn sàng nộp') : (ans[cur] === null ? 'Chọn một phương án để tiếp tục' : '');
+    if (!rm && dir) gsap.from('#qText, #opts .opt', { x: dir * 18, opacity: 0, duration: .4, stagger: .05, ease: 'power2.out', overwrite: 'auto' });
+  }
+  opts.addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b) return;
+    ans[cur] = +b.dataset.i; render(0);
+    if (!rm) { gsap.fromTo($('.opt.is-on .k'), { scale: .7 }, { scale: 1, duration: .45, ease: 'back.out(2.5)' }); gsap.fromTo($$('#sq button')[cur], { scale: .6 }, { scale: 1, duration: .45, ease: 'back.out(2.5)' }); } });
+  $('#btnPrev').addEventListener('click', () => { if (cur > 0) { cur--; render(-1); } });
+  $('#btnNext').addEventListener('click', () => { if (cur < Q.length - 1) { cur++; render(1); } else submit(); });
+  sq.addEventListener('click', e => { const d = e.target.closest('button'); if (d) { const i = +d.dataset.i; if (i !== cur) { const dir = i > cur ? 1 : -1; cur = i; render(dir); } } });
+  document.addEventListener('keydown', e => { if ($('#result').style.display === 'block') return; const i = 'abcd1234'.indexOf(e.key.toLowerCase()); if (i >= 0 && !e.target.matches('input,textarea')) $$('.opt')[i % 4].click(); if (e.key === 'Enter' && !$('#btnNext').disabled && !e.target.matches('button')) $('#btnNext').click(); });
+  $('#btnDemo').addEventListener('click', () => { DEMO.forEach((a, i) => ans[i] = a); cur = Q.length - 1; render(1); SEN.toast('Đã điền 10 câu theo mẫu trả lời của An — bấm Nộp bài', 'wand-sparkles'); });
+  let secs = 12 * 60; setInterval(() => { if (document.hidden || secs <= 0 || $('#result').style.display === 'block') return; secs--; $('#clock').textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`; }, 1000);
+  function submit() {
+    const correct = ans.filter((a, i) => a === Q[i].a).length;
+    $('#mgrid').innerHTML = MASTERY.map(([n, m]) => `<div class="mtile m-${lvl(m)}" data-pop><span class="nm">${n}</span><span class="sc"><span data-m="${m}">${rm ? m : 0}</span><small>/100</small><span class="lvl lvl-${lvl(m)}">${LBL[lvl(m)]}</span></span></div>`).join('');
+    $('#resScore').textContent = correct;
+    const quiz = $('#quiz'), band = $('#band'), res = $('#result');
+    document.dispatchEvent(new CustomEvent('sen:submit')); // motion-assets: thinker pop
+    const show = () => { quiz.style.display = 'none'; band.style.display = 'none'; res.style.display = 'block'; $('.timer').style.display = 'none';
+      if (rm) { $('#resArc').style.strokeDashoffset = 263.9 * (1 - correct / 10); $('#planState').innerHTML = SEN.ic('check') + 'Kế hoạch tuần v1 đã sẵn sàng'; $('#btnPlan').focus({ preventScroll: true }); return; }
+      const tl = gsap.timeline();
+      tl.from(res, { y: 20, opacity: 0, duration: .6, ease: 'power3.out' })
+        .to('#resArc', { strokeDashoffset: 263.9 * (1 - correct / 10), duration: 1, ease: 'power3.out' }, .2)
+        .from('.mtile', { y: 18, opacity: 0, scale: .92, transformOrigin: '50% 50%', duration: .55, stagger: .07, ease: 'back.out(1.6)' }, .3)
+        .from('.res-weak, .res-acts', { y: 12, opacity: 0, duration: .5, stagger: .1 }, 1);
+      $$('.mtile [data-m]').forEach((el, i) => { const o = { v: 0 }; tl.to(o, { v: +el.dataset.m, duration: .9, ease: 'power3.out', onUpdate: () => el.textContent = Math.round(o.v) }, .45 + i * .07); });
+      tl.add(() => { $('#planState').innerHTML = SEN.ic('check') + 'Kế hoạch tuần v1 đã sẵn sàng · 7 mục tới 20/09'; gsap.from('#planState', { x: -8, opacity: 0, duration: .4 }); SEN.toast('Kế hoạch tuần v1 đã lập từ kết quả chẩn đoán', 'route'); }, 2.2);
+      $('#btnPlan').focus({ preventScroll: true });
+    };
+    if (rm) show(); else gsap.to([quiz, band], { y: -12, opacity: 0, duration: .35, ease: 'power2.in', onComplete: show });
+  }
+  render(0);
+  if (/[?&]done/.test(location.search)) { DEMO.forEach((a, i) => ans[i] = a); cur = Q.length - 1; render(0); submit(); }
+})();
+</script>
+</body>
+</html>

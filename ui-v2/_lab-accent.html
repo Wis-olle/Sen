@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lab — màu khối nhấn (thay nền than)</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  body{background:var(--cream);padding:28px 24px 60px;font-family:var(--sans);color:var(--ink)}
+  .wrap{max-width:1180px;margin:0 auto;display:grid;gap:22px}
+  h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
+  .sw{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .sw button{padding:9px 14px;border-radius:999px;background:var(--white);border:1.5px solid var(--line);font-weight:700;font-size:13.5px}
+  .sw button.is-on{background:var(--ink);color:var(--white);border-color:var(--ink)}
+  .sw .note{font-size:13px;color:var(--muted);margin-left:6px}
+  .panel{background:var(--white);border-radius:28px;padding:24px 28px}
+  .panel h2{font-size:15px;font-weight:800;margin-bottom:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .lesson{max-width:66ch}
+  .sec-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .sec-h .n{width:30px;height:30px;border-radius:50%;background:var(--amber);color:var(--ink);font-family:var(--num);font-weight:700;font-size:13px;display:grid;place-items:center;flex:none}
+  .sec-h h2{font-size:19px;font-weight:800;letter-spacing:-.015em;line-height:1.25;margin:0;color:var(--ink);text-transform:none}
+  .prose{font-size:16px;line-height:1.7;color:var(--ink-2)}
+  .prose code{font-family:var(--num);font-weight:700;background:var(--cream);border-radius:6px;padding:1px 6px;font-size:.92em;color:var(--ink)}
+  .x .art{display:flex;align-items:center;justify-content:space-evenly;padding:0 10px}
+  .x .art img{height:64px;width:auto;opacity:.9}
+  .x .big{font-size:46px}
+  .x .big small{font-size:12px;margin-left:3px}
+  .mx{padding:20px 22px 22px;position:relative}
+  .mx .fig{position:absolute;right:16px;top:-30px;width:150px;pointer-events:none}
+  .mx>.prose{padding-right:150px}
+  .tokens{font-family:var(--num);font-size:12px;color:var(--muted);margin-top:10px}
+  /* ===== HIỆN TẠI: than ===== */
+  [data-v="ink"] .x{background:var(--ink);color:var(--white)}[data-v="ink"] .x .art{background:#2b2b2b}[data-v="ink"] .x small{color:rgba(255,255,255,.7)}[data-v="ink"] .x .go{background:var(--amber);color:var(--ink)}[data-v="ink"] .x .pillmini{background:rgba(255,255,255,.14);color:var(--white)}[data-v="ink"] .x .big{color:var(--amber)}[data-v="ink"] .x .big small{color:rgba(255,255,255,.65)}[data-v="ink"] .x .art img{filter:invert(1)}
+  [data-v="ink"] .mx{background:var(--ink);color:var(--white)}[data-v="ink"] .mx .prose{color:rgba(255,255,255,.8)}[data-v="ink"] .mx .sec-h h2{color:var(--white)}[data-v="ink"] .mx .mem{background:rgba(255,255,255,.08);border-left-color:var(--amber);color:var(--white)}[data-v="ink"] .mx .mem .ic{color:var(--amber)}[data-v="ink"] .mx .mem p{color:rgba(255,255,255,.82)}[data-v="ink"] .mx .mem small{color:rgba(255,255,255,.55)}[data-v="ink"] .mx .kind--mis{background:rgba(207,90,60,.4);color:var(--white)}[data-v="ink"] .mx .kind--eff{background:rgba(61,143,92,.45);color:var(--white)}
+  /* ===== A: hổ phách đặc + chữ than ===== */
+  [data-v="a"] .x{background:var(--amber);color:var(--ink)}[data-v="a"] .x .art{background:var(--amber-light)}[data-v="a"] .x small{color:var(--ink-2)}[data-v="a"] .x .go{background:var(--ink);color:var(--white)}[data-v="a"] .x .pillmini{background:rgba(29,29,29,.1);color:var(--ink-2)}[data-v="a"] .x .big{color:var(--ink)}[data-v="a"] .x .big small{color:var(--ink-2)}
+  [data-v="a"] .mx{background:var(--amber);color:var(--ink)}[data-v="a"] .mx .sec-h .n{background:var(--ink);color:var(--amber)}[data-v="a"] .mx .mem{background:rgba(255,255,255,.62);border-left-color:var(--ink)}[data-v="a"] .mx .mem .ic{color:var(--ink)}[data-v="a"] .mx .mem.good{border-left-color:var(--ok)}[data-v="a"] .mx .mem.good .ic{color:var(--ok)}
+  /* ===== B: cam đất / terracotta ===== */
+  [data-v="b"] .x{background:var(--tint-peach-2);color:var(--ink)}[data-v="b"] .x .art{background:#f7dccd}[data-v="b"] .x small{color:var(--ink-2)}[data-v="b"] .x .go{background:var(--ink);color:var(--white)}[data-v="b"] .x .pillmini{background:rgba(29,29,29,.1);color:var(--ink-2)}[data-v="b"] .x .big{color:var(--m1a)}[data-v="b"] .x .big small{color:var(--ink-2)}
+  [data-v="b"] .mx{background:var(--tint-peach);color:var(--ink);border-left:4px solid var(--m1a)}[data-v="b"] .mx .sec-h .n{background:var(--m1a);color:#fff}[data-v="b"] .mx .mem{background:var(--white);border-left-color:var(--m1a)}[data-v="b"] .mx .mem .ic{color:var(--m1a)}[data-v="b"] .mx .mem.good{border-left-color:var(--ok)}[data-v="b"] .mx .mem.good .ic{color:var(--ok)}
+  /* ===== C: kem đậm + viền hổ phách ===== */
+  [data-v="c"] .x{background:var(--cream-deep);color:var(--ink);box-shadow:inset 0 0 0 2.5px var(--amber-deep)}[data-v="c"] .x .art{background:var(--amber-light)}[data-v="c"] .x small{color:var(--ink-2)}[data-v="c"] .x .go{background:var(--ink);color:var(--white)}[data-v="c"] .x .pillmini{background:var(--white);color:var(--ink-2)}[data-v="c"] .x .big{color:var(--ink)}[data-v="c"] .x .big small{color:var(--ink-2)}
+  [data-v="c"] .mx{background:var(--cream-deep);color:var(--ink);border-left:4px solid var(--amber-deep)}[data-v="c"] .mx .mem{background:var(--white);border-left-color:var(--amber-deep)}[data-v="c"] .mx .mem .ic{color:var(--amber-deep)}[data-v="c"] .mx .mem.good{border-left-color:var(--ok)}[data-v="c"] .mx .mem.good .ic{color:var(--ok)}
+  /* ===== D: espresso (tối-ấm) ===== */
+  [data-v="d"] .x{background:#2a201a;color:var(--cream)}[data-v="d"] .x .art{background:#3d2c1e}[data-v="d"] .x small{color:rgba(255,246,229,.72)}[data-v="d"] .x .go{background:var(--amber);color:var(--ink)}[data-v="d"] .x .pillmini{background:rgba(255,255,255,.12);color:var(--cream)}[data-v="d"] .x .big{color:var(--amber)}[data-v="d"] .x .big small{color:rgba(255,246,229,.65)}[data-v="d"] .x .art img{filter:invert(1)}
+  [data-v="d"] .mx{background:#2a201a;color:var(--cream)}[data-v="d"] .mx .prose{color:rgba(255,246,229,.82)}[data-v="d"] .mx .sec-h h2{color:var(--cream)}[data-v="d"] .mx .mem{background:rgba(255,255,255,.08);border-left-color:var(--amber);color:var(--cream)}[data-v="d"] .mx .mem .ic{color:var(--amber)}[data-v="d"] .mx .mem p{color:rgba(255,246,229,.82)}[data-v="d"] .mx .mem small{color:rgba(255,246,229,.55)}[data-v="d"] .mx .kind--mis{background:rgba(207,90,60,.45);color:#fff}[data-v="d"] .mx .kind--eff{background:rgba(61,143,92,.5);color:#fff}
+  /* ===== KHUYÊN DÙNG: A cho thẻ ngắn + C cho khối đọc dài ===== */
+  [data-v="ac"] .x{background:var(--amber);color:var(--ink)}[data-v="ac"] .x .art{background:var(--amber-light)}[data-v="ac"] .x small{color:var(--ink-2)}[data-v="ac"] .x .go{background:var(--ink);color:var(--white)}[data-v="ac"] .x .pillmini{background:rgba(29,29,29,.1);color:var(--ink-2)}[data-v="ac"] .x .big{color:var(--ink)}[data-v="ac"] .x .big small{color:var(--ink-2)}
+  [data-v="ac"] .mx{background:var(--cream-deep);color:var(--ink);border-left:4px solid var(--amber-deep)}[data-v="ac"] .mx .mem{background:var(--white);border-left-color:var(--amber-deep)}[data-v="ac"] .mx .mem .ic{color:var(--amber-deep)}[data-v="ac"] .mx .mem.good{border-left-color:var(--ok)}[data-v="ac"] .mx .mem.good .ic{color:var(--ok)}
+  @media (max-width:900px){.trio{grid-template-columns:1fr}.mx .fig{display:none}.mx>.prose{padding-right:0}}
+</style>
+</head>
+<body data-v="ac">
+<div class="wrap">
+  <div>
+    <h1>Màu khối nhấn — thay nền than</h1>
+    <p style="color:var(--muted);font-size:14px;margin-top:4px">Theo <code>RESEARCH-accent-color.md</code>: than chỉ nên làm pill/nút/nhãn; bề mặt nhấn nên là màu ấm + chữ than. Bấm để so sánh.</p>
+  </div>
+  <div class="sw" id="sw">
+    <button data-v="ac" class="is-on">★ Khuyên dùng: A thẻ ngắn + C khối đọc</button>
+    <button data-v="a">A · Hổ phách đặc</button>
+    <button data-v="b">B · Cam đất</button>
+    <button data-v="c">C · Kem đậm + viền</button>
+    <button data-v="d">D · Espresso (tối-ấm)</button>
+    <button data-v="ink">Hiện tại (than)</button>
+    <span class="note" id="note"></span>
+  </div>
+
+  <section class="panel">
+    <h2>Trang chủ · hàng "Hôm nay của An"</h2>
+    <div class="trio">
+      <a class="tcard t-amber" href="#"><div class="art"><img class="spot" src="assets/spot/learning.svg" alt="" width="500" height="500" /></div><h3>Bài học · Phụ thuộc bắc cầu</h3><small>30 phút · tối 20:00 · soạn riêng cho bạn</small><div class="foot"><span class="pillmini"><span class="ring" style="--p:40"></span>Đang học 40%</span><span class="go">→</span></div></a>
+      <a class="tcard t-mint" href="#"><div class="art"><img class="spot" src="assets/spot/timer.svg" alt="" width="500" height="500" /></div><h3>Ôn nhanh · Phụ thuộc hàm</h3><small>5 câu · 10 phút · vì hôm qua sai 1 câu</small><div class="foot"><span class="pillmini">10′</span><span class="go">→</span></div></a>
+      <a class="tcard x" href="#"><div class="art"><img src="assets/ico/alarm.svg" alt="" width="64" height="64" /><span class="big">11<small>ngày</small></span></div><h3>Sắp thi · Cơ sở dữ liệu</h3><small>Thứ Bảy 20/09 · A2-301 · sẵn sàng 29/100</small><div class="foot"><span class="pillmini">kế hoạch v2 · 7 mục</span><span class="go">→</span></div></a>
+    </div>
+    <p class="tokens" id="tk1"></p>
+  </section>
+
+  <section class="panel">
+    <h2>Bài học · mục 5 "Lỗi bạn từng mắc"</h2>
+    <div class="lesson">
+      <div class="card mx">
+        <img class="fig" src="assets/doodles/clumsy-amber.svg" alt="" width="800" height="600" />
+        <div class="sec-h"><span class="n">5</span><h2>Lỗi bạn từng mắc</h2></div>
+        <div class="prose"><p>Hệ thống nhớ hai chỗ bạn hay nhầm — bài này đã viết lại phần giải thích và câu kiểm tra để nhắm đúng vào đó.</p></div>
+        <div class="mem"><span class="ic">🧠</span><div><b>Coi phụ thuộc bắc cầu như phụ thuộc hàm thường<span class="kind kind--mis">nhầm lẫn</span></b><p>Bạn nhận ra <code>MaSV → TenKhoa</code> nhưng bỏ qua trung gian <code>MaKhoa</code>, nên không thấy cần tách bảng.</p><small>Bằng chứng: sai câu 5 bài chẩn đoán (08/09)</small></div></div>
+        <div class="mem"><span class="ic">🧠</span><div><b>Nghĩ 2NF là đủ cho 3NF<span class="kind kind--mis">nhầm lẫn</span></b><p>2NF chỉ loại phụ thuộc bộ phận; phụ thuộc bắc cầu vẫn còn — đó là việc của 3NF.</p><small>Bằng chứng: sai 2 lần quiz 3NF (08–09/09)</small></div></div>
+        <div class="mem good"><span class="ic">💡</span><div><b>Bạn hiểu nhanh khi có bảng dữ liệu cụ thể<span class="kind kind--eff">cách hiểu tốt</span></b><p>Vì thế phần 4 dùng bảng thật thay vì ký hiệu — giống bài Phụ thuộc hàm bạn đánh giá “dễ hiểu”.</p><small>Bằng chứng: đánh giá sau bài 08/09</small></div></div>
+      </div>
+    </div>
+    <p class="tokens" id="tk2"></p>
+  </section>
+</div>
+<script>
+  const NOTE = {
+    ac: 'Nội dung ngắn → nền bão hòa (hổ phách); nội dung đọc dài → nền dịu + viền (kem đậm). Cùng họ hổ phách nên vẫn nhất quán.',
+    a: 'Hổ phách #f8c365 + chữ than 10,4:1. Đúng thẻ hero MONAC. Khối đọc dài hơi chói.',
+    b: 'Cam đất/peach + số đỏ gạch. Tách hue với 2 thẻ bên cạnh, nhưng gần màu cảnh báo (--danger).',
+    c: 'Kem đậm #fee7bb + viền hổ phách đậm 2,5–4px. Dịu nhất để đọc; ở trang chủ nhẹ vía hơn.',
+    d: 'Espresso #2a201a + chữ kem. Vẫn tối nhưng ấm; không chữa mỏi mắt khi đọc dài.',
+    ink: 'Than #1d1d1d hiện tại — bị chê: nặng, lạc tông ấm, chữ dài trên đen mỏi.'
+  };
+  const sw = document.getElementById('sw'), note = document.getElementById('note');
+  const set = v => { document.body.dataset.v = v; [...sw.querySelectorAll('button')].forEach(b => b.classList.toggle('is-on', b.dataset.v === v)); note.textContent = NOTE[v] || ''; history.replaceState(null, '', '?v=' + v); };
+  sw.addEventListener('click', e => { const b = e.target.closest('button'); if (b) set(b.dataset.v); });
+  set(new URLSearchParams(location.search).get('v') || 'ac');
+  document.querySelectorAll('.mem .ic').forEach(i => { i.style.cssText = 'font-size:18px;line-height:1;width:20px;height:20px;display:grid;place-items:center'; });
+</script>
+</body>
+</html>
