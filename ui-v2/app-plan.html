@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lộ trình — Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng Lộ trình ---- */
+  .seg{display:inline-flex;background:var(--cream);border-radius:12px;padding:4px;gap:2px}
+  .seg button{height:32px;padding:0 14px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;transition:background .2s,color .2s}
+  .seg button.is-on{background:var(--ink);color:var(--white)}
+  .strip{margin-bottom:16px}
+  .cal-card{padding:0;overflow:hidden;background:var(--white);border:1px solid var(--line-2)}
+  .cal-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+  .cal-bar .sp{flex:1}
+  .week{display:flex;gap:0;padding:12px 10px 14px;overflow-x:auto}
+  .slots{flex:none;width:52px;display:grid;grid-template-rows:44px repeat(3,1fr);gap:6px}
+  .slots span{display:grid;place-items:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);writing-mode:vertical-rl;transform:rotate(180deg)}
+  .day{flex:1 1 0;min-width:0;display:grid;grid-template-rows:44px repeat(3,1fr);gap:6px;padding:0 3px;border-radius:14px}
+  .day.is-today{background:var(--tint-amber)}
+  .dh{display:grid;place-items:center;gap:1px;font-size:12px;font-weight:600;color:var(--muted);line-height:1.1}
+  .dh b{font-family:var(--num);font-size:15px;color:var(--ink)}
+  .day.is-today .dh b{background:var(--ink);color:var(--amber);border-radius:999px;padding:2px 8px}
+  .cell{position:relative;min-height:88px;border-radius:12px;border:1.5px dashed var(--line-2);padding:5px}
+  .cell.is-free{border-color:var(--amber-soft);background:#fffdf8}
+  .cell.is-class{border:0;background:repeating-linear-gradient(-45deg,var(--cream) 0 6px,#f6ebd2 6px 12px)}
+  .cell .cls{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:11px;line-height:1.25;color:var(--muted);padding:6px}
+  .cell .cls b{display:block;color:var(--ink-2);font-size:11.5px}
+  .pi{display:grid;gap:3px;padding:8px 9px;border-radius:10px;background:var(--white);border:1px solid var(--line-2);border-left:3px solid var(--amber);box-shadow:var(--shadow-sm);font-size:12.5px;line-height:1.25;cursor:pointer;color:inherit}
+  .pi b{font-weight:700;font-size:12.5px}
+  .pi small{color:var(--muted);font-size:11px;display:flex;align-items:center;gap:5px}
+  .pi .ring{width:12px;height:12px}
+  .pi.is-done{border-left-color:var(--m5a);background:var(--cream)}
+  .pi.is-done b{text-decoration:line-through;color:var(--muted)}
+  .pi.is-doing{border-left-color:var(--ink)}
+  .pi.is-exam{background:var(--ink);color:var(--white);border-color:var(--ink)}
+  .pi.is-exam small{color:var(--amber)}
+  .pi.is-dead{border-left-color:var(--danger)}
+  .pi+.pi{margin-top:5px}
+  .cal-legend{display:flex;gap:16px;flex-wrap:wrap;padding:0 16px 12px;font-size:12px;color:var(--muted)}
+  .cal-legend span{display:inline-flex;align-items:center;gap:6px}
+  .cal-legend i{width:14px;height:10px;border-radius:3px}
+  /* rail */
+  .reason{font-family:var(--serif);font-style:italic;font-optical-sizing:auto;font-size:17px;line-height:1.4;color:var(--ink);margin:4px 0 10px}
+  .delta{display:grid;gap:6px;font-size:13px;color:var(--ink-2);margin-bottom:12px}
+  .delta span{display:flex;gap:8px;align-items:flex-start}
+  .delta .ic{width:15px;height:15px;color:var(--amber-deep);flex:none;margin-top:2px}
+  .vers{list-style:none;margin:0;padding:0;display:grid}
+  .ver{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:7px 0;position:relative}
+  .ver:not(:last-child)::before{content:"";position:absolute;left:10px;top:28px;bottom:-6px;border-left:2px dashed var(--line)}
+  .ver i{width:22px;height:22px;border-radius:50%;background:var(--cream-deep);display:grid;place-items:center;font-family:var(--num);font-size:10.5px;font-weight:700;position:relative;z-index:1}
+  .ver.is-cur i{background:var(--ink);color:var(--amber)}
+  .ver b{display:block;font-size:13px}
+  .ver small{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+  .field{display:grid;gap:6px;margin-bottom:10px}
+  .field label{font-size:12.5px;font-weight:700}
+  .row-in{display:flex;flex-wrap:wrap;gap:8px}.row-in .btn-sm{margin-left:auto}
+  .row-in .in{flex:1 1 150px;width:auto;min-width:0}.row-in .btn{flex:none}
+  .card--amber .in{border-color:transparent;background:rgba(255,255,255,.75)}
+  .card--amber .in:focus{border-color:var(--ink)}
+  .card--amber .btn-white{box-shadow:none}
+  .extract{display:none;margin-top:8px;padding:12px;border-radius:14px;background:rgba(255,255,255,.7);gap:10px;font-size:12.5px}
+  .extract.show{display:grid}
+  .extract h4{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:700}
+  .extract .raw{font-family:var(--serif);font-style:italic;color:var(--ink-2)}
+  .extract .ai{display:grid;gap:3px}
+  .extract .ai b{font-family:var(--num)}
+  .extract .acts{display:flex;gap:8px;justify-content:flex-end}
+  .plan-fig{width:170px;margin:-10px auto -6px;display:block}
+  @media (max-width:900px){
+    .week{flex-direction:column;gap:10px;overflow:visible}
+    .slots{display:none}
+    .day{grid-template-rows:auto;grid-template-columns:64px 1fr;gap:6px;padding:8px;border:1px solid var(--line-2)}
+    .day .dh{grid-row:1/4;align-content:start}
+    .cell{min-height:0}
+    .cell:not(.is-class):empty{display:none}
+    .cell.is-class{min-height:36px}
+  }
+</style>
+</head>
+<body data-page="plan" data-role="student" data-title="Lộ trình" data-promo="tutor">
+<div class="app">
+  <aside class="sb" id="sb"></aside>
+  <main class="main" id="main">
+    <header class="tb" id="tb"></header>
+    <div class="content">
+      <div class="ph">
+        <div><p class="eyebrow">Kế hoạch tuần · phiên bản <span id="phVer">2</span> · thi CSDL còn 11 ngày</p><p class="sub">Tự tính lại khi bạn trễ, làm sai quiz hay đổi ngày thi.</p></div>
+        <div class="ph-actions">
+          <div class="seg" role="tablist" aria-label="Chọn tuần"><button type="button" role="tab" class="is-on" data-week="0" aria-selected="true">Tuần này</button><button type="button" role="tab" data-week="1" aria-selected="false">Tuần thi</button></div>
+          <a class="btn btn-dark btn-sm" href="app-lesson.html">Học mục hôm nay<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+        </div>
+      </div>
+
+      <div class="strip" data-reveal>
+        <div class="stile"><span class="lbl">Buổi học tuần này</span><span class="val"><span id="stItems">5</span><small>mục</small></span><span class="sub">mỗi mục 30′ · việc lớn 45–60′</span></div>
+        <div class="stile" style="background:var(--tint-mint)"><span class="lbl">Tổng thời gian</span><span class="val"><span id="stMin">180</span><small>phút</small></span><span class="sub">tối 20:00 · sáng Chủ nhật</span></div>
+        <div class="stile" style="background:var(--tint-sky)"><span class="lbl">Đã xong</span><span class="val"><span id="stDone">1</span><small>/ <span id="stTot">5</span></small></span><span class="sub">Phụ thuộc hàm · hôm qua</span></div>
+      </div>
+
+      <article class="card cal-card" data-reveal>
+        <div class="cal-bar">
+          <span class="tag tag--soft" id="weekLbl"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg>08 – 14/09/2026</span>
+          <span class="sp"></span>
+          <div class="cal-legend" style="padding:0">
+            <span><i style="background:repeating-linear-gradient(-45deg,var(--cream) 0 3px,#f6ebd2 3px 6px)"></i>Lên lớp</span>
+            <span><i style="border:1.5px dashed var(--amber-soft);background:#fffdf8"></i>Giờ rảnh</span>
+            <span><i style="background:var(--white);border-left:3px solid var(--amber);border-radius:2px"></i>Mục kế hoạch</span>
+          </div>
+        </div>
+        <div class="week" id="week"></div>
+      </article>
+    </div>
+  </main>
+
+  <aside class="rail" aria-label="Lý do và điều chỉnh">
+    <div class="card" id="reasonCard" data-reveal>
+      <div class="card-h"><h2><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>Lý do xếp lịch</h2><span class="tag tag--ink" id="verTag">v2</span></div>
+      <p class="reason" id="reason">“Dồn về Phụ thuộc hàm và 3NF vì thi sau 11 ngày và cả hai đang dưới 35/100.”</p>
+      <div class="delta" id="delta">
+        <span><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Thêm phiên ôn 3NF tối 16/09 sau khi bạn trả lời sai câu 3NF</span>
+        <span><svg class="ic" aria-hidden="true"><use href="#i-move-right"/></svg>Dời BCNF từ 17/09 sang 18/09 để giữ khoảng nghỉ 1 ngày</span>
+      </div>
+      <ul class="vers" id="vers">
+        <li class="ver is-cur"><i>2</i><div><b>Tính lại sau khi trả lời sai câu 3NF</b><small>09/09 · 20:14 · 7 mục cả kỳ</small></div></li>
+        <li class="ver"><i>1</i><div><b>Kế hoạch gốc sau bài chẩn đoán</b><small>08/09 · 21:02 · 6 mục cả kỳ</small></div></li>
+      </ul>
+    </div>
+
+    <div class="card card--amber" data-reveal>
+      <img class="plan-fig" src="assets/doodles/strolling-blue.svg" alt="" width="800" height="600" data-float />
+      <div class="card-h" style="margin-bottom:10px"><h2><svg class="ic" aria-hidden="true" style="color:var(--ink)"><use href="#i-calendar-sync"/></svg>Đổi lịch, thêm deadline</h2></div>
+      <div class="field"><label for="exam">Ngày thi Cơ sở dữ liệu</label><div class="row-in"><input class="in" type="date" id="exam" value="2026-09-20" /><button class="btn btn-dark btn-sm" type="button" id="btnExam">Tính lại</button></div></div>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="icons.js"></script>
+<script src="shell.js"></script>
+<script src="motion.js"></script>
+<script src="motion-assets.js"></script>
+<script>
+/* Lịch tuần (05 §6.4, StudyPlan v2 của An) + tính lại kèm lý do (planner.ts). */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rm = SEN.rm, DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'], SLOTS = ['Sáng', 'Chiều', 'Tối'];
+  const WEEKS = [
+    { lbl: '08 – 14/09/2026', dates: ['08/09', '09/09', '10/09', '11/09', '12/09', '13/09', '14/09'], today: 1, cls: { '0-0': 'CSDL · 7:00–9:30', '1-0': 'Mạng MT · 7:00–9:30', '2-1': 'Toán rời rạc · 13:00', '3-0': 'CSDL · 7:00–9:30', '4-1': 'Anh văn · 13:00' }, free: ['0-2', '1-2', '2-2', '3-2', '4-2', '5-0', '5-2', '6-0', '6-2'] },
+    { lbl: '15 – 21/09/2026', dates: ['15/09', '16/09', '17/09', '18/09', '19/09', '20/09', '21/09'], today: -1, cls: { '0-0': 'CSDL · 7:00–9:30', '1-0': 'Mạng MT · 7:00–9:30', '3-0': 'Ôn tập lớp · 7:00' }, free: ['0-2', '1-2', '2-2', '3-2', '4-2', '5-2', '6-0', '6-2'] },
+  ];
+  let ITEMS = [
+    { w: 0, d: 0, s: 2, k: 'Phụ thuộc hàm', a: 'Phụ thuộc hàm', min: 30, st: 'done', t: '20:00' },
+    { w: 0, d: 1, s: 2, k: 'Phụ thuộc bắc cầu', a: 'PT bắc cầu', min: 30, st: 'doing', t: '20:00', p: 40 },
+    { w: 0, d: 2, s: 2, k: 'Phụ thuộc hàm đầy đủ', a: 'FD đầy đủ', min: 30, st: 'todo', t: '20:00' },
+    { w: 0, d: 4, s: 2, k: 'Dạng chuẩn 2 (2NF)', a: '2NF', min: 30, st: 'todo', t: '20:00' },
+    { w: 0, d: 6, s: 0, k: 'Dạng chuẩn 3 (3NF)', a: '3NF', min: 60, st: 'todo', t: '8:00' },
+    { w: 1, d: 1, s: 2, k: '3NF — ôn lại', a: 'Ôn 3NF', min: 30, st: 'todo', t: '20:00' },
+    { w: 1, d: 3, s: 2, k: 'Dạng chuẩn Boyce–Codd (BCNF)', a: 'BCNF', min: 30, st: 'todo', t: '20:00' },
+    { w: 1, d: 5, s: 0, k: 'THI Cơ sở dữ liệu', min: 0, st: 'exam', t: '7:30 · A2-301' },
+  ];
+  let week = 0, ver = 2;
+  const pi = it => it.st === 'exam' ? `<div class="pi is-exam"><b>${it.k}</b><small>${SEN.ic('flag')}${it.t}</small></div>`
+    : `<a class="pi is-${it.st}" href="${it.st === 'dead' ? '#' : 'app-lesson.html'}"${it.st === 'dead' ? ' data-soon' : ''} title="${it.k}"><b>${it.a || it.k}</b><small>${it.st === 'done' ? SEN.ic('check') : it.st === 'doing' ? `<span class="ring" style="--p:${it.p}"></span>` : it.st === 'dead' ? SEN.ic('flag') : SEN.ic('clock')}${it.min ? it.min + '′ · ' : ''}${it.t}</small></a>`;
+  function render(animate) {
+    const W = WEEKS[week], box = $('#week');
+    box.innerHTML = `<div class="slots"><span></span>${SLOTS.map(s => `<span>${s}</span>`).join('')}</div>` + DAYS.map((d, i) => `<div class="day${i === W.today ? ' is-today' : ''}"><div class="dh"><span>${d}</span><b>${W.dates[i].slice(0, 2)}</b>${i === W.today ? '<span style="font-size:10px;color:var(--amber-deep)">hôm nay</span>' : ''}</div>${SLOTS.map((_, s) => { const key = `${i}-${s}`, c = W.cls[key];
+      return `<div class="cell${c ? ' is-class' : W.free.includes(key) ? ' is-free' : ''}">${c ? `<span class="cls"><b>Lên lớp</b>${c}</span>` : ITEMS.filter(it => it.w === week && it.d === i && it.s === s).map(pi).join('')}</div>`; }).join('')}</div>`).join('');
+    const its = ITEMS.filter(it => it.w === week && it.st !== 'exam');
+    $('#stItems').textContent = its.length; $('#stMin').textContent = its.reduce((a, b) => a + b.min, 0); $('#stDone').textContent = its.filter(i => i.st === 'done').length; $('#stTot').textContent = its.length;
+    $('#weekLbl').innerHTML = SEN.ic('calendar') + W.lbl;
+    if (animate && !rm) gsap.from($$('.day', box), { y: 14, opacity: 0, duration: .5, stagger: .05, ease: 'power2.out', overwrite: 'auto' });
+  }
+  render(false);
+  $$('.seg [data-week]').forEach(b => b.addEventListener('click', () => { week = +b.dataset.week; $$('.seg button').forEach(x => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-selected', x === b); }); render(true); }));
+  function recompute(reason, deltas, mutate) {
+    ver++; mutate();
+    const card = $('#reasonCard');
+    const apply = () => {
+      $('#reason').textContent = '“' + reason + '”'; $('#verTag').textContent = 'v' + ver; $('#phVer').textContent = ver;
+      $('#delta').innerHTML = deltas.map(([ic, t]) => `<span>${SEN.ic(ic)}${t}</span>`).join('');
+      $$('#vers .ver').forEach(v => v.classList.remove('is-cur'));
+      $('#vers').insertAdjacentHTML('afterbegin', `<li class="ver is-cur"><i>${ver}</i><div><b>${deltas[0][2]}</b><small>vừa xong · ${ITEMS.filter(i => i.st !== 'exam' && i.st !== 'dead').length} mục cả kỳ</small></div></li>`);
+      render(true);
+      document.dispatchEvent(new CustomEvent('sen:data', { detail: { els: [$('#stItems'), $('#stMin'), $('#stDone')] } })); // motion.js C2: số đổi → nảy & đếm lại
+      if (!rm) { gsap.from('#reason, #delta > span', { y: 10, opacity: 0, duration: .45, stagger: .06, ease: 'power2.out' }); gsap.from('#vers .ver:first-child', { x: -10, opacity: 0, duration: .45, ease: 'power2.out' }); }
+      SEN.toast('Kế hoạch đã tính lại — phiên bản ' + ver, 'route');
+    };
+    if (rm) return apply();
+    gsap.to('#reason, #delta', { opacity: 0, duration: .25, onComplete: () => { gsap.set('#reason, #delta', { opacity: 1 }); apply(); } });
+    gsap.fromTo(card, { boxShadow: '0 0 0 0 rgba(248,195,101,0)' }, { boxShadow: '0 0 0 6px rgba(248,195,101,.5)', duration: .5, yoyo: true, repeat: 1 });
+  }
+  $('#btnExam').addEventListener('click', () => {
+    const d = new Date($('#exam').value); if (isNaN(d)) return;
+    const dd = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+    const days = Math.round((d - new Date(2026, 8, 9)) / 864e5);
+    recompute(`Thi ${dd} (còn ${days} ngày): ${days < 11 ? 'gộp 2NF vào tối 11/09 và đưa 3NF lên sáng 13/09' : 'giữ nhịp 30 phút/tối, thêm một buổi ôn tổng hợp trước ngày thi'}.`,
+      [['calendar', `Ngày thi đổi sang ${dd}`, `Tính lại vì đổi ngày thi (${dd})`], ['move-right', days < 11 ? 'Dồn 2NF → tối 11/09, 3NF → sáng 13/09' : 'Thêm buổi ôn tổng hợp tối trước ngày thi']],
+      () => { if (days < 11) { ITEMS.find(i => i.k.startsWith('Dạng chuẩn 2')).d = 3; ITEMS.find(i => i.k.startsWith('Dạng chuẩn 3')).d = 5; } else ITEMS.push({ w: 1, d: 4, s: 2, k: 'Ôn tổng hợp chương 4', a: 'Ôn tổng hợp', min: 30, st: 'todo', t: '20:00' }); });
+  });
+})();
+</script>
+</body>
+</html>

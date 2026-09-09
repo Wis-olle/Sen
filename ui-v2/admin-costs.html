@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chi phí &amp; nhật ký AI — Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng Quản trị: chi phí & nhật ký — 4 ô số lớn (1 ô than), biểu đồ (1 cột than hôm nay), bảng KHÔNG hộp ---- */
+  .seg{display:inline-flex;background:var(--cream);border-radius:12px;padding:4px;gap:2px}
+  .seg button{height:32px;padding:0 14px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;transition:background .2s,color .2s}
+  .seg button.is-on{background:var(--ink);color:var(--white)}
+  .strip{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}
+  .stile .val{font-size:clamp(30px,2.6vw,40px)}
+  .stile .mbar{margin-top:6px}
+  .stile.is-ink .mbar{background:rgba(255,255,255,.14)}
+  .viz-card{background:var(--white);border:1px solid var(--line-2)}
+  .viz{position:relative}
+  .viz svg{display:block;width:100%;height:auto;overflow:visible}
+  .viz .gridl{stroke:var(--line-2);stroke-width:1}
+  .viz .base{stroke:var(--line);stroke-width:1.5}
+  .viz .ax{font-family:var(--num);font-size:11px;fill:var(--muted);font-weight:500}
+  .viz .lab{font-family:var(--num);font-size:11.5px;font-weight:700;fill:var(--ink)}
+  .viz .bar{transform-origin:50% 100%;transform-box:fill-box}
+  .viz .hit{fill:transparent;cursor:pointer}
+  .viz .hbar{transform-origin:0 50%;transform-box:fill-box}
+  .tip{position:absolute;z-index:5;pointer-events:none;background:var(--ink);color:var(--white);border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.35;box-shadow:var(--shadow-float);opacity:0;transform:translate(-50%,-100%) translateY(-8px);white-space:nowrap;transition:opacity .15s}
+  .tip.show{opacity:1}
+  .tip b{font-family:var(--num);color:var(--amber)}
+  .legend2{display:flex;gap:14px;font-size:12.5px;color:var(--ink-2);margin-top:8px}
+  .legend2 span{display:inline-flex;align-items:center;gap:6px}
+  .legend2 i{width:10px;height:10px;border-radius:3px}
+  .note-sys{font-size:12.5px;color:var(--muted);margin-top:10px}
+  /* bảng không hộp */
+  .filters{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:4px 0 12px}
+  .filters .grp{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .filters .grp>span{font-size:12px;color:var(--muted);font-weight:600;margin-right:2px}
+  .fchip{height:30px;padding:0 12px;border-radius:999px;background:var(--cream);font-size:12.5px;font-weight:600;color:var(--ink-2);transition:background .2s,color .2s}
+  .fchip:hover{background:var(--cream-deep)}
+  .fchip.is-on{background:var(--ink);color:var(--white)}
+  .tbl-wrap{overflow-x:auto}
+  table.log{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;min-width:860px}
+  .log th{background:var(--white);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 12px 10px;font-weight:700;white-space:nowrap;position:sticky;top:0;border-bottom:1px solid var(--line)}
+  .log td{padding:11px 12px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+  .log tr.r{cursor:pointer;transition:background .15s}
+  .log tr.r:hover td{background:var(--cream)}
+  .log td.n,.log th.n{text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums}
+  .log td.n{font-weight:600}
+  .log .who{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+  .log .who .av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+  .log .model{font-family:var(--num);font-size:12.5px;color:var(--ink-2)}
+  .log .st{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:700}
+  .log .st .ic{width:12px;height:12px}
+  .st--ok{background:var(--ok-tint);color:var(--ink)}.st--ok .ic{color:var(--ok)}
+  .st--err{background:var(--danger-tint);color:var(--ink)}.st--err .ic{color:var(--danger)}
+  .st--retry{background:var(--cream-deep);color:var(--ink)}.st--retry .ic{color:var(--amber-deep)}
+  .log .cache{display:inline-flex;align-items:center;gap:4px;background:var(--amber);color:var(--ink);border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;margin-left:6px;font-family:var(--num)}
+  .log tr.pair td{background:var(--tint-amber)}
+  .log tr.pair td:first-child{box-shadow:inset 3px 0 0 var(--amber-deep)}
+  .log tr.det{display:none}
+  .log tr.det.show{display:table-row}
+  .log tr.det td{background:var(--cream);padding:12px 16px 14px 44px;font-size:13px;color:var(--ink-2)}
+  .log .chev{width:14px;height:14px;color:var(--muted);transition:transform .25s}
+  .log tr.r.open .chev{transform:rotate(180deg)}
+  .errs{display:grid;gap:8px}
+  .err{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px 14px;border-radius:14px;background:var(--tint-peach);font-size:13.5px}
+  .err .ic{width:18px;height:18px;color:var(--danger);margin-top:1px}
+  .err b{display:block}
+  .err small{color:var(--ink-2);font-size:12px}
+  .err time{font-family:var(--num);font-size:12px;color:var(--muted);white-space:nowrap}
+  @media (max-width:1180px){.strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:700px){.strip{grid-template-columns:1fr 1fr}.viz{overflow-x:auto}#vizDay svg{min-width:520px}}
+</style>
+</head>
+<body data-page="costs" data-role="admin" data-title="Chi phí & nhật ký AI">
+<div class="app no-rail">
+  <aside class="sb" id="sb"></aside>
+  <main class="main" id="main">
+    <header class="tb" id="tb"></header>
+    <div class="content">
+      <div class="ph">
+        <div><p class="eyebrow">Quản trị · Nhật ký gọi AI · hạn mức 5 USD/ngày</p><p class="sub">Nguồn: mỗi lời gọi mô hình = 1 dòng <code style="font-family:var(--num);background:var(--cream);border-radius:6px;padding:1px 6px">AiCall</code>.</p></div>
+        <div class="ph-actions">
+          <div class="seg" role="tablist" aria-label="Khoảng thời gian"><button type="button" role="tab" class="is-on" aria-selected="true" data-range="today">Hôm nay</button><button type="button" role="tab" aria-selected="false" data-range="7d">7 ngày</button><button type="button" role="tab" aria-selected="false" data-range="30d">30 ngày</button></div>
+          <button class="btn btn-white btn-sm" type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Xuất CSV</button>
+        </div>
+      </div>
+
+      <div class="strip">
+        <div class="stile is-ink" data-reveal><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg></span><span class="lbl">Chi phí hôm nay</span><span class="val"><span data-count="1.84" data-mark="circle">1,84</span><small>USD</small></span><div class="mbar" aria-label="Đã dùng 37% hạn mức"><i style="--p:37"></i></div><span class="sub">37% hạn mức 5 USD · ▼ 0,46 so hôm qua</span></div>
+        <div class="stile" data-reveal><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg></span><span class="lbl">Lời gọi mô hình</span><span class="val"><span data-count="37">37</span><small>lượt</small></span><span class="sub">29 Opus 5 · 8 Haiku 4.5 · trung vị 4,2 s</span></div>
+        <div class="stile" style="background:var(--tint-peach)" data-reveal><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-triangle-alert"/></svg></span><span class="lbl">Lỗi &amp; sinh lại</span><span class="val"><span data-count="1">1</span><small>lỗi · 2,7%</small></span><span class="sub">1 bài không qua kiểm tra bám nguồn → sinh lại đạt</span></div>
+        <div class="stile" style="background:var(--tint-mint)" data-reveal><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg></span><span class="lbl">Tiết kiệm nhờ cache</span><span class="val"><span data-count="0.62">0,62</span><small>USD</small></span><span class="sub">34% token vào đọc từ cache · đoạn nguồn dùng chung A→B</span></div>
+      </div>
+
+      <section class="grid" aria-label="Biểu đồ">
+        <article class="card viz-card c8" data-reveal>
+          <div class="card-h"><h2><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Chi phí theo ngày</h2><span class="tag tag--soft">USD · 7 ngày gần nhất</span></div>
+          <div class="viz" id="vizDay"></div>
+        </article>
+        <article class="card viz-card c4" data-reveal>
+          <div class="card-h"><h2><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Theo người</h2><span class="tag tag--soft">7 ngày</span></div>
+          <div class="viz" id="vizWho"></div>
+          <div class="legend2"><span><i style="background:var(--blue)"></i>An · 21 lời gọi</span><span><i style="background:var(--ok)"></i>Bình · 12 lời gọi</span></div>
+          <p class="note-sys">Tác vụ hệ thống (đồng bộ thư viện số, kiểm thử prompt): 0,58 USD, không gán người.</p>
+        </article>
+      </section>
+
+      <div class="sec-h" style="margin-top:24px"><h2>Nhật ký gọi AI</h2><span class="tag tag--soft" id="logCount">10 / 37 dòng hôm nay</span></div>
+      <div class="filters" data-reveal>
+        <div class="grp" data-f="task"><span>Tác vụ</span><button class="fchip is-on" aria-pressed="true" data-v="all">Tất cả</button><button class="fchip" aria-pressed="false" data-v="map">Rút bản đồ</button><button class="fchip" aria-pressed="false" data-v="diag">Chẩn đoán</button><button class="fchip" aria-pressed="false" data-v="lesson">Bài học</button><button class="fchip" aria-pressed="false" data-v="tutor">Trợ giảng</button></div>
+        <div class="grp" data-f="who"><span>Người</span><button class="fchip is-on" aria-pressed="true" data-v="all">Tất cả</button><button class="fchip" aria-pressed="false" data-v="an">An</button><button class="fchip" aria-pressed="false" data-v="binh">Bình</button></div>
+        <div class="grp" data-f="st"><span>Trạng thái</span><button class="fchip is-on" aria-pressed="true" data-v="all">Tất cả</button><button class="fchip" aria-pressed="false" data-v="err">Lỗi / sinh lại</button><button class="fchip" aria-pressed="false" data-v="cache">Có cache</button></div>
+      </div>
+      <div class="tbl-wrap" data-reveal>
+        <table class="log" id="log">
+          <thead><tr><th>Thời gian</th><th>Người</th><th>Tác vụ</th><th>Mô hình</th><th class="n">Vào</th><th class="n">Ra</th><th class="n">Cache</th><th class="n">USD</th><th>Prompt</th><th>Trạng thái</th><th></th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+      <p class="small muted" style="margin:10px 0 0">Hai dòng tô kem là <b>bằng chứng cache</b>: ① bài 3NF của An tạo cache trên 5 đoạn nguồn, ② bài của Bình 5 phút sau đọc lại 5,0k token từ cache (<code style="font-family:var(--num)">usage.cache_read_input_tokens</code>) — rẻ hơn ~30% dù dài hơn ~30%.</p>
+
+      <div class="sec-h" style="margin-top:26px"><h2>Nhật ký lỗi hệ thống</h2><span class="tag tag--soft">2 · 24 giờ</span></div>
+      <div class="errs" data-reveal data-pop-row>
+        <div class="err"><svg class="ic" aria-hidden="true"><use href="#i-triangle-alert"/></svg><div><b>Grounding không đạt lần 1 — bài “Phụ thuộc hàm đầy đủ” (An)</b><small>Thiếu nguồn cho 1 câu kiểm tra → sinh lại với effort cao hơn, đạt sau 14 s. AiCall #1031 ok = false, #1032 ok = true.</small></div><time>hôm nay 09:41</time></div>
+        <div class="err"><svg class="ic" aria-hidden="true"><use href="#i-triangle-alert"/></svg><div><b>Trích xuất thất bại — “Đề cương ôn tập cuối kỳ (bản scan)”</b><small>pdfjs trả 0 ký tự trên 12 trang; Material.status = extracted lỗi, người dùng được báo thử lại. OCR ngoài phạm vi demo.</small></div><time>hôm nay 13:40</time></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="icons.js"></script>
+<script src="shell.js"></script>
+<script src="motion.js"></script>
+<script src="motion-assets.js"></script>
+<script>
+/* A03: biểu đồ SVG (dataviz: một trục, thanh mảnh bo 4 px, nhãn trực tiếp, tooltip; hôm nay = 1 cột than) + bảng AiCall lọc & mở chi tiết */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rm = SEN.rm, NS = 'http://www.w3.org/2000/svg';
+  const fmt = v => v.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const tip = document.createElement('div'); tip.className = 'tip'; document.body.appendChild(tip);
+  const showTip = (el, html) => { const r = el.getBoundingClientRect(); tip.innerHTML = html; tip.style.left = (r.left + r.width / 2 + scrollX) + 'px'; tip.style.top = (r.top + scrollY) + 'px'; tip.classList.add('show'); };
+  const hideTip = () => tip.classList.remove('show');
+  const DAYS = [['03/09', .41], ['04/09', .92], ['05/09', 1.63], ['06/09', 2.31], ['07/09', 1.08], ['08/09', 2.9], ['09/09', 1.84]];
+  (function () {
+    const W = 640, H = 220, L = 36, R = 8, T = 22, B = 30, max = 3, pw = W - L - R, ph = H - T - B, bw = Math.min(40, pw / DAYS.length - 12);
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Chi phí AI theo ngày, 7 ngày gần nhất, đơn vị USD');
+    let s = '';
+    [0, 1, 2, 3].forEach(v => { const y = T + ph - v / max * ph; s += `<line class="${v ? 'gridl' : 'base'}" x1="${L}" x2="${W - R}" y1="${y}" y2="${y}"/><text class="ax" x="${L - 8}" y="${y + 4}" text-anchor="end">${v}</text>`; });
+    DAYS.forEach(([d, v], i) => { const x = L + (i + .5) * pw / DAYS.length - bw / 2, h = v / max * ph, y = T + ph - h, today = i === DAYS.length - 1;
+      s += `<path class="bar" data-i="${i}" fill="${today ? 'var(--ink)' : 'var(--amber)'}" d="M${x} ${T + ph} v${-(h - 4)} a4 4 0 0 1 4 -4 h${bw - 8} a4 4 0 0 1 4 4 v${h - 4} z"/>`;
+      s += `<text class="lab" x="${x + bw / 2}" y="${y - 7}" text-anchor="middle">${fmt(v)}</text><text class="ax" x="${x + bw / 2}" y="${H - 8}" text-anchor="middle"${today ? ' font-weight="700" fill="var(--ink)"' : ''}>${today ? 'Hôm nay' : d}</text>`;
+      s += `<rect class="hit" data-i="${i}" x="${x - 6}" y="${T}" width="${bw + 12}" height="${ph}"/>`; });
+    svg.innerHTML = s; $('#vizDay').appendChild(svg);
+    svg.addEventListener('mouseover', e => { const h = e.target.closest('.hit'); if (!h) return; const i = +h.dataset.i, [d, v] = DAYS[i]; showTip($$('.bar', svg)[i], `${d} · <b>${fmt(v)} USD</b><br>${[5, 9, 18, 26, 12, 31, 37][i]} lời gọi · cache ${[0, 12, 22, 31, 28, 35, 34][i]}%`); });
+    svg.addEventListener('mouseout', e => { if (e.target.closest('.hit')) hideTip(); });
+    if (!rm) gsap.from($$('.bar', svg), { scaleY: 0, duration: .8, stagger: .06, ease: 'power3.out', delay: .6 }), gsap.from($$('.lab', svg), { opacity: 0, duration: .4, stagger: .06, delay: 1.1 });
+  })();
+  const WHO = [['An', 4.12, 'var(--blue)'], ['Bình', 2.31, 'var(--ok)']];
+  (function () {
+    const W = 320, H = 96, L = 44, R = 60, rowH = 40, max = 5, pw = W - L - R;
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Chi phí 7 ngày theo sinh viên: An 4,12 USD, Bình 2,31 USD');
+    let s = `<line class="base" x1="${L}" x2="${L}" y1="6" y2="${H - 6}"/>`;
+    WHO.forEach(([n, v, c], i) => { const y = 12 + i * rowH, w = v / max * pw;
+      s += `<text class="ax" x="${L - 10}" y="${y + 17}" text-anchor="end" font-weight="700" fill="var(--ink)">${n}</text><path class="hbar" data-i="${i}" fill="${c}" d="M${L} ${y} h${w - 4} a4 4 0 0 1 4 4 v16 a4 4 0 0 1 -4 4 h${-(w - 4)} z"/><text class="lab" x="${L + w + 8}" y="${y + 17}">${fmt(v)}</text><rect class="hit" data-i="${i}" x="${L}" y="${y - 6}" width="${pw + R}" height="${rowH - 4}"/>`; });
+    svg.innerHTML = s; $('#vizWho').appendChild(svg);
+    svg.addEventListener('mouseover', e => { const h = e.target.closest('.hit'); if (!h) return; const i = +h.dataset.i, [n, v] = WHO[i]; showTip($$('.hbar', svg)[i], `${n} · <b>${fmt(v)} USD</b><br>${i ? '12 lời gọi · bài dài 60′' : '21 lời gọi · 2 lần sinh lại'}`); });
+    svg.addEventListener('mouseout', e => { if (e.target.closest('.hit')) hideTip(); });
+    if (!rm) gsap.from($$('.hbar', svg), { scaleX: 0, duration: .8, stagger: .12, ease: 'power3.out', delay: .8 });
+  })();
+  const TASK = { map: 'Rút bản đồ', diag: 'Sinh chẩn đoán', lesson: 'Sinh bài học', tutor: 'Trợ giảng', ground: 'Kiểm tra bám nguồn', quiz: 'Chấm tự luận' };
+  const ROWS = [
+    { t: '20:19', who: 'binh', task: 'lesson', m: 'claude-opus-5', i: 6100, o: 1900, c: 5000, usd: .05, pv: 'v3', st: 'ok', pair: '②', d: 'Khái niệm 3NF · 5 đoạn nguồn giống lời gọi #1046 của An → cache_read_input_tokens = 5.012 · thời gian 11,8 s · effort medium' },
+    { t: '20:14', who: 'an', task: 'lesson', m: 'claude-opus-5', i: 6100, o: 1500, c: 0, usd: .07, pv: 'v3', st: 'ok', pair: '①', d: 'Khái niệm 3NF · [QUY TẮC]+[ĐOẠN NGUỒN] gắn cache_control · cache_creation_input_tokens = 5.012 · 9,6 s' },
+    { t: '20:02', who: 'an', task: 'tutor', m: 'claude-opus-5', i: 2400, o: 420, c: 1800, usd: .01, pv: 'v2', st: 'ok', d: 'Câu hỏi “MaKhoa là khóa dự tuyển thì sao?” · 3 đoạn tìm toàn văn · 2 Memory đang bật · stream 2,1 s' },
+    { t: '19:48', who: 'an', task: 'ground', m: 'claude-haiku-4-5', i: 3100, o: 210, c: 0, usd: .004, pv: 'v1', st: 'ok', d: 'Kiểm tra bài “Phụ thuộc bắc cầu”: 5/5 mã nguồn tồn tại, mỗi câu ≥1 nguồn, độ dài trong ngưỡng 30 phút' },
+    { t: '19:47', who: 'an', task: 'lesson', m: 'claude-opus-5', i: 5800, o: 1400, c: 4300, usd: .05, pv: 'v3', st: 'ok', d: 'Khái niệm Phụ thuộc bắc cầu · cache đọc 4.300 · 10,2 s' },
+    { t: '14:05', who: 'binh', task: 'map', m: 'claude-opus-5', i: 19800, o: 3100, c: 0, usd: .18, pv: 'v2', st: 'ok', d: 'Slide 7 (152 đoạn) → 6 khái niệm, 7 tiên quyết · 48 s · zodOutputFormat hợp lệ' },
+    { t: '09:41', who: 'an', task: 'lesson', m: 'claude-opus-5', i: 5900, o: 1600, c: 4300, usd: .05, pv: 'v3', st: 'retry', d: 'Sinh lại sau khi #1031 không đạt grounding (thiếu nguồn câu kiểm tra 3) · effort high · 14,1 s · đạt' },
+    { t: '09:40', who: 'an', task: 'lesson', m: 'claude-opus-5', i: 5900, o: 1450, c: 4300, usd: .05, pv: 'v3', st: 'err', d: 'Không đạt kiểm tra bám nguồn: câu kiểm tra 3 không có mã đoạn → ok = false, không giao bài' },
+    { t: '08:15', who: 'binh', task: 'diag', m: 'claude-opus-5', i: 7900, o: 2100, c: 0, usd: .09, pv: 'v1', st: 'ok', d: '10 câu chẩn đoán trải 8 khái niệm · 21 s' },
+    { t: '07:52', who: 'an', task: 'quiz', m: 'claude-haiku-4-5', i: 900, o: 120, c: 0, usd: .001, pv: 'v1', st: 'ok', d: 'Chấm câu tự luận ngắn (ôn nhanh Phụ thuộc hàm)' },
+  ];
+  const AV = { an: ['a', 'A', 'An'], binh: ['b', 'B', 'Bình'] };
+  const k = n => n >= 1000 ? (n / 1000).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + 'k' : String(n);
+  const f = { task: 'all', who: 'all', st: 'all' }; let first = true;
+  function render() {
+    const rows = ROWS.filter(r => (f.task === 'all' || r.task === f.task) && (f.who === 'all' || r.who === f.who) && (f.st === 'all' || (f.st === 'err' ? r.st !== 'ok' : r.c > 0)));
+    $('#logBody').innerHTML = rows.map((r, i) => `<tr class="r${r.pair ? ' pair' : ''}" data-i="${i}" tabindex="0" aria-expanded="false"><td class="n" style="text-align:left">${r.pair ? `<b style="color:var(--warn-ink);margin-right:4px">${r.pair}</b>` : ''}${r.t}</td><td><span class="who"><span class="av ${AV[r.who][0]}">${AV[r.who][1]}</span>${AV[r.who][2]}</span></td><td>${TASK[r.task]}</td><td class="model">${r.m}</td><td class="n">${k(r.i)}</td><td class="n">${k(r.o)}</td><td class="n">${r.c ? k(r.c) + `<span class="cache">${Math.round(r.c / r.i * 100)}%</span>` : '—'}</td><td class="n">${r.usd.toLocaleString('vi-VN', { minimumFractionDigits: r.usd < .01 ? 3 : 2, maximumFractionDigits: 3 })}</td><td class="model">${r.pv}</td><td><span class="st st--${r.st}">${SEN.ic(r.st === 'ok' ? 'circle-check' : r.st === 'err' ? 'circle-alert' : 'rotate-ccw')}${r.st === 'ok' ? 'Thành công' : r.st === 'err' ? 'Không đạt' : 'Sinh lại'}</span></td><td><svg class="ic chev" aria-hidden="true"><use href="#i-chevron-down"/></svg></td></tr><tr class="det"><td colspan="11">Chi tiết: ${r.d}</td></tr>`).join('');
+    $('#logCount').textContent = `${rows.length} / 37 dòng hôm nay`;
+    if (!rm && first) gsap.from($$('#logBody tr.r'), { opacity: 0, y: 6, duration: .35, stagger: .04, ease: 'power2.out', delay: .7 }); first = false;
+  }
+  render();
+  $$('.filters .grp').forEach(g => g.addEventListener('click', e => { const b = e.target.closest('.fchip'); if (!b) return; $('.fchip', g).forEach(x => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', x === b); }); f[g.dataset.f] = b.dataset.v; render(); }));
+  const toggle = tr => { const det = tr.nextElementSibling, open = tr.classList.toggle('open'); tr.setAttribute('aria-expanded', open); det.classList.toggle('show', open); if (open && !rm) gsap.from(det.firstElementChild, { opacity: 0, y: -4, duration: .3 }); };
+  $('#log').addEventListener('click', e => { const tr = e.target.closest('tr.r'); if (tr) toggle(tr); });
+  $('#log').addEventListener('keydown', e => { const tr = e.target.closest('tr.r'); if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(tr); } });
+  $$('.seg [data-range]').forEach(b => b.addEventListener('click', () => { $$('.seg button').forEach(x => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-selected', x === b); }); SEN.toast('Bản demo chỉ có dữ liệu hôm nay và 7 ngày', 'calendar'); }));
+})();
+</script>
+</body>
+</html>

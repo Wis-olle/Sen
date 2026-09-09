@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kho học liệu — Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng Kho học liệu ---- */
+  .strip{margin-bottom:18px}
+  /* khối hổ phách: vùng thả (khối nhấn duy nhất của màn) */
+  .drop{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;min-height:100%;padding:18px 18px 18px;cursor:pointer;border:2px dashed transparent;transition:border-color .25s}
+  .drop.is-over,.drop:focus-within{border-color:var(--ink)}
+  .drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .drop :is(img,svg.inl){width:150px;margin:-6px 0 2px}
+  .drop b{font-size:16px;letter-spacing:-.01em}
+  .drop p{font-size:13px;color:var(--ink-2);max-width:26ch}
+  .drop .fmt{display:flex;gap:6px;margin-top:6px}
+  .drop .fmt span{font-family:var(--num);font-size:11px;font-weight:700;background:rgba(255,255,255,.55);border-radius:6px;padding:2px 7px}
+  .drop .btn{margin-top:10px;position:relative;z-index:1}
+  /* thẻ đang xử lý (lớn) */
+  .proc{display:grid;grid-template-columns:1fr auto;gap:10px 18px;align-items:start}
+  .proc .who{display:flex;align-items:center;gap:12px;grid-column:1/-1}
+  .proc h3{font-size:17px;letter-spacing:-.01em;line-height:1.25}
+  .proc .s{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px}
+  .proc .stepper{grid-column:1/-1;margin-top:10px;max-width:none}
+  .proc .end{display:flex;align-items:center;gap:8px}
+  .spin{width:14px;height:14px;border-radius:50%;border:2.5px solid var(--cream-deep);border-top-color:var(--amber-deep);animation:spin 1s linear infinite;flex:none}
+  .is-static .spin{animation:none}
+  /* thẻ tài liệu có bìa */
+  .docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+  .doc{padding:0;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+  .doc .cover{height:96px;display:grid;place-items:center;position:relative}
+  .doc .cover :is(img,svg.inl){width:54px;height:54px}
+  .doc .cover .kind{position:absolute;left:12px;top:12px;font-family:var(--num);font-size:11px;font-weight:700;background:var(--ink);color:var(--amber);border-radius:6px;padding:2px 7px}
+  .doc .cover .st-tag{position:absolute;right:12px;top:12px}
+  .doc .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .doc h3{font-size:15px;line-height:1.3;letter-spacing:-.01em}
+  .doc .s{font-size:12.5px;color:var(--muted)}
+  .doc .foot{margin-top:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:6px}
+  .doc .stepper--compact{max-width:140px}
+  .doc.is-error{background:var(--tint-peach)}
+  .doc-err{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink-2);line-height:1.4}
+  .doc-err .ic{width:15px;height:15px;color:var(--danger);flex:none;margin-top:1px}
+  .lib-item{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line-2)}
+  .lib-item:first-of-type{border-top:0;padding-top:0}
+  .lib-item b{display:block;font-size:13.5px;line-height:1.3}
+  .lib-item small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .lib-item .btn{margin-left:auto;flex:none}
+  @media (max-width:1100px){.docs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:700px){.docs{grid-template-columns:1fr}.proc{grid-template-columns:1fr}.proc .who{flex-wrap:wrap}.proc .who>div{flex:1 1 170px;min-width:0}.proc .who .end{width:100%;margin-left:0!important}}
+</style>
+</head>
+<body data-page="library" data-role="student" data-title="Kho học liệu">
+<div class="app">
+  <aside class="sb" id="sb"></aside>
+  <main class="main" id="main">
+    <header class="tb" id="tb"></header>
+    <div class="content">
+
+      <div class="ph">
+        <div><p class="eyebrow">Tài liệu riêng tư của bạn · Học kỳ 20261</p></div>
+        <div class="ph-actions">
+          <button class="btn btn-white btn-sm" type="button" data-soon title="Mở qua extension"><svg class="ic" aria-hidden="true"><use href="#i-library-big"/></svg>Nhập từ thư viện số</button>
+          <button class="btn btn-dark btn-sm" type="button" id="btnUpload">Tải lên<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></button>
+        </div>
+      </div>
+
+      <div class="strip" data-reveal>
+        <div class="stile"><span class="lbl">Tài liệu</span><span class="val"><span data-count="4" id="cntAll">4</span><small>2 môn</small></span><span class="sub">3 tải lên · 1 thư viện số</span></div>
+        <div class="stile" style="background:var(--tint-mint)"><span class="lbl">Đã lập chỉ mục</span><span class="val"><span data-count="334">334</span><small>đoạn</small></span><span class="sub">90 trang</span></div>
+        <div class="stile" style="background:var(--tint-sky)"><span class="lbl">Khái niệm rút được</span><span class="val"><span data-count="14">14</span><small>2 bản đồ</small></span></div>
+      </div>
+
+      <section class="grid" style="align-items:stretch" aria-label="Tài liệu">
+        <!-- đang xử lý: khối lớn, vân gạch chéo -->
+        <article class="card hatch c8 proc" id="procCard" data-reveal>
+          <div class="who"><span class="tile" style="background:var(--white)"><img src="assets/ico/doc-search.svg" alt="" /></span><div><h3>Slide bài giảng 7 — Phụ thuộc hàm và khóa</h3><div class="s"><span class="tag tag--white"><svg class="ic" aria-hidden="true"><use href="#i-library-big"/></svg>Thư viện số UTT</span><span>hôm nay 14:02</span><span>46 trang · 152 đoạn</span></div></div><span class="end" style="margin-left:auto"><span class="tag tag--amber"><span class="spin" aria-hidden="true"></span>Đang dựng bản đồ · ~1 phút</span></span></div>
+          <div class="stepper" aria-label="Trạng thái xử lý: đang ở bước 4/4">
+            <div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i><span>Đã tải</span></div><div class="st-line is-done"></div>
+            <div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i><span>Đã trích xuất</span></div><div class="st-line is-done"></div>
+            <div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i><span>Đã lập chỉ mục</span></div><div class="st-line"></div>
+            <div class="st is-current"><i></i><span>Đang dựng bản đồ</span></div>
+          </div>
+        </article>
+
+        <!-- vùng thả: khối nhấn hổ phách -->
+        <label class="card card--amber c4 drop" id="drop" data-reveal>
+          <input type="file" id="file" accept=".pdf,.txt,.md,text/plain,text/markdown,application/pdf" aria-label="Chọn tài liệu để tải lên" />
+          <img class="spot" src="assets/spot/note.svg" alt="" width="500" height="500" data-float />
+          <b>Kéo thả tài liệu vào đây</b>
+          <p>PDF, text, markdown · tối đa 50 MB · xử lý xong trong 1–2 phút</p>
+          <div class="fmt"><span>PDF</span><span>TXT</span><span>MD</span></div>
+          <span class="btn btn-dark btn-xs">Chọn tệp</span>
+        </label>
+      </section>
+
+      <div class="sec-h" style="margin-top:22px"><h2 data-mark="underline">Tài liệu đã tải</h2><span class="tag tag--soft" id="cntDb">3 tài liệu</span></div>
+      <div class="docs" id="docsDb" data-reveal>
+        <article class="card doc">
+          <div class="cover" style="background:var(--tint-amber)"><span class="kind">PDF</span><span class="tag tag--green st-tag"><svg class="ic" aria-hidden="true"><use href="#i-waypoints"/></svg>8 khái niệm</span><img src="assets/ico/book.svg" alt="" /></div>
+          <div class="body"><h3>Chương 4 — Chuẩn hóa cơ sở dữ liệu</h3><div class="s">Tải lên · Cơ sở dữ liệu · 05/09 · 32 trang · 118 đoạn</div>
+            <div class="foot"><a class="btn btn-dark btn-xs" href="app-map.html" style="margin-left:auto">Mở bản đồ</a></div>
+          </div>
+        </article>
+        <article class="card doc is-error">
+          <div class="cover" style="background:var(--tint-peach-2)"><span class="kind">PDF</span><span class="tag tag--white st-tag"><svg class="ic" aria-hidden="true" style="color:var(--danger)"><use href="#i-triangle-alert"/></svg>Lỗi trích xuất</span><img src="assets/ico/exclaim.svg" alt="" /></div>
+          <div class="body"><h3>Đề cương ôn tập cuối kỳ (bản scan)</h3><div class="s">Tải lên · Cơ sở dữ liệu · hôm nay 13:40 · 12 trang · 0 đoạn</div>
+            <div class="doc-err"><svg class="ic" aria-hidden="true"><use href="#i-triangle-alert"/></svg><span>File là ảnh quét, không trích được chữ. Hãy tải bản PDF có chữ.</span></div>
+            <div class="foot"><button class="btn btn-white btn-xs" type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-rotate-ccw"/></svg>Thử lại</button><button class="btn btn-ghost btn-xs" type="button" data-soon>Xóa</button></div>
+          </div>
+        </article>
+        <article class="card doc">
+          <div class="cover" style="background:var(--tint-sky)"><span class="kind">WEB</span><span class="tag tag--green st-tag"><svg class="ic" aria-hidden="true"><use href="#i-waypoints"/></svg>6 khái niệm</span><img src="assets/ico/globe.svg" alt="" /></div>
+          <div class="body"><h3>Chương 3 — Tầng giao vận (TCP/UDP)</h3><div class="s">Link · Mạng máy tính · 01/09 · 64 đoạn</div>
+            <div class="foot"><a class="btn btn-white btn-xs" href="#" data-soon style="margin-left:auto">Mở bản đồ</a></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <aside class="rail" aria-label="Gợi ý và hướng dẫn">
+    <div class="rh" data-reveal>
+      <h2>Gợi ý từ thư viện số<span class="tag tag--soft">OAI-PMH</span></h2>
+      <div class="lib-item"><span class="tile" style="background:var(--tint-amber)"><img src="assets/ico/book-open.svg" alt="" /></span><div><b>Giáo trình Cơ sở dữ liệu</b><small>Nguyễn Kim Anh · 2019 · 312 trang</small></div><button class="btn btn-ghost btn-xs" type="button" data-soon>Nhập</button></div>
+      <div class="lib-item"><span class="tile" style="background:var(--tint-mint)"><img src="assets/ico/video-board.svg" alt="" /></span><div><b>Bài giảng Hệ quản trị CSDL</b><small>Khoa CNTT UTT · 2023 · 96 trang</small></div><button class="btn btn-ghost btn-xs" type="button" data-soon>Nhập</button></div>
+      <div class="lib-item"><span class="tile" style="background:var(--tint-sky)"><img src="assets/ico/pencil.svg" alt="" /></span><div><b>Bài tập chuẩn hóa có lời giải</b><small>Bộ môn HTTT · 2022 · 40 trang</small></div><button class="btn btn-ghost btn-xs" type="button" data-soon>Nhập</button></div>
+      <p class="small muted">Bài giảng công khai khớp môn của bạn trên thuvien.utt.edu.vn.</p>
+    </div>
+    <div class="rh" data-reveal>
+    </div>
+  </aside>
+</div>
+
+<template id="tplDoc">
+  <article class="card hatch c12 proc">
+    <div class="who"><span class="tile" style="background:var(--white)"><img src="assets/ico/upload.svg" alt="" /></span><div><h3></h3><div class="s"><span class="tag tag--white"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg>Tải lên</span><span>vừa xong</span><span class="meta">—</span></div></div><span class="end" style="margin-left:auto"><span class="tag tag--amber status"><span class="spin" aria-hidden="true"></span>Đang tải lên…</span></span></div>
+    <div class="stepper" aria-label="Trạng thái xử lý">
+      <div class="st is-current"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i><span>Đang tải</span></div><div class="st-line"></div>
+      <div class="st"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i><span>Trích xuất</span></div><div class="st-line"></div>
+      <div class="st"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i><span>Lập chỉ mục</span></div><div class="st-line"></div>
+      <div class="st"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i><span>Bản đồ</span></div>
+    </div>
+  </article>
+</template>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="icons.js"></script>
+<script src="shell.js"></script>
+<script src="motion.js"></script>
+<script src="motion-assets.js"></script>
+<script>
+/* Demo tải lên (kịch bản bước 1): thẻ mới chèn trên cùng lưới, chạy 4 bước mỗi 1,5 s như giao diện poll 2 s. */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const drop = $('#drop'), file = $('#file'), grid = $('.grid'), tpl = $('#tplDoc'), rm = window.SEN && SEN.rm;
+  const STEPS = [
+    { lbl: 'Đã tải', status: 'Đang trích xuất…', meta: '28 trang' },
+    { lbl: 'Đã trích xuất', status: 'Đang lập chỉ mục…', meta: '28 trang · 96 đoạn' },
+    { lbl: 'Đã lập chỉ mục', status: 'Đang dựng bản đồ · ~1 phút', meta: '28 trang · 96 đoạn' },
+    { lbl: 'Đã có bản đồ', status: '7 khái niệm', meta: '28 trang · 96 đoạn' },
+  ];
+  let busy = false;
+  function upload(name) {
+    if (busy) return; busy = true;
+    const el = tpl.content.firstElementChild.cloneNode(true);
+    $('h3', el).textContent = name.replace(/\.(pdf|txt|md)$/i, '');
+    grid.prepend(el); $('#cntDb').textContent = '4 tài liệu'; $('#cntAll').textContent = '5';
+    const sts = $$('.st', el), lines = $$('.st-line', el), status = $('.status', el), meta = $('.meta', el);
+    if (!rm) gsap.from(el, { y: -16, opacity: 0, duration: .6, ease: 'power3.out' });
+    let k = 0;
+    const next = () => {
+      const s = STEPS[k], node = sts[k];
+      node.classList.remove('is-current'); node.classList.add('is-done'); $('span', node).textContent = s.lbl;
+      const ln = lines[k]; if (ln) setTimeout(() => ln.classList.add('is-done'), 80); // bắt giá trị trước khi k tăng
+      if (!rm) gsap.fromTo($('i', node), { scale: .6 }, { scale: 1, duration: .5, ease: 'back.out(2.5)' });
+      meta.textContent = s.meta;
+      if (sts[k + 1]) { sts[k + 1].classList.add('is-current'); status.innerHTML = '<span class="spin" aria-hidden="true"></span>' + s.status; }
+      else {
+        status.className = 'tag tag--green'; status.innerHTML = SEN.ic('waypoints') + s.status;
+        const a = document.createElement('a'); a.className = 'btn btn-dark btn-xs'; a.href = 'app-map.html'; a.textContent = 'Mở bản đồ'; status.parentNode.appendChild(a);
+        if (!rm) gsap.from(a, { scale: .6, opacity: 0, duration: .5, ease: 'back.out(2)' });
+        el.classList.remove('hatch'); document.dispatchEvent(new CustomEvent('sen:upload-done', { detail: { el: status } })); SEN.toast('Đã có bản đồ: 7 khái niệm, 5 tiên quyết', 'waypoints'); busy = false;
+      }
+      if (++k < STEPS.length) setTimeout(next, rm ? 0 : 1500);
+    };
+    setTimeout(next, rm ? 0 : 900);
+  }
+  file.addEventListener('change', () => { if (file.files[0]) upload(file.files[0].name); file.value = ''; });
+  $('#btnUpload').addEventListener('click', () => upload('Chương 5 — Ngôn ngữ SQL.pdf'));
+  ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
+  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) upload(f.name); });
+})();
+</script>
+</body>
+</html>

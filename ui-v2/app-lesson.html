@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bài học: Phụ thuộc bắc cầu — Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng Bài học: KHÔNG hộp bao ngoài, 8 đốt có ruy-băng; đúng 1 khối than = "Lỗi bạn từng mắc" ---- */
+  .readbar{position:fixed;left:0;top:0;height:3px;width:100%;background:var(--amber);transform:scaleX(0);transform-origin:0 50%;z-index:60;pointer-events:none}
+  .lh-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .lh-meta .mp{padding:5px 11px 5px 7px;border-radius:999px;background:var(--cream)}
+  .lesson{max-width:66ch}
+  .lesson code{white-space:nowrap}
+  .sec{position:relative;padding:22px 0 26px;border-top:1px solid var(--line-2);scroll-margin-top:24px}
+  .sec:first-child{border-top:0;padding-top:4px}
+  .sec-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .sec-h .n{width:30px;height:30px;border-radius:50%;background:var(--amber);color:var(--ink);font-family:var(--num);font-weight:700;font-size:13px;display:grid;place-items:center;flex:none}
+  .sec-h h2{font-size:19px;font-weight:800;letter-spacing:-.015em;line-height:1.25}
+  .sec-h .tag{margin-left:auto}
+  .prose{font-size:16px;line-height:1.7;color:var(--ink-2)}
+  .prose p+p{margin-top:12px}
+  .prose b{color:var(--ink);font-weight:700}
+  .prose code{font-family:var(--num);font-weight:700;background:var(--cream);border-radius:6px;padding:1px 6px;font-size:.92em;color:var(--ink)}
+  .prose ul{margin:8px 0 0;padding-left:0;list-style:none;display:grid;gap:8px}
+  .prose li{display:flex;gap:10px;align-items:flex-start}
+  .prose li i{flex:none;width:22px;height:22px;border-radius:50%;background:var(--amber);position:relative;margin-top:2px}
+  .prose li i::after{content:"";position:absolute;left:7px;top:5px;width:6px;height:10px;border:solid var(--ink);border-width:0 2.2px 2.2px 0;transform:rotate(45deg)}
+  .cite{margin:0 2px}
+  /* mục tiêu: khối tint + blob "viết" */
+  .goal{display:grid;grid-template-columns:1fr 150px;gap:14px;align-items:center;padding:16px 18px;border-radius:18px;background:var(--tint-sky)}
+  .goal :is(img,svg.inl){width:150px}
+  .chain{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0 6px;padding:14px 16px;border-radius:16px;background:var(--cream)}
+  .chain .nd{padding:8px 14px;border-radius:999px;background:var(--white);border:1.5px solid var(--line);font-family:var(--num);font-weight:700;font-size:14px}
+  .chain .nd.key{background:var(--ink);color:var(--amber);border-color:var(--ink)}
+  .chain .ar svg{width:34px;height:14px;overflow:visible}
+  .chain .ar path{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .chain .note{margin-left:auto;font-size:13px;color:var(--ink-2);font-style:italic;font-family:var(--serif)}
+  /* ví dụ: khối tint + bảng */
+  .example{padding:16px 18px 14px;border-radius:18px;background:var(--tint-amber)}
+  .tbl{width:100%;border-collapse:separate;border-spacing:0;margin:12px 0 6px;font-size:14px;border:1px solid rgba(0,0,0,.06);border-radius:14px;overflow:hidden;background:var(--white)}
+  .tbl th{background:var(--cream);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 12px;font-weight:700}
+  .tbl td{padding:9px 12px;border-top:1px solid var(--line-2);font-family:var(--num);font-weight:500}
+  .tbl td.dup{background:#fff1d6;position:relative}
+  .tbl td.dup::after{content:"lặp";position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--sans);font-size:10px;font-weight:700;color:var(--warn-ink)}
+  .tbl caption{caption-side:bottom;text-align:left;font-size:12.5px;color:var(--ink-2);padding:8px 2px 0}
+  /* lỗi bạn từng mắc: KHỐI THAN (điểm nhấn của màn) */
+  .mistakes{padding:20px 22px 22px}
+  .mistakes .sec-h .n{background:var(--amber)}
+  .mistakes .fig{position:absolute;right:16px;top:-30px;width:150px;pointer-events:none}
+  .mistakes>.prose{padding-right:150px}
+  .outside{padding:14px 16px;border-radius:14px;background:var(--white);border:1px dashed var(--line);margin-top:6px}
+  .outside .lbl{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--warn-ink);margin-bottom:6px}
+  .outside .lbl .ic{width:14px;height:14px}
+  /* quiz: thẻ kem viền hổ phách */
+  .qz{display:grid;gap:14px}
+  .qi{padding:16px 18px;border-radius:16px;background:var(--white);border:1.5px solid var(--amber-soft)}
+  .qi .qq{font-weight:700;font-size:15.5px;line-height:1.45;margin-bottom:12px;display:flex;gap:10px}
+  .qi .qq .k{font-family:var(--num);color:var(--muted);flex:none}
+  .qi .opts{display:grid;gap:8px}
+  .qi .opt{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line-2);text-align:left;font-size:14.5px;line-height:1.35;transition:border-color .2s,background .2s}
+  .qi .opt:hover{border-color:var(--amber-soft);background:#fffdf8}
+  .qi .opt .k{width:26px;height:26px;border-radius:50%;background:var(--cream);display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:12px;flex:none}
+  .qi .opt.is-right{border-color:var(--ok);background:var(--ok-tint)}
+  .qi .opt.is-right .k{background:var(--ok);color:#fff}
+  .qi .opt.is-wrong{border-color:var(--danger);background:var(--danger-tint)}
+  .qi .opt.is-wrong .k{background:var(--danger);color:#fff}
+  .qi.is-locked .opt{pointer-events:none}
+  .qi .fb{display:none;margin-top:12px;padding:10px 12px;border-radius:12px;font-size:13.5px;line-height:1.5;background:var(--cream)}
+  .qi .fb.show{display:block}
+  .qi .fb.ok{background:var(--ok-tint)}.qi .fb.no{background:var(--danger-tint)}
+  .qz-done{display:none;margin-top:6px;padding:16px 18px;border-radius:16px;background:var(--tint-amber);border:1.5px solid var(--amber)}
+  .qz-done.show{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+  .qz-done .big{font-size:34px}
+  .qz-done p{font-size:14px;color:var(--ink-2)}
+  /* kết bài: khối bạc hà + blob party */
+  .finish{display:grid;grid-template-columns:1fr 140px;gap:16px;align-items:center;padding:18px 20px;border-radius:18px;background:var(--tint-mint)}
+  .finish :is(img,svg.inl){width:140px}
+  .rate{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .rate .btn.is-on{background:var(--ink);color:var(--white)}
+  .next{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+  .next .sp{flex:1}
+  /* rail */
+  .toc{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:t}
+  .toc a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;font-size:13.5px;color:var(--ink-2);transition:background .2s,color .2s}
+  .toc a::before{counter-increment:t;content:counter(t);width:20px;height:20px;border-radius:50%;background:var(--cream);font-family:var(--num);font-size:11px;font-weight:700;display:grid;place-items:center;flex:none;color:var(--ink)}
+  .toc a:hover{background:var(--cream)}
+  .toc a.is-on{background:var(--amber);color:var(--ink);font-weight:600}
+  .toc a.is-on::before{background:var(--ink);color:var(--amber)}
+  .srcs{display:grid;gap:8px}
+  .srcs .s{display:flex;align-items:center;gap:10px;font-size:13px}
+  .srcs .s span{color:var(--muted)}
+  .ask{display:flex;gap:8px;margin-top:10px}
+  .ask .in{flex:1;height:40px;font-size:13.5px}
+  @media (max-width:900px){.goal,.finish{grid-template-columns:1fr}.goal :is(img,svg.inl),.finish :is(img,svg.inl){display:none}.mistakes .fig{display:none}.chain .note{margin-left:0;width:100%}}
+  @media (max-width:600px){.tbl{font-size:12.5px}.tbl td,.tbl th{padding:7px 8px}}
+</style>
+</head>
+<body data-page="lesson" data-role="student" data-title="Phụ thuộc bắc cầu" data-promo="plan">
+<div class="readbar" id="readbar" aria-hidden="true"></div>
+<div class="app">
+  <aside class="sb" id="sb"></aside>
+  <main class="main" id="main">
+    <header class="tb" id="tb"></header>
+    <div class="content">
+      <div class="ph">
+        <div><p class="eyebrow">Bài học hôm nay · CSDL · Chương 4 · mục 2/7 tuần này</p>
+          <div class="lh-meta"><span class="mp" id="mpTop"><span class="ring" id="ringTop" style="--p:20"></span><span id="scTop">20</span><small>/100</small><span class="lvl lvl-2" id="lvlTop">Yếu</span></span><span class="tag tag--soft" title="Mọi ý chính gắn mã đoạn nguồn; bài đã qua kiểm tra bám nguồn"><svg class="ic" aria-hidden="true"><use href="#i-badge-check"/></svg>Bám nguồn · 5 trích dẫn</span></div></div>
+        <div class="ph-actions"><a class="btn btn-white btn-sm" href="app-tutor.html"><svg class="ic" aria-hidden="true"><use href="#i-message-circle"/></svg>Hỏi trợ giảng</a><a class="btn btn-dark btn-sm" href="#kiem-tra">Làm kiểm tra<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+      </div>
+
+      <article class="lesson">
+        <section class="sec" id="s1" data-reveal>
+          <div class="sec-h"><span class="n">1</span><h2 data-mark="underline">Sau bài này bạn làm được gì</h2></div>
+          <div class="goal">
+            <div class="prose"><ul>
+              <li><i></i><span>Nhận ra chuỗi <code>X → Y → Z</code> trong một bảng thật, không chỉ trong công thức.</span></li>
+              <li><i></i><span>Phân biệt phụ thuộc bắc cầu với phụ thuộc hàm trực tiếp vào khóa.</span></li>
+              <li><i></i><span>Giải thích vì sao nó gây dữ liệu lặp và lỗi cập nhật — lý do 3NF ra đời.</span></li>
+            </ul></div>
+            <img class="spot" src="assets/spot/writing.svg" alt="" width="500" height="500" data-float />
+          </div>
+        </section>
+
+        <section class="sec" id="s2" data-reveal>
+          <div class="sec-h"><span class="n">2</span><h2>Ôn nhanh tiên quyết: Phụ thuộc hàm</h2><span class="tag tag--soft">bạn đang 30/100</span></div>
+          <div class="prose">
+            <p><b>X → Y</b> nghĩa là: hai dòng nào trùng nhau ở X thì phải trùng nhau ở Y. Ví dụ <code>MaSV → HoTen</code>: biết mã sinh viên là biết tên.<button class="cite" type="button" data-src="D1" data-page="12" data-q="Phụ thuộc hàm X → Y trên lược đồ R: với mọi bộ t1, t2 của r(R), nếu t1[X] = t2[X] thì t1[Y] = t2[Y].">[D1] tr. 12</button></p>
+            <p>Hôm qua bạn học phần này và đánh giá “dễ hiểu” — chỉ cần nhớ chiều mũi tên: bên trái quyết định bên phải. <a class="u-draw" href="#" data-soon>Ôn lại 5 phút</a></p>
+          </div>
+        </section>
+
+        <section class="sec" id="s3" data-reveal>
+          <div class="sec-h"><span class="n">3</span><h2>Giải thích</h2></div>
+          <div class="prose">
+            <p>Phụ thuộc bắc cầu xuất hiện khi khóa quyết định một thuộc tính <b>qua trung gian</b>: <code>MaSV → MaKhoa</code> và <code>MaKhoa → TenKhoa</code>, nên <code>MaSV → TenKhoa</code> — nhưng không trực tiếp, mà “bắc cầu” qua <code>MaKhoa</code>.<button class="cite" type="button" data-src="D4" data-page="14" data-q="Thuộc tính Z phụ thuộc bắc cầu vào X nếu tồn tại Y sao cho X → Y, Y → Z, Y không xác định X và Y không phải là khóa.">[D4] tr. 14</button></p>
+            <div class="chain" aria-label="Sơ đồ chuỗi phụ thuộc">
+              <span class="nd key">MaSV</span><span class="ar"><svg viewBox="0 0 34 14" data-draw><path d="M1 7h30M26 2l5 5-5 5"/></svg></span><span class="nd">MaKhoa</span><span class="ar"><svg viewBox="0 0 34 14" data-draw><path d="M1 7h30M26 2l5 5-5 5"/></svg></span><span class="nd">TenKhoa</span>
+              <span class="note">MaKhoa không phải khóa → TenKhoa phụ thuộc bắc cầu vào MaSV</span>
+            </div>
+            <p>Điều kiện quan trọng: <b>trung gian Y không phải khóa</b>. Nếu Y cũng là khóa dự tuyển thì đó chỉ là hai phụ thuộc hàm bình thường, không có gì phải tách.<button class="cite" type="button" data-src="D4" data-page="14" data-q="Nếu Y là siêu khóa của R thì X → Y → Z không tạo thành phụ thuộc bắc cầu theo nghĩa của 3NF.">[D4] tr. 14</button></p>
+          </div>
+        </section>
+
+        <section class="sec" id="s4" data-reveal>
+          <div class="sec-h"><span class="n">4</span><h2>Ví dụ trong ngành của bạn</h2><span class="tag tag--soft">CNTT · quản lý sinh viên</span></div>
+          <div class="example">
+            <div class="prose"><p>Bảng <code>SinhVien</code> của phần mềm quản lý đào tạo, đúng kiểu dữ liệu bạn sẽ gặp khi làm bài tập lớn:</p></div>
+            <table class="tbl">
+              <caption>Đổi tên khoa CNTT → “Công nghệ thông tin &amp; Truyền thông” phải sửa 3 dòng; quên một dòng là dữ liệu mâu thuẫn.<button class="cite" type="button" data-src="D4" data-page="15" data-q="Dư thừa dữ liệu do phụ thuộc bắc cầu dẫn tới dị thường cập nhật: cùng một sự kiện phải sửa ở nhiều bộ.">[D4] tr. 15</button></caption>
+              <thead><tr><th>MaSV</th><th>HoTen</th><th>MaKhoa</th><th>TenKhoa</th></tr></thead>
+              <tbody>
+                <tr><td>SV001</td><td>Nguyễn Văn An</td><td>CNTT</td><td class="dup">Công nghệ thông tin</td></tr>
+                <tr><td>SV002</td><td>Trần Thị Bình</td><td>CNTT</td><td class="dup">Công nghệ thông tin</td></tr>
+                <tr><td>SV003</td><td>Lê Văn Cường</td><td>KTPM</td><td>Kỹ thuật phần mềm</td></tr>
+                <tr><td>SV004</td><td>Phạm Thu Hà</td><td>CNTT</td><td class="dup">Công nghệ thông tin</td></tr>
+              </tbody>
+            </table>
+            <div class="prose"><p>Cách chữa: tách <code>Khoa(MaKhoa, TenKhoa)</code> ra bảng riêng, <code>SinhVien</code> chỉ giữ <code>MaKhoa</code>. Đó chính là bước đưa bảng lên 3NF.<button class="cite" type="button" data-src="D7" data-page="17" data-q="Một quan hệ đạt 3NF khi đạt 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa chính.">[D7] tr. 17</button></p></div>
+          </div>
+        </section>
+
+        <section class="sec" id="s5">
+          <div class="card card--warm mistakes" data-reveal>
+            <img class="fig" src="assets/doodles/clumsy-amber.svg" alt="" width="800" height="600" data-float />
+            <div class="sec-h"><span class="n">5</span><h2>Lỗi bạn từng mắc</h2></div>
+            <div class="prose"><p>Hệ thống nhớ hai chỗ bạn hay nhầm — bài này đã viết lại phần giải thích và câu kiểm tra để nhắm đúng vào đó.</p></div>
+            <div class="mem" data-pop><svg class="ic" aria-hidden="true"><use href="#i-brain"/></svg><div><b>Coi phụ thuộc bắc cầu như phụ thuộc hàm thường<span class="kind kind--mis">nhầm lẫn</span></b><p>Bạn nhận ra <code>MaSV → TenKhoa</code> nhưng bỏ qua trung gian <code>MaKhoa</code>, nên không thấy cần tách bảng.</p><small>Bằng chứng: sai câu 5 bài chẩn đoán (08/09)</small></div></div>
+            <div class="mem" data-pop><svg class="ic" aria-hidden="true"><use href="#i-brain"/></svg><div><b>Nghĩ 2NF là đủ cho 3NF<span class="kind kind--mis">nhầm lẫn</span></b><p>2NF chỉ loại phụ thuộc bộ phận; phụ thuộc bắc cầu vẫn còn — đó là việc của 3NF.</p><small>Bằng chứng: sai 2 lần quiz 3NF (08–09/09)</small></div></div>
+            <div class="mem good" data-pop><svg class="ic" aria-hidden="true"><use href="#i-lightbulb"/></svg><div><b>Bạn hiểu nhanh khi có bảng dữ liệu cụ thể<span class="kind kind--eff">cách hiểu tốt</span></b><p>Vì thế phần 4 dùng bảng thật thay vì ký hiệu — giống bài Phụ thuộc hàm bạn đánh giá “dễ hiểu”.</p><small>Bằng chứng: đánh giá sau bài 08/09</small></div></div>
+          </div>
+        </section>
+
+        <section class="sec" id="s6" data-reveal>
+          <div class="sec-h"><span class="n">6</span><h2>Mở rộng</h2></div>
+          <div class="outside"><span class="lbl"><svg class="ic" aria-hidden="true"><use href="#i-circle-alert"/></svg>Ngoài tài liệu môn học</span><div class="prose"><p>Trong thực tế, các ORM như Prisma hay Hibernate không tự phát hiện phụ thuộc bắc cầu — bạn vẫn phải thiết kế lược đồ đúng trước khi viết mã. Ý này không có trong giáo trình, chỉ để bạn thấy nó xuất hiện ở đâu khi đi làm.</p></div></div>
+        </section>
+
+        <section class="sec" id="kiem-tra" data-reveal>
+          <div class="sec-h"><span class="n">7</span><h2>Kiểm tra 3 câu</h2><span class="tag tag--soft" id="qzCount">0/3</span></div>
+          <div class="prose" style="margin-bottom:12px"><p>Trả lời xong, mức thành thạo đổi ngay và kế hoạch tuần được tính lại nếu cần.</p></div>
+          <div class="qz" id="qz"></div>
+          <div class="qz-done" id="qzDone" aria-live="polite">
+            <div class="big"><span id="qzScore">0</span><small>/3</small></div>
+            <p><b>Mức thành thạo Phụ thuộc bắc cầu: <span id="qzFrom">20</span> → <span id="qzTo">34</span>.</b> Bạn vẫn dưới ngưỡng 60 nên phiên ôn 3NF sáng Chủ nhật được giữ nguyên; kế hoạch tính lại thành <b>v3</b>: <span id="qzReason">thêm 5 câu ôn bắc cầu vào tối 11/09 vì bạn sai câu về trung gian là khóa.</span></p>
+          </div>
+        </section>
+
+        <section class="sec" id="s8" data-reveal>
+          <div class="sec-h"><span class="n">8</span><h2>Bài này với bạn thế nào?</h2></div>
+          <div class="finish">
+            <div>
+              <div class="prose"><p>Đánh giá của bạn đổi cách soạn bài sau — không phải để chấm điểm ai.</p></div>
+              <div class="rate" role="group" aria-label="Đánh giá bài học">
+                <button class="btn btn-white btn-xs" type="button" data-rate="easy"><svg class="ic" aria-hidden="true"><use href="#i-thumbs-up"/></svg>Dễ hiểu</button>
+                <button class="btn btn-white btn-xs" type="button" data-rate="tooEasy"><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg>Quá dễ</button>
+                <button class="btn btn-white btn-xs" type="button" data-rate="tooHard"><svg class="ic" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Quá khó</button>
+                <button class="btn btn-white btn-xs" type="button" data-rate="wrong"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg>Có chỗ sai</button>
+              </div>
+              <div class="next"><span class="small muted">Tiếp theo: <b>Phụ thuộc hàm đầy đủ</b> · tối 10/09 · 30 phút</span><span class="sp"></span><a class="btn btn-dark btn-sm" href="app-plan.html">Về lộ trình<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a></div>
+            </div>
+            <img class="spot" src="assets/spot/party.svg" alt="" width="500" height="500" data-float />
+          </div>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <aside class="rail" aria-label="Mục lục và nguồn">
+    <div class="rh" data-reveal>
+      <h2>Trong bài<span class="tag tag--soft">8 phần</span></h2>
+      <ol class="toc" id="toc">
+        <li><a href="#s1">Mục tiêu</a></li><li><a href="#s2">Ôn tiên quyết</a></li><li><a href="#s3">Giải thích</a></li><li><a href="#s4">Ví dụ theo ngành</a></li>
+        <li><a href="#s5">Lỗi bạn từng mắc</a></li><li><a href="#s6">Mở rộng</a></li><li><a href="#kiem-tra">Kiểm tra 3 câu</a></li><li><a href="#s8">Đánh giá</a></li>
+      </ol>
+    </div>
+    <div class="rh" data-reveal>
+      <h2>Nguồn trong bài</h2>
+      <div class="srcs">
+        <div class="s"><button class="cite" type="button" data-src="D1" data-page="12" data-q="Phụ thuộc hàm X → Y trên lược đồ R: với mọi bộ t1, t2 của r(R), nếu t1[X] = t2[X] thì t1[Y] = t2[Y].">[D1] tr. 12</button><span>Định nghĩa phụ thuộc hàm</span></div>
+        <div class="s"><button class="cite" type="button" data-src="D4" data-page="14" data-q="Thuộc tính Z phụ thuộc bắc cầu vào X nếu tồn tại Y sao cho X → Y, Y → Z, Y không xác định X và Y không phải là khóa.">[D4] tr. 14</button><span>Định nghĩa bắc cầu</span></div>
+        <div class="s"><button class="cite" type="button" data-src="D4" data-page="15" data-q="Dư thừa dữ liệu do phụ thuộc bắc cầu dẫn tới dị thường cập nhật: cùng một sự kiện phải sửa ở nhiều bộ.">[D4] tr. 15</button><span>Dị thường cập nhật</span></div>
+        <div class="s"><button class="cite" type="button" data-src="D7" data-page="17" data-q="Một quan hệ đạt 3NF khi đạt 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa chính.">[D7] tr. 17</button><span>Định nghĩa 3NF</span></div>
+      </div>
+      <p class="small muted">Giáo trình Cơ sở dữ liệu · Chương 4 (bạn tải 05/09). Bấm mã để xem đoạn gốc.</p>
+    </div>
+    <a class="link-arrow" href="app-tutor.html" style="margin-top:4px">Hỏi trợ giảng về bài này <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="icons.js"></script>
+<script src="shell.js"></script>
+<script src="motion.js"></script>
+<script src="motion-assets.js"></script>
+<script>
+/* Bài học S09: thanh đọc · scroll-spy · 3 câu kiểm tra → mastery đổi ngay + planner tính lại · 4 nút đánh giá (popover cite do shell.js) */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rm = SEN.rm;
+  const bar = $('#readbar'), lesson = $('.lesson'), toc = $$('#toc a'), secs = $$('.sec');
+  const onScroll = () => { const r = lesson.getBoundingClientRect(), total = r.height - innerHeight * .6, p = Math.min(1, Math.max(0, (-r.top + 80) / total)); bar.style.transform = `scaleX(${p})`;
+    let cur = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < innerHeight * .4) cur = i; }); toc.forEach((a, i) => a.classList.toggle('is-on', i === cur)); };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  toc.forEach(a => a.addEventListener('click', e => { e.preventDefault(); $(a.getAttribute('href')).scrollIntoView({ behavior: rm ? 'auto' : 'smooth', block: 'start' }); }));
+  const QZ = [
+    { q: 'Trong bảng SinhVien ở phần 4, thuộc tính nào phụ thuộc bắc cầu vào <code>MaSV</code>?', o: ['HoTen', 'MaKhoa', 'TenKhoa', 'Không có'], a: 2, ok: '<code>MaSV → MaKhoa → TenKhoa</code>, và MaKhoa không phải khóa.', no: 'HoTen và MaKhoa phụ thuộc <b>trực tiếp</b> vào MaSV; chỉ TenKhoa đi qua trung gian MaKhoa.', src: ['D4', '14', 'Thuộc tính Z phụ thuộc bắc cầu vào X nếu tồn tại Y sao cho X → Y, Y → Z, Y không xác định X và Y không phải là khóa.'] },
+    { q: 'Nếu <code>MaKhoa</code> cũng là khóa dự tuyển của bảng thì <code>TenKhoa</code> có còn phụ thuộc bắc cầu vào <code>MaSV</code> không?', o: ['Có, vì vẫn có chuỗi MaSV → MaKhoa → TenKhoa', 'Không, vì trung gian là khóa thì không tính', 'Chỉ khi TenKhoa duy nhất', 'Không xác định được'], a: 1, ok: 'Đây chính là chỗ bạn từng nhầm: trung gian là khóa thì không phải bắc cầu.', no: 'Đây là chỗ bạn từng nhầm: điều kiện “Y không phải khóa” là bắt buộc. Nếu MaKhoa là khóa dự tuyển thì không có phụ thuộc bắc cầu.', src: ['D4', '14', 'Nếu Y là siêu khóa của R thì X → Y → Z không tạo thành phụ thuộc bắc cầu theo nghĩa của 3NF.'] },
+    { q: 'Cách tách nào loại bỏ phụ thuộc bắc cầu trong bảng SinhVien?', o: ['SinhVien(MaSV, HoTen) và Khoa(MaKhoa, TenKhoa)', 'SinhVien(MaSV, HoTen, MaKhoa) và Khoa(MaKhoa, TenKhoa)', 'SinhVien(MaSV, TenKhoa) và Khoa(MaKhoa, HoTen)', 'Không cần tách, chỉ cần thêm chỉ mục'], a: 1, ok: 'SinhVien giữ MaKhoa làm khóa ngoại; TenKhoa về bảng Khoa — bảng đạt 3NF.', no: 'SinhVien phải giữ <code>MaKhoa</code> để còn nối được sang Khoa; TenKhoa chuyển sang Khoa.', src: ['D7', '17', 'Một quan hệ đạt 3NF khi đạt 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa chính.'] },
+  ];
+  const qz = $('#qz'); let answered = 0, right = 0;
+  qz.innerHTML = QZ.map((q, i) => `<div class="qi" data-i="${i}"><div class="qq"><span class="k">${i + 1}.</span><span>${q.q}</span></div><div class="opts">${q.o.map((o, j) => `<button class="opt" type="button" data-j="${j}"><span class="k">${'ABCD'[j]}</span><span>${o}</span></button>`).join('')}</div><div class="fb"></div></div>`).join('');
+  qz.addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b) return; const qi = b.closest('.qi'); if (qi.classList.contains('is-locked')) return;
+    const i = +qi.dataset.i, j = +b.dataset.j, q = QZ[i], ok = j === q.a; qi.classList.add('is-locked');
+    b.classList.add(ok ? 'is-right' : 'is-wrong'); if (!ok) $$('.opt', qi)[q.a].classList.add('is-right');
+    const fb = $('.fb', qi); fb.className = 'fb show ' + (ok ? 'ok' : 'no'); fb.innerHTML = (ok ? '<b>✓ Đúng.</b> ' : '<b>✗ Chưa đúng.</b> ') + (ok ? q.ok : q.no) + ` <button class="cite" type="button" data-src="${q.src[0]}" data-page="${q.src[1]}" data-q="${q.src[2]}">[${q.src[0]}] tr. ${q.src[1]}</button>`;
+    if (!rm) { gsap.fromTo($('.k', b), { scale: .6 }, { scale: 1, duration: .45, ease: 'back.out(2.5)' }); gsap.from(fb, { y: 6, opacity: 0, duration: .35, ease: 'power2.out' }); }
+    answered++; if (ok) right++; $('#qzCount').textContent = answered + '/3';
+    if (answered === QZ.length) setTimeout(finish, 500);
+  });
+  function finish() {
+    const from = 20, to = 20 + right * 6 - (3 - right) * 2, done = $('#qzDone');
+    $('#qzScore').textContent = right; $('#qzFrom').textContent = from; $('#qzTo').textContent = to;
+    $('#qzReason').textContent = right === 3 ? 'gộp phiên ôn bắc cầu vào tối 11/09 vì bạn đã nắm chắc trung gian là khóa.' : 'thêm 5 câu ôn bắc cầu vào tối 11/09 vì bạn còn sai câu về trung gian là khóa.';
+    done.classList.add('show');
+    document.dispatchEvent(new CustomEvent('sen:finish', { detail: { el: $('#qzScore') } })); // motion.js D3: ăn mừng một lần
+    const lv = to < 20 ? 1 : to < 40 ? 2 : to < 60 ? 3 : 4, LBL = ['', 'Rất yếu', 'Yếu', 'Cần ôn', 'Khá'];
+    const apply = () => { $('#lvlTop').textContent = LBL[lv]; $('#lvlTop').className = 'lvl lvl-' + lv; };
+    if (rm) { $('#scTop').textContent = to; $('#ringTop').style.setProperty('--p', to); apply(); return; }
+    const o = { v: from };
+    gsap.timeline().from(done, { y: 14, opacity: 0, duration: .5, ease: 'power3.out' })
+      .to(o, { v: to, duration: .9, ease: 'power3.out', onUpdate: () => $('#scTop').textContent = Math.round(o.v) }, .3)
+      .to('#ringTop', { '--p': to, duration: .9, ease: 'power3.out' }, .3)
+      .fromTo('#mpTop', { scale: 1 }, { scale: 1.08, duration: .25, yoyo: true, repeat: 1, ease: 'sine.inOut', onComplete: apply }, .3)
+      .add(() => SEN.toast('Kế hoạch đã tính lại — phiên bản 3 (thêm ôn bắc cầu 11/09)', 'route'), 1.3);
+  }
+  const MSG = { easy: 'Đã ghi “dễ hiểu” — bài sau giữ kiểu ví dụ bảng dữ liệu', tooEasy: 'Đã ghi “quá dễ” — bài sau tăng độ khó và rút phần ôn', tooHard: 'Đã ghi “quá khó” — bài sau thêm ví dụ và chia nhỏ hơn', wrong: 'Đã đưa bài vào hàng đợi kiểm tra của quản trị' };
+  $$('.rate .btn').forEach(b => b.addEventListener('click', () => { $$('.rate .btn').forEach(x => x.classList.remove('is-on')); b.classList.add('is-on'); SEN.toast(MSG[b.dataset.rate], b.dataset.rate === 'wrong' ? 'flag' : 'check'); }));
+  if (!rm && window.ScrollTrigger) gsap.from('.tbl td.dup', { backgroundColor: '#ffffff', duration: .8, stagger: .2, ease: 'power2.out', scrollTrigger: { trigger: '.tbl', start: 'top 80%', once: true } });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trợ giảng — Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="app.css" />
+<style>
+  /* ---- riêng Trợ giảng ---- */
+  .chat{padding:0;display:flex;flex-direction:column;height:calc(100vh - 220px);min-height:520px;overflow:hidden;background:var(--white);border:1px solid var(--line-2)}
+  .msgs{flex:1;overflow:auto;padding:20px 22px 8px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
+  .is-static .msgs{scroll-behavior:auto}
+  .empty-chat{margin:auto;text-align:center;max-width:520px;padding:10px 0 20px}
+  .empty-chat :is(img,svg.inl){width:170px;margin:0 auto 4px}
+  .empty-chat h2{display:inline-block;font-size:20px;font-weight:800;letter-spacing:-.015em;margin-bottom:6px} /* inline-block: nét gạch chân vẽ tay ôm đúng chữ */
+  .empty-chat p{font-size:14px;color:var(--muted);margin-bottom:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .chip-q{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:var(--cream);font-size:13.5px;font-weight:600;text-align:left;transition:background .2s}
+  .chip-q:hover{background:var(--cream-deep)}
+  .chip-q .ic{width:14px;height:14px;color:var(--amber-deep)}
+  .chip-q em{font-style:normal;background:var(--white);border-radius:6px;padding:0 5px}
+  .msg{display:flex;gap:12px;max-width:88%}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse}
+  .msg .av-ai{width:34px;height:34px;border-radius:50%;background:var(--amber);display:grid;place-items:center;flex:none;margin-top:2px}
+  .msg .av-ai svg{width:20px;height:20px}
+  .msg .body{display:grid;gap:8px;min-width:0}
+  .bub{padding:12px 16px;border-radius:18px;font-size:15px;line-height:1.6}
+  .me .bub{background:var(--ink);color:var(--white);border-bottom-right-radius:4px}
+  .ai .bub{background:var(--cream);border-bottom-left-radius:4px;color:var(--ink-2)}
+  .ai .bub b{color:var(--ink)}
+  .ai .bub code{font-family:var(--num);font-weight:700;background:var(--white);border-radius:6px;padding:1px 5px;font-size:.92em;color:var(--ink)}
+  .ai .bub p+p{margin-top:8px}
+  .ai .bub .cite{margin:0 2px}
+  .ai .bub .tbl{margin:10px 0 4px;font-size:13px}
+  .tbl{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line-2);border-radius:12px;overflow:hidden;background:var(--white)}
+  .tbl th{background:var(--cream-deep);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px}
+  .tbl td{padding:7px 10px;border-top:1px solid var(--line-2);font-family:var(--num);font-weight:500}
+  .tbl td.dup{background:#fff1d6}
+  .msg time{font-size:11.5px;color:var(--muted);padding:0 6px}
+  .me time{text-align:right}
+  .bub.streaming::after{content:"";display:inline-block;width:2px;height:1em;background:var(--amber-deep);vertical-align:-2px;margin-left:2px;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .is-static .bub.streaming::after{animation:none}
+  .typing{display:inline-flex;gap:5px;padding:14px 16px}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--amber-deep);animation:bounce 1.2s ease-in-out infinite}
+  .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+  .is-static .typing i{animation:none}
+  .mem-strip{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:12px;background:var(--tint-amber);border-left:3px solid var(--amber-deep);font-size:13.5px;line-height:1.45}
+  .mem-strip .ic{width:16px;height:16px;color:var(--amber-deep);flex:none;margin-top:2px}
+  .mem-strip b{font-weight:700}
+  .mem-strip.eff{background:var(--tint-mint);border-left-color:var(--ok)}.mem-strip.eff .ic{color:var(--ok)}
+  .outside{padding:10px 14px;border-radius:12px;background:var(--white);border:1px dashed var(--line);font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+  .outside .lbl{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--warn-ink);margin-right:6px}
+  .outside .lbl .ic{width:13px;height:13px}
+  .follow{display:flex;flex-wrap:wrap;gap:6px}
+  .follow .chip-q{padding:7px 12px;font-size:13px}
+  .composer{border-top:1px solid var(--line-2);padding:14px 18px;background:var(--white)}
+  .composer form{display:flex;align-items:flex-end;gap:10px}
+  .composer textarea{flex:1;resize:none;min-height:46px;max-height:140px;height:46px;padding:12px 14px;line-height:1.4}
+  .composer .send{width:46px;height:46px;border-radius:50%;background:var(--amber);color:var(--ink);display:grid;place-items:center;flex:none;transition:background .2s}
+  .composer .send:hover{background:var(--amber-deep)}
+  .composer .send:disabled{background:var(--cream-deep);color:var(--muted);cursor:default}
+  .composer .send .ic{width:18px;height:18px}
+  .composer .hint{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
+  .composer .hint span{display:inline-flex;align-items:center;gap:5px}
+  .composer .hint .ic{width:13px;height:13px;color:var(--amber-deep)}
+  /* rail */
+  .ctxl{display:grid;gap:6px}
+  .ctxl .row{padding:8px 8px;gap:10px;background:transparent;flex-wrap:nowrap}.ctxl .row>div:not(.end){flex:1 1 0}
+  .ctxl .row .t{font-size:13.5px}
+  .mem-mini{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid rgba(0,0,0,.06);font-size:13px;line-height:1.4}
+  .mem-mini:first-of-type{border-top:0;padding-top:0}
+  .mem-mini .ic{width:16px;height:16px;color:var(--amber-deep);flex:none;margin-top:2px}
+  .mem-mini .kind{margin-left:0;margin-top:3px}
+  .mem-mini .switch{margin-left:auto}
+  .mem-mini .switch input{width:32px;height:18px;background:rgba(255,255,255,.8)}.mem-mini .switch input::after{width:12px;height:12px}.mem-mini .switch input:checked{background:var(--ink)}.mem-mini .switch input:checked::after{transform:translateX(14px)}
+  .rail-fig{width:110px;margin:-6px auto -4px;display:block}
+  @media (max-width:900px){.chat{height:auto;min-height:0}.msgs{max-height:60vh}.msg{max-width:100%}}
+  @media (max-width:600px){.chips{flex-direction:column}.chip-q{width:100%;justify-content:flex-start;text-align:left}.empty-chat :is(img,svg.inl){width:140px}}
+</style>
+</head>
+<body data-page="tutor" data-role="student" data-title="Trợ giảng">
+<div class="app">
+  <aside class="sb" id="sb"></aside>
+  <main class="main" id="main">
+    <header class="tb" id="tb"></header>
+    <div class="content">
+      <div class="ph">
+        <div><p class="eyebrow">Cơ sở dữ liệu · Chương 4</p></div>
+        <div class="ph-actions"><button class="btn btn-white btn-sm" type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg>Lịch sử</button><button class="btn btn-ghost btn-sm" type="button" id="btnClear"><svg class="ic" aria-hidden="true"><use href="#i-rotate-ccw"/></svg>Hội thoại mới</button></div>
+      </div>
+
+      <article class="card chat" data-reveal>
+        <div class="msgs" id="msgs" aria-live="polite" aria-label="Hội thoại">
+          <div class="empty-chat" id="empty">
+            <img class="spot" src="assets/spot/talk.svg" alt="" width="500" height="500" data-float />
+            <h2 data-mark="underline">Hỏi gì về Chương 4?</h2>
+            <div class="chips" id="chips">
+              <button class="chip-q" type="button" data-q="a"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>Tại sao bảng SinhVien chưa đạt <em>3NF</em> dù đã 2NF?</button>
+              <button class="chip-q" type="button" data-q="b"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><em>MaKhoa</em> là khóa dự tuyển thì sao?</button>
+              <button class="chip-q" type="button" data-q="c"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>Cho ví dụ khác về <em>phụ thuộc bắc cầu</em></button>
+              <button class="chip-q" type="button" data-q="d"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>3NF khác <em>BCNF</em> chỗ nào?</button>
+            </div>
+          </div>
+        </div>
+        <div class="composer">
+          <form id="form">
+            <textarea class="in" id="input" rows="1" placeholder="Hỏi về Chương 4…" title="Enter gửi · Shift+Enter xuống dòng" aria-label="Câu hỏi"></textarea>
+            <button class="send" type="submit" id="send" aria-label="Gửi" disabled><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg></button>
+          </form>
+          <div class="hint"><span><svg class="ic" aria-hidden="true"><use href="#i-badge-check"/></svg>Bám tài liệu Chương 4</span><span><svg class="ic" aria-hidden="true"><use href="#i-quote"/></svg>Có trích dẫn từng ý</span><span><svg class="ic" aria-hidden="true"><use href="#i-brain"/></svg>Nhớ 2 lỗi cũ của bạn</span></div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <aside class="rail" aria-label="Ngữ cảnh và trí nhớ">
+    <div class="rh" data-reveal>
+      <h2>Ngữ cảnh<span class="tag tag--soft">3–5 đoạn / câu</span></h2>
+      <div class="ctxl" data-pop-row>
+        <div class="row"><span class="tile" style="background:var(--tint-amber)"><img src="assets/ico/book.svg" alt="" /></span><div><div class="t">Cơ sở dữ liệu · Chương 4</div><div class="s">Chuẩn hóa CSDL · 8 khái niệm</div></div></div>
+        <label class="row" style="cursor:pointer"><span class="tile" style="background:var(--tint-sky)"><img src="assets/ico/document.svg" alt="" /></span><div><div class="t">Chương 4 — Chuẩn hóa CSDL.pdf</div><div class="s">118 đoạn · đã lập chỉ mục</div></div><span class="end"><span class="switch"><input type="checkbox" checked aria-label="Dùng tài liệu này" /></span></span></label>
+        <label class="row" style="cursor:pointer"><span class="tile" style="background:var(--tint-peach)"><img src="assets/ico/doc-search.svg" alt="" /></span><div><div class="t">Slide 7 — Phụ thuộc hàm và khóa</div><div class="s">152 đoạn · đang dựng bản đồ</div></div><span class="end"><span class="switch"><input type="checkbox" aria-label="Dùng tài liệu này" /></span></span></label>
+      </div>
+    </div>
+    <div class="card card--tint-amber" data-reveal>
+      <img class="rail-fig spot" src="assets/spot/magic.svg" alt="" width="500" height="500" data-float />
+      <div class="card-h" style="margin-bottom:8px"><h2><svg class="ic" aria-hidden="true"><use href="#i-brain"/></svg>Trí nhớ đang bật</h2><span class="tag tag--white">3</span></div>
+      <div class="mem-mini"><svg class="ic" aria-hidden="true"><use href="#i-brain"/></svg><div><b>Nghĩ 2NF là đủ cho 3NF</b><br><span class="kind kind--mis">nhầm lẫn</span> <span class="muted small">sai 2 lần quiz</span></div><label class="switch"><input type="checkbox" checked aria-label="Bật trí nhớ" /></label></div>
+      <div class="mem-mini"><svg class="ic" aria-hidden="true"><use href="#i-brain"/></svg><div><b>Coi bắc cầu như FD thường</b><br><span class="kind kind--mis">nhầm lẫn</span> <span class="muted small">chẩn đoán 08/09</span></div><label class="switch"><input type="checkbox" checked aria-label="Bật trí nhớ" /></label></div>
+      <div class="mem-mini"><svg class="ic" aria-hidden="true" style="color:var(--ok)"><use href="#i-lightbulb"/></svg><div><b>Hiểu nhanh qua bảng dữ liệu</b><br><span class="kind kind--eff">cách hiểu tốt</span> <span class="muted small">đánh giá 08/09</span></div><label class="switch"><input type="checkbox" checked aria-label="Bật trí nhớ" /></label></div>
+      <p class="small muted" style="margin-top:8px">Tự tắt sau 3 lần đúng liên tiếp.</p>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="icons.js"></script>
+<script src="shell.js"></script>
+<script src="motion.js"></script>
+<script src="motion-assets.js"></script>
+<script>
+/* Trợ giảng S11: hội thoại có trích dẫn + trí nhớ; câu trả lời "stream" từng từ (mô phỏng messages.stream). */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rm = SEN.rm, msgs = $('#msgs'), empty = $('#empty'), input = $('#input'), send = $('#send');
+  const cite = (d, p, q) => `<button class="cite" type="button" data-src="${d}" data-page="${p}" data-q="${q}">[${d}] tr. ${p}</button>`;
+  const Q = {
+    D4a: 'Thuộc tính Z phụ thuộc bắc cầu vào X nếu tồn tại Y sao cho X → Y, Y → Z, Y không xác định X và Y không phải là khóa.',
+    D4b: 'Nếu Y là siêu khóa của R thì X → Y → Z không tạo thành phụ thuộc bắc cầu theo nghĩa của 3NF.',
+    D4c: 'Dư thừa dữ liệu do phụ thuộc bắc cầu dẫn tới dị thường cập nhật: cùng một sự kiện phải sửa ở nhiều bộ.',
+    D6: 'Quan hệ đạt 2NF khi đạt 1NF và mọi thuộc tính không khóa phụ thuộc đầy đủ vào mọi khóa dự tuyển.',
+    D7: 'Một quan hệ đạt 3NF khi đạt 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa chính.',
+    D8: 'Quan hệ đạt BCNF khi với mọi phụ thuộc hàm không tầm thường X → Y, X là siêu khóa.',
+  };
+  const A = {
+    a: { q: 'Tại sao bảng SinhVien chưa đạt 3NF dù đã 2NF?', mem: ['mis', 'Nhớ bạn từng nhầm:', '2NF là đủ cho 3NF (sai 2 lần quiz 3NF) — mình giải thích đúng chỗ đó.'],
+      html: `<p>2NF chỉ bảo đảm <b>không có phụ thuộc bộ phận</b> vào khóa.${cite('D6', 16, Q.D6)} Bảng <code>SinhVien</code> có khóa đơn <code>MaSV</code> nên nghiễm nhiên đạt 2NF.</p><p>Nhưng <code>TenKhoa</code> vẫn đi vòng qua <code>MaKhoa</code>: <code>MaSV → MaKhoa → TenKhoa</code>, mà MaKhoa không phải khóa — đó là phụ thuộc bắc cầu.${cite('D4', 14, Q.D4a)} 3NF đòi hỏi thêm điều kiện này.${cite('D7', 17, Q.D7)}</p><p><b>Kết luận:</b> đạt 2NF chưa đủ; tách <code>Khoa(MaKhoa, TenKhoa)</code> ra là SinhVien đạt 3NF.</p>`,
+      follow: ['Tách bảng cụ thể thế nào?', 'MaKhoa là khóa dự tuyển thì sao?'] },
+    b: { q: 'MaKhoa là khóa dự tuyển thì sao?',
+      html: `<p>Khi đó chuỗi <code>MaSV → MaKhoa → TenKhoa</code> <b>không còn là phụ thuộc bắc cầu</b> theo định nghĩa, vì trung gian phải không phải khóa.${cite('D4', 14, Q.D4b)} SinhVien đạt 3NF mà không cần tách.</p>`,
+      outside: 'Trong thực tế mã khoa hiếm khi xác định được sinh viên — một khoa có nhiều sinh viên — nên với bảng SinhVien trường hợp này gần như không xảy ra.',
+      follow: ['Cho ví dụ khác về phụ thuộc bắc cầu', 'Siêu khóa và khóa dự tuyển khác gì?'] },
+    c: { q: 'Cho ví dụ khác về phụ thuộc bắc cầu', mem: ['eff', 'Bạn hiểu nhanh khi có bảng dữ liệu', '— nên mình kèm bảng 3 dòng.'],
+      html: `<p>Bảng <code>DonHang(MaDon, MaKH, TenKH, DiaChiKH)</code>: <code>MaDon → MaKH</code> và <code>MaKH → TenKH, DiaChiKH</code>, nên TenKH và DiaChiKH phụ thuộc bắc cầu vào MaDon qua MaKH.${cite('D4', 15, Q.D4c)}</p><table class="tbl"><thead><tr><th>MaDon</th><th>MaKH</th><th>TenKH</th><th>DiaChiKH</th></tr></thead><tbody><tr><td>DH01</td><td>KH1</td><td class="dup">Lan</td><td class="dup">Hà Nội</td></tr><tr><td>DH02</td><td>KH1</td><td class="dup">Lan</td><td class="dup">Hà Nội</td></tr><tr><td>DH03</td><td>KH2</td><td>Minh</td><td>Đà Nẵng</td></tr></tbody></table><p>Dấu hiệu: đổi địa chỉ của Lan phải sửa mọi đơn của Lan. Tách <code>KhachHang(MaKH, TenKH, DiaChiKH)</code> là xong.</p>`,
+      follow: ['Bảng này đạt dạng chuẩn nào?', '3NF khác BCNF chỗ nào?'] },
+    d: { q: '3NF khác BCNF chỗ nào?',
+      html: `<p>3NF cho phép một ngoại lệ: <code>X → A</code> được chấp nhận nếu <b>A là thuộc tính khóa</b>, dù X không phải siêu khóa.${cite('D7', 17, Q.D7)} BCNF bỏ ngoại lệ đó: mọi vế trái của phụ thuộc hàm không tầm thường phải là siêu khóa.${cite('D8', 18, Q.D8)}</p><p>Vì thế với bảng có nhiều khóa dự tuyển chồng lấn, 3NF vẫn có thể còn dư thừa mà BCNF loại được.</p>`,
+      outside: 'Đổi lại, phân rã tới BCNF có thể làm mất bảo toàn phụ thuộc, nên trong thực hành nhiều thiết kế dừng ở 3NF.',
+      follow: ['Cho ví dụ bảng đạt 3NF nhưng không BCNF', 'Ôn lại phụ thuộc hàm'] },
+    x: { q: '', html: `<p>Trong Chương 4 mình tìm được 3 đoạn liên quan nhất tới câu hỏi của bạn. Ý chính: một quan hệ đạt 3NF khi đạt 2NF và không có thuộc tính không khóa phụ thuộc bắc cầu vào khóa chính.${cite('D7', 17, Q.D7)} Phụ thuộc bắc cầu là chuỗi X → Y → Z với Y không phải khóa.${cite('D4', 14, Q.D4a)}</p><p>Bạn hỏi cụ thể hơn về bảng nào hoặc bước nào để mình đi sâu?</p>`,
+      follow: ['Tại sao bảng SinhVien chưa đạt 3NF dù đã 2NF?', '3NF khác BCNF chỗ nào?'] },
+  };
+  const now = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  const lotus = '<svg viewBox="0 0 32 32" fill="none" stroke="#1d1d1d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 27c-6.5 0-10-4.2-10-9.5 0-3 1.4-5.4 3.2-7.3.6 2.4 1.9 4 3.6 4.9C12.5 11.6 14 8 16 5c2 3 3.5 6.6 3.2 10.1 1.7-.9 3-2.5 3.6-4.9C24.6 12.1 26 14.5 26 17.5 26 22.8 22.5 27 16 27Z" fill="#fff6e5"/><path d="M16 27V15"/></svg>';
+  let busy = false;
+  const scrollEnd = () => { msgs.scrollTop = msgs.scrollHeight; };
+  const add = html => { const d = document.createElement('div'); d.innerHTML = html; const el = d.firstElementChild; msgs.appendChild(el); if (!rm) gsap.from(el, { opacity: 0, y: 6, duration: .25, ease: 'power2.out' }); scrollEnd(); return el; };
+  function ask(text, key) {
+    if (busy) return; busy = true; send.disabled = true;
+    if (empty.parentNode) { if (rm) empty.remove(); else gsap.to(empty, { opacity: 0, y: -8, duration: .25, onComplete: () => empty.remove() }); }
+    add(`<div class="msg me"><div class="body"><div class="bub">${text.replace(/</g, '&lt;')}</div><time>${now()}</time></div></div>`);
+    const ans = A[key] || A.x;
+    const wrap = add(`<div class="msg ai"><span class="av-ai">${lotus}</span><div class="body"><div class="bub typing" aria-label="Đang soạn"><i></i><i></i><i></i></div></div></div>`);
+    const body = $('.body', wrap);
+    setTimeout(() => {
+      $('.typing', body).remove();
+      if (ans.mem) { const m = document.createElement('div'); m.className = 'mem-strip ' + (ans.mem[0] === 'eff' ? 'eff' : ''); m.innerHTML = SEN.ic(ans.mem[0] === 'eff' ? 'lightbulb' : 'brain') + `<span><b>${ans.mem[1]}</b> ${ans.mem[2]}</span>`; body.appendChild(m); if (!rm) gsap.from(m, { x: -8, opacity: 0, duration: .3 }); }
+      const bub = document.createElement('div'); bub.className = 'bub streaming'; body.appendChild(bub);
+      const toks = ans.html.match(/<[^>]+>|[^<\s]+\s*/g) || [ans.html]; let acc = '', i = 0;
+      const finish = () => { bub.innerHTML = acc; bub.classList.remove('streaming');
+        if (ans.outside) { const o = document.createElement('div'); o.className = 'outside'; o.innerHTML = `<span class="lbl">${SEN.ic('circle-alert')}Ngoài tài liệu môn học</span>${ans.outside}`; body.appendChild(o); if (!rm) gsap.from(o, { y: 6, opacity: 0, duration: .3 }); }
+        const f = document.createElement('div'); f.className = 'follow'; f.innerHTML = ans.follow.map(t => `<button class="chip-q" type="button" data-text="${t}">${SEN.ic('corner-down-right')}${t}</button>`).join(''); body.appendChild(f);
+        const t = document.createElement('time'); t.textContent = now() + ' · 3 đoạn nguồn · 0,4 s'; body.appendChild(t);
+        if (!rm) gsap.from($$('.chip-q', f), { scale: .85, opacity: 0, duration: .35, stagger: .06, ease: 'back.out(1.6)' });
+        busy = false; send.disabled = !input.value.trim(); scrollEnd(); };
+      if (rm) { acc = ans.html; return finish(); }
+      const step = () => { if (i >= toks.length) return finish(); const n = Math.min(toks.length, i + 2); acc += toks.slice(i, n).join(''); i = n; bub.innerHTML = acc; scrollEnd(); setTimeout(step, 22); };
+      step();
+    }, rm ? 0 : 750);
+  }
+  const findKey = t => { const s = t.toLowerCase(); return /2nf/.test(s) && /3nf/.test(s) ? 'a' : /khóa dự tuyển|khoá dự tuyển|makhoa là khóa/.test(s) ? 'b' : /ví dụ/.test(s) ? 'c' : /bcnf/.test(s) ? 'd' : 'x'; };
+  $('#form').addEventListener('submit', e => { e.preventDefault(); const v = input.value.trim(); if (!v || busy) return; input.value = ''; input.style.height = ''; send.disabled = true; ask(v, findKey(v)); });
+  input.addEventListener('input', () => { send.disabled = !input.value.trim() || busy; input.style.height = 'auto'; input.style.height = Math.min(140, input.scrollHeight) + 'px'; });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#form').requestSubmit(); } });
+  msgs.addEventListener('click', e => { const c = e.target.closest('.chip-q'); if (!c) return; const k = c.dataset.q; ask(k ? A[k].q : c.dataset.text, k || findKey(c.dataset.text)); });
+  $('#btnClear').addEventListener('click', () => { if (busy) return; $$('.msg', msgs).forEach(m => m.remove()); msgs.appendChild(empty); empty.style.opacity = ''; if (!rm) gsap.from(empty, { opacity: 0, y: 8, duration: .35 }); SEN.toast('Đã bắt đầu hội thoại mới', 'rotate-ccw'); });
+  const q = new URLSearchParams(location.search).get('q'); if (q) setTimeout(() => ask(A[q] ? A[q].q : q, A[q] ? q : findKey(q)), rm ? 0 : 900);
+})();
+</script>
+</body>
+</html>
