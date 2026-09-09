@@ -79,9 +79,9 @@
   <p class="sr-only">Minh họa: hai sinh viên cùng học một chương nhưng nhận hai bài học khác nhau. Thẻ ví dụ: An — Chuẩn hóa 3NF, mức thành thạo 62/100, cần ôn; trích dẫn từ giáo trình Cơ sở dữ liệu, tài liệu D3 trang 14; bản đồ kiến thức chương 4 với 4 khái niệm; bài học hôm nay của Bình dài 25 phút.</p>
 
   <div class="container hero-art" aria-hidden="true">
-    <!-- hai sinh viên (Open Doodles, CC0) — cùng chương, hai màu, hai bài học -->
-    <div class="figure fig-a"><picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/doodles/sitting-reading-blue.svg" type="image/svg+xml" /><img src="assets/anim/sitting-reading-blue.webp" data-static="assets/doodles/sitting-reading-blue.svg" alt="" width="800" height="600" /></picture></div>
-    <div class="figure fig-b"><picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/doodles/reading-side-green.svg" type="image/svg+xml" /><img src="assets/anim/reading-side-green.webp" data-static="assets/doodles/reading-side-green.svg" alt="" width="800" height="600" loading="lazy" /></picture></div>
+    <!-- hai sinh viên (Open Doodles hoạt hình vector — Icons8, Lottie JSON; SVG tĩnh là ảnh đầu tiên và fallback khi ?static / reduced-motion) -->
+    <div class="figure fig-a" data-lottie="an"><img src="assets/doodles/sitting-reading-blue.svg" alt="" width="800" height="600" /></div>
+    <div class="figure fig-b" data-lottie="binh"><img src="assets/doodles/reading-side-green.svg" alt="" width="800" height="600" /></div>
 
     <!-- thẻ UI thật của sản phẩm, lơ lửng -->
     <div class="fcard fc-mastery">
@@ -130,9 +130,9 @@
 
     <!-- máy bay giấy (Iconoodle) bay theo đường chấm từ bài của An sang bài của Bình -->
     <svg class="flight" viewBox="0 0 1200 580" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-      <defs><mask id="routeMask"><path class="route-mask" d="M360 250C500 60 760 40 930 300"/></mask></defs>
-      <path class="route" d="M360 250C500 60 760 40 930 300" mask="url(#routeMask)"/>
-      <g class="plane" transform="translate(930 300) rotate(57)"><g transform="translate(-28,-18) scale(.5)"><path d="M3.00431 2C-4.98069 2 36.9406 58.9454 47.3211 72.9813C49.7164 73.7833 90.0409 48.5188 90.8394 48.5188M3.00431 2C10.9893 2 108.406 30.4727 112 37.2901L94.8319 44.5086M3.00431 2L94.8319 44.5086M3.00431 2L90.8394 48.5188M94.8319 44.5086C94.8319 45.578 94.8319 47.8772 94.8319 48.5188C94.8319 49.3209 91.6379 48.5188 90.8394 48.5188"/></g></g>
+      <defs><mask id="routeMask"><path class="route-mask" d="M270 150C420 40 760 20 945 240"/></mask></defs>
+      <path class="route" d="M270 150C420 40 760 20 945 240" mask="url(#routeMask)"/>
+      <g class="plane" transform="translate(945 240) rotate(50)"><g transform="translate(-28,-18) scale(.5)"><path d="M3.00431 2C-4.98069 2 36.9406 58.9454 47.3211 72.9813C49.7164 73.7833 90.0409 48.5188 90.8394 48.5188M3.00431 2C10.9893 2 108.406 30.4727 112 37.2901L94.8319 44.5086M3.00431 2L94.8319 44.5086M3.00431 2L90.8394 48.5188M94.8319 44.5086C94.8319 45.578 94.8319 47.8772 94.8319 48.5188C94.8319 49.3209 91.6379 48.5188 90.8394 48.5188"/></g></g>
     </svg>
 
     <!-- nét vẽ tay (Iconoodle crispy doodles, MIT) -->
@@ -414,6 +414,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/MotionPathPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie_light.min.js"></script>
+<!-- dữ liệu Lottie (assets/anim/an.js, binh.js) do app.js nạp theo nhân vật đang hiển thị -->
 <script src="app.js"></script>
 </body>
 </html>

@@ -18,6 +18,18 @@
 
   /* ảnh động (WebP) → đổi sang SVG tĩnh cùng tư thế khi tắt chuyển động */
   if (rm) { document.documentElement.classList.add('is-static'); $$('img[data-static]').forEach(i => { i.src = i.dataset.static; }); }
+  // nhân vật hero: Lottie vector (Icons8 Open Doodles) thay ảnh SVG tĩnh sau khi dựng xong khung đầu
+  // dữ liệu ở assets/anim/<key>.js (JSON bọc JS để mở file:// vẫn chạy), chỉ nạp cho nhân vật đang hiển thị (mobile ẩn Bình)
+  if (!rm && window.lottie) $$('[data-lottie]').forEach(f => {
+    if (getComputedStyle(f).display === 'none') return;
+    const key = f.dataset.lottie, start = () => {
+      const box = document.createElement('div'); box.className = 'lot';
+      lottie.loadAnimation({ container: box, renderer: 'svg', loop: true, autoplay: true, animationData: SEN_ANIM[key] })
+        .addEventListener('DOMLoaded', () => f.querySelector('img').replaceWith(box));
+    };
+    if (window.SEN_ANIM && SEN_ANIM[key]) start();
+    else { const s = document.createElement('script'); s.src = 'assets/anim/' + key + '.js'; s.onload = start; document.head.appendChild(s); }
+  });
   if (rm || !window.gsap) return;
   gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
@@ -54,8 +66,9 @@
   const route = $('.flight .route'), routeMask = $('.flight .route-mask'), plane = $('.flight .plane');
   if (route && plane) {
     prepDraw([routeMask]);
-    gsap.set(plane, { xPercent: 0, yPercent: 0 });
+    gsap.set(plane, { xPercent: 0, yPercent: 0, opacity: 0 }); // ẩn tới lúc cất cánh (transform gốc là điểm hạ cánh)
     tl.to(routeMask, { strokeDashoffset: 0, duration: 1.8, ease: 'power1.inOut' }, 1.2)
+      .set(plane, { opacity: 1 }, 1.2)
       .to(plane, { motionPath: { path: route, align: route, alignOrigin: [.5, .5], autoRotate: true }, duration: 1.8, ease: 'power1.inOut' }, 1.2)
       .to(plane, { y: '-=6', duration: 3.2, ease: 'sine.inOut', yoyo: true, repeat: -1 }, 3);
   }
@@ -92,6 +105,12 @@
   });
   /* icon tính năng bật ra */
   $$('.feat-ic').forEach(el => gsap.from($$('img, i', el), { scale: .4, rotation: -14, opacity: 0, transformOrigin: '50% 50%', duration: .9, stagger: .08, ease: 'back.out(2)', scrollTrigger: { trigger: el, start: 'top 88%', once: true } }));
+  /* nhấc thẻ tính năng khi hover (GSAP thay CSS transition transform — xem ghi chú ở .feat trong style.css) */
+  $$('.feat').forEach(c => {
+    const halo = c.querySelector('.feat-ic i'), o = { duration: .45, ease: 'power2.out', overwrite: 'auto' };
+    c.addEventListener('mouseenter', () => { gsap.to(c, { y: -6, ...o }); gsap.to(halo, { scale: 1.25, ...o }); });
+    c.addEventListener('mouseleave', () => { gsap.to(c, { y: 0, ...o }); gsap.to(halo, { scale: 1, ...o }); });
+  });
   /* minh họa "về sản phẩm" lơ lửng + parallax nhẹ */
   gsap.to('.about-fig', { y: -10, duration: 3.6, ease: 'sine.inOut', yoyo: true, repeat: -1 });
   $$('.doodle').forEach((d, i) => gsap.to(d, { y: i % 2 ? 40 : -40, ease: 'none', scrollTrigger: { trigger: '.about', start: 'top bottom', end: 'bottom top', scrub: .8 } }));

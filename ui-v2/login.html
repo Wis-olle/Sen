@@ -79,7 +79,7 @@
     <span>Sen</span>
   </a>
   <div class="auth-scene" aria-hidden="true">
-    <div class="figure"><picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/doodles/sitting-reading-blue.svg" type="image/svg+xml" /><img src="assets/anim/sitting-reading-blue.webp" data-static="assets/doodles/sitting-reading-blue.svg" alt="" width="800" height="600" /></picture></div>
+    <div class="figure" data-lottie="an"><img src="assets/doodles/sitting-reading-blue.svg" alt="" width="800" height="600" /></div>
     <div class="fcard fc-mastery">
       <div class="who"><span class="av a">A</span><div class="t" style="margin:0">An · Chuẩn hóa 3NF</div></div>
       <div class="s">Mức thành thạo</div>
@@ -139,6 +139,7 @@
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie_light.min.js"></script>
 <script>
 (function () {
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -147,6 +148,17 @@
   $$('.demo-chip').forEach(b => b.addEventListener('click', () => { $('#email').value = b.dataset.email; pw.value = 'demo1234'; $('#email').focus(); }));
   const rm = matchMedia('(prefers-reduced-motion: reduce)').matches || /[?&]static/.test(location.search);
   if (rm) { document.documentElement.classList.add('is-static'); $$('img[data-static]').forEach(i => { i.src = i.dataset.static; }); }
+  // nhân vật Lottie (vector) thay ảnh SVG tĩnh sau khi dựng xong khung đầu
+  if (!rm && window.lottie) $$('[data-lottie]').forEach(f => {
+    if (getComputedStyle(f).display === 'none') return;
+    const key = f.dataset.lottie, start = () => {
+      const box = document.createElement('div'); box.className = 'lot';
+      lottie.loadAnimation({ container: box, renderer: 'svg', loop: true, autoplay: true, animationData: SEN_ANIM[key] })
+        .addEventListener('DOMLoaded', () => f.querySelector('img').replaceWith(box));
+    };
+    if (window.SEN_ANIM && SEN_ANIM[key]) start();
+    else { const s = document.createElement('script'); s.src = 'assets/anim/' + key + '.js'; s.onload = start; document.head.appendChild(s); }
+  });
   if (rm || !window.gsap) return;
   const paths = $$('.mark path'); paths.forEach(p => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });
   const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });

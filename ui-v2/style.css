@@ -100,7 +100,8 @@ h3{font-weight:700;font-size:21px;line-height:1.25;letter-spacing:-.01em}
 
 .hero-art{position:relative;height:clamp(440px,46vw,580px);margin-top:clamp(16px,2.4vw,36px)}
 .figure{position:absolute;bottom:0;z-index:2}
-.figure img,.figure picture{width:100%;height:auto;display:block}
+.figure img,.figure picture,.figure .lot{width:100%;height:auto;display:block}
+.figure .lot{aspect-ratio:4/3}.figure .lot svg{display:block}
 /* rig cut-out: các lớp chồng khít lên ảnh gốc */
 .rig .rig-layer{position:absolute;inset:0;width:100%;height:100%;will-change:transform}
 .rig .rig-part .rig-img{position:absolute;inset:0;width:100%;height:100%}
@@ -258,11 +259,12 @@ h3{font-weight:700;font-size:21px;line-height:1.25;letter-spacing:-.01em}
 .bento-hero .btn{align-self:flex-start;margin-top:4px}
 .mk-sp-feat{position:absolute;right:26px;top:24px;width:30px;height:30px;color:var(--amber)}
 .mk-sp-feat path{stroke-width:30}
-.feat{position:relative;background:var(--white);border:1px solid var(--line-2);border-radius:var(--r-lg);padding:28px 26px 30px;box-shadow:var(--shadow-card);transition:transform .45s var(--ease-out),box-shadow .45s var(--ease-out),border-color .3s}
-.feat:hover{transform:translateY(-6px);box-shadow:0 30px 60px rgba(61,45,10,.14),0 4px 10px rgba(61,45,10,.05);border-color:var(--amber-soft)}
+/* không transition transform: GSAP reveal + ScrollTrigger.refresh() sẽ đọc nhầm giá trị đang chuyển tiếp làm điểm kết thúc (thẻ kẹt +30px); nhấc thẻ khi hover làm bằng GSAP trong app.js */
+.feat{position:relative;background:var(--white);border:1px solid var(--line-2);border-radius:var(--r-lg);padding:28px 26px 30px;box-shadow:var(--shadow-card);transition:box-shadow .45s var(--ease-out),border-color .3s}
+.feat:hover{box-shadow:0 30px 60px rgba(61,45,10,.14),0 4px 10px rgba(61,45,10,.05);border-color:var(--amber-soft)}
+/* chấm hổ phách góc trên-phải icon (thiết kế gốc); hover phóng 1,25 bằng GSAP trong app.js — không transition transform (cùng lý do ghi ở .feat) */
 .feat-ic{position:relative;width:74px;height:74px;margin-bottom:22px}
-.feat-ic i{position:absolute;right:-6px;top:-4px;width:48px;height:48px;border-radius:50%;background:var(--amber-soft);transition:transform .45s var(--ease-out)}
-.feat:hover .feat-ic i{transform:scale(1.25)}
+.feat-ic i{position:absolute;right:-6px;top:-4px;width:48px;height:48px;border-radius:50%;background:var(--amber-soft)}
 .feat-ic img{position:relative;width:64px;height:64px;object-fit:contain;margin-top:8px}
 .feat h3{margin-bottom:10px}
 .feat p{font-size:14.5px;line-height:1.6;color:var(--muted)}
@@ -364,7 +366,8 @@ h3{font-weight:700;font-size:21px;line-height:1.25;letter-spacing:-.01em}
 .mk-cta-sp path{stroke-width:26}
 
 /* ---------- Nền tảng ---------- */
-.platforms{position:relative;background:var(--cream);padding:clamp(72px,8vw,120px) 0 clamp(72px,8vw,110px);overflow:hidden}
+/* chỉ cắt ngang (blob tràn mép phải/trái), không cắt dọc: blob phải chui xuống dưới footer thay vì bị xén phẳng ở đáy section */
+.platforms{position:relative;background:var(--cream);padding:clamp(72px,8vw,120px) 0 clamp(72px,8vw,110px);overflow-x:clip;overflow-y:visible}
 .blob-pf-l{left:-90px;top:20%;width:220px}
 .blob-pf-r{right:-110px;bottom:-40px;width:260px}
 .platforms-in{position:relative;z-index:1;text-align:center;max-width:680px}
@@ -379,7 +382,7 @@ h3{font-weight:700;font-size:21px;line-height:1.25;letter-spacing:-.01em}
 .store span{font-weight:700;font-size:15px}
 
 /* ---------- Footer ---------- */
-.footer{background:var(--cream);padding:0 24px}
+.footer{position:relative;z-index:1;padding:0 24px} /* nền trong suốt (body đã kem) và nổi trên blob của section trước */
 .footer-in{background:var(--ink);color:rgba(255,255,255,.78);border-radius:var(--r-xl) var(--r-xl) 0 0;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,64px) clamp(24px,4vw,56px) 28px}
 .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:32px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.1)}
 .footer-brand .brand{color:var(--white);justify-self:start;margin-bottom:16px}
@@ -414,8 +417,8 @@ h3{font-weight:700;font-size:21px;line-height:1.25;letter-spacing:-.01em}
 /* ---------- Asset động ---------- */
 /* line boil: chỉ bật khi JS cho phép chuyển động (html.boil-on) */
 .boil-on .boil{filter:url(#boil)}
-.marquee-track svg{animation:spin 9s linear infinite}
-@media (prefers-reduced-motion:reduce){.marquee-track svg{animation:none}}
 
 /* ?static hoặc reduced-motion qua JS: đóng băng cả animation thuần CSS */
+.marquee-track svg{animation:spin 9s linear infinite}
+@media (prefers-reduced-motion:reduce){.marquee-track svg{animation:none}}
 .is-static .marquee-track,.is-static .marquee-track svg,.is-static .badge-rot .ring,.is-static .how-chip .spin{animation:none}
