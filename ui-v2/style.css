@@ -52,7 +52,8 @@ h3{font-weight:700;font-size:21px;line-height:1.25;letter-spacing:-.01em}
 
 /* ---------- Buttons ---------- */
 .btn{position:relative;display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:14px 24px;
-  font-weight:600;font-size:15px;letter-spacing:.005em;line-height:1;white-space:nowrap;transition:transform .35s var(--ease-out),background .25s,color .25s,box-shadow .25s;will-change:transform}
+  font-weight:600;font-size:15px;letter-spacing:.005em;line-height:1;white-space:nowrap;transition:background .25s,color .25s,box-shadow .25s;will-change:transform}
+/* không transition transform: mọi transform của nút do GSAP (nam châm app.js, cú vỗ paw.js) — transition CSS sẽ kéo bết tween ngắn */
 .btn svg{width:16px;height:16px;transition:transform .35s var(--ease-out)}
 .btn:hover svg{transform:translate(3px,-3px)}
 .btn-dark{background:var(--ink);color:var(--white)}
@@ -62,6 +63,11 @@ h3{font-weight:700;font-size:21px;line-height:1.25;letter-spacing:-.01em}
 .btn-amber{background:var(--amber);color:var(--ink)}
 .btn-amber:hover{background:var(--amber-deep)}
 .btn-sm{padding:11px 18px;font-size:14px}
+/* tay mèo thò ra vỗ nút (paw.js, tham khảo rive.app): khung .paw cắt phần cổ tay, svg trượt trong khung bằng GSAP; right/top = xoay cả khung */
+.paw{position:absolute;top:0;right:100%;height:100%;aspect-ratio:11/9;overflow:hidden;pointer-events:none}
+.btn .paw svg{position:absolute;left:-27%;top:0;width:145%;max-width:none;height:100%;transition:none}
+.paw--right{right:auto;left:100%;transform:scaleX(-1)}
+.paw--top{right:4px;left:auto;top:auto;bottom:calc(100% - 4px);transform:rotate(90deg)}
 .link-arrow{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
 .link-arrow svg{width:16px;height:16px;transition:transform .35s var(--ease-out)}
 .link-arrow:hover svg{transform:translateX(4px)}

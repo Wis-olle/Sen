@@ -11,15 +11,21 @@ cd Sen
 
 ## Chạy web (`ui-v2`)
 
-Mở trực tiếp `ui-v2/index.html` bằng trình duyệt là chạy được (không cần server). Hoặc chạy server tĩnh:
+Chỉ cần trình duyệt (Chrome/Edge mới). Không có bước build.
+
+**Cách 1 — mở file trực tiếp:** mở `ui-v2/index.html` (nhấp đúp) là chạy được.
+
+**Cách 2 — server tĩnh (khuyên dùng, đủ mọi hiệu ứng):** cần Node.js ≥ 18, chạy từ thư mục gốc repo:
 
 ```bash
 npx --yes serve ui-v2 -l 5174
 ```
 
-Rồi mở http://localhost:5174. Thêm `?static` vào URL để tắt animation khi cần soi bố cục (với `serve`, bỏ đuôi `.html`: `/app-dashboard?static`).
+Rồi mở http://localhost:5174. Không có Node thì dùng Python: `python -m http.server 5174 --directory ui-v2`.
 
-Lớp chuyển động bổ sung (`ui-v2/motion.js`, theo `ui-v2/RESEARCH-motion.md`): 24 họ có khóa (nét vẽ tay tự vẽ, blob thở, doodle đung đưa, nút nhấn lún, số đếm lên, cạnh bản đồ chảy, tick đúng/rung sai, nổ doodle khi hoàn thành, chuyển trang mềm bằng View Transitions, viên than trượt trước khi đổi trang…). Thêm `?lab` vào URL bất kỳ màn app (ví dụ `/app-dashboard?lab`) để mở **bảng thử** bật/tắt từng họ; lựa chọn lưu trong trình duyệt (`localStorage` `sen.motion2`), nút "Mặc định" bật lại toàn bộ 24 họ (mặc định của web là bật hết). Lớp "minh hoạ sống" (`ui-v2/motion-assets.js`, theo `ui-v2/RESEARCH-asset-motion.md`): các minh hoạ SVG được nội tuyến để nét tự vẽ khi hiện, nhân vật doodle lắp ráp theo lớp, thở/gật thưa, nảy khi rê chuột và phản hồi theo sự kiện (xong bài, nộp bài, tải lên xong). Nhóm G trong bảng thử. `?static` tắt toàn bộ; `prefers-reduced-motion` của hệ điều hành cũng tắt, trừ khi bấm "Vẫn bật chuyển động" trong bảng thử.
+Trang vào: `/` landing → `/login.html` → `/app-dashboard.html` (xem luồng demo bên dưới). Tham số URL: `?static` tắt mọi animation để soi bố cục, `?lab` mở bảng thử chuyển động ở màn app, `?done` mở thẳng kết quả chẩn đoán (với `serve` có thể bỏ đuôi `.html`, ví dụ `/app-dashboard?static`). Trang lab: `/_lab-paw.html` (tay mèo vỗ nút), `/_lab-accent.html` (màu khối nhấn), `/_gallery-assets.html` (toàn bộ minh họa).
+
+Lớp chuyển động bổ sung (`ui-v2/motion.js`, theo `ui-v2/RESEARCH-motion.md`): 24 họ có khóa (nét vẽ tay tự vẽ, blob thở, doodle đung đưa, nút nhấn lún, số đếm lên, cạnh bản đồ chảy, tick đúng/rung sai, nổ doodle khi hoàn thành, chuyển trang mềm bằng View Transitions, viên than trượt trước khi đổi trang…). Thêm `?lab` vào URL bất kỳ màn app (ví dụ `/app-dashboard?lab`) để mở **bảng thử** bật/tắt từng họ; lựa chọn lưu trong trình duyệt (`localStorage` `sen.motion2`), nút "Mặc định" bật lại toàn bộ 24 họ (mặc định của web là bật hết). Lớp "minh hoạ sống" (`ui-v2/motion-assets.js`, theo `ui-v2/RESEARCH-asset-motion.md`): các minh hoạ SVG được nội tuyến để nét tự vẽ khi hiện, nhân vật doodle lắp ráp theo lớp, thở/gật thưa, nảy khi rê chuột và phản hồi theo sự kiện (xong bài, nộp bài, tải lên xong). Nhóm G trong bảng thử. `?static` tắt toàn bộ; `prefers-reduced-motion` của hệ điều hành cũng tắt, trừ khi bấm "Vẫn bật chuyển động" trong bảng thử. Landing: tay mèo thò ra vỗ nút "Bắt đầu miễn phí" khi rê chuột (`ui-v2/paw.js`, tham khảo nút Get started của rive.app; đặt hướng bằng `data-paw="left|right|top"`, xem ba hướng ở `ui-v2/_lab-paw.html`).
 
 ## Luồng demo 5 phút (chỉ UI, dữ liệu mẫu An/Bình)
 
