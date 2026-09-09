@@ -173,9 +173,10 @@
     .from('.auth-card .pill', { scale: .6, rotation: -8, duration: .8, ease: 'back.out(1.8)' }, .5);
   gsap.to('.auth-scene .fcard', { y: -8, duration: 3, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.6 });
   gsap.to('.auth-scene .figure', { y: -5, duration: 4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.6 });
-  if (matchMedia('(hover:hover)').matches) $$('.btn').forEach(b => {
-    b.addEventListener('mousemove', e => { const r = b.getBoundingClientRect(); gsap.to(b, { x: (e.clientX - r.left - r.width / 2) * .12, y: (e.clientY - r.top - r.height / 2) * .22, duration: .4 }); });
-    b.addEventListener('mouseleave', () => gsap.to(b, { x: 0, y: 0, duration: .6, ease: 'elastic.out(1,.4)' }));
+  // không gate bằng matchMedia('(hover:hover)'): laptop màn cảm ứng báo hover:none dù đang dùng chuột → lọc theo pointerType từng sự kiện
+  $$('.btn').forEach(b => {
+    b.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = b.getBoundingClientRect(); gsap.to(b, { x: (e.clientX - r.left - r.width / 2) * .12, y: (e.clientY - r.top - r.height / 2) * .22, duration: .4 }); });
+    b.addEventListener('pointerleave', () => gsap.to(b, { x: 0, y: 0, duration: .6, ease: 'elastic.out(1,.4)' }));
   });
 })();
 </script>

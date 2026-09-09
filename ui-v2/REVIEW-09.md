@@ -271,3 +271,48 @@ Thay đổi: bỏ dòng "Minh họa hoạt hình: Icons8" ở footer. `index.htm
 - Match duy nhất còn lại: `index.html:82` — comment credit doodle **hero** (`Open Doodles … Icons8, Lottie`), không thuộc footer → hợp lệ như ghi chú Icons8 trong ASSETS.md.
 
 **Kết luận 09d: PASS cả 2 mục.** Bỏ credit Icons8 ở footer thành công; dòng bản quyền phẳng gọn và canh hàng đúng ở desktop lẫn mobile; không sót Icons8/luật CSS mồ côi. Không phát sinh regression.
+
+---
+
+## Kiểm tra lại nút nam châm (09e)
+
+Bối cảnh: clone repo sang máy khác, mở `index.html` thì các `.btn` mất hiệu ứng "nam châm" (nút hút theo chuột). Gốc rễ: hiệu ứng bị gate bằng `matchMedia('(hover:hover)').matches`; laptop màn cảm ứng báo `hover:none` dù đang dùng chuột → gate chặn nhầm. Sửa: `app.js` (khối "Nút nam châm", ~dòng 156) và `login.html` (~dòng 176) **bỏ gate**, chuyển sang `pointermove`/`pointerleave` và chỉ phản ứng khi `e.pointerType === 'mouse'`; hệ số kéo + ease giữ nguyên (index x×.18 / y×.28; login ×.12 / ×.22; về 0 bằng `elastic.out(1,.4)` .6 s). Kiểm 3 mục, không sửa nguồn. Đo: server 5177 (log xác nhận phục vụ `index.html?r=1` · `app.js` · `login.html?r=1` = 200, đúng mã hiện tại), Browser pane. **`document.hidden=true` → GSAP không tick theo rAF**, nên đo bằng cách bơm `PointerEvent({pointerType:'mouse'})` thật vào nút (đúng code path của handler), đọc target của tween rồi ép render `seek(0,5 s)` / `seek(1,0 s)` + `gsap.ticker.tick()` để đọc `style.transform` — đúng fallback brief nêu.
+
+| Mục | Nội dung | Kết luận |
+|---|---|---|
+| (a) | Index 1440×900 — nav "Bắt đầu miễn phí" + hero "Bắt đầu học": nút dịch theo chuột đúng hệ số, rời chuột nảy về 0; console sạch | **PASS** |
+| (b) | Login — nút "Đăng nhập" (`.btn-block`) dịch theo chuột đúng hệ số, về 0; console sạch | **PASS** |
+| (c) | Mobile 375 — chạm không tạo tween, nút không nhảy; console sạch | **PASS** |
+
+### (a) Index 1440×900 — nút hút theo chuột, nảy về 0
+
+| Nút | Offset chuột từ tâm | `style.transform` sau 0,5 s | = kỳ vọng | ease/dur move | Sau rời 1 s | ease/dur leave |
+|---|---|---|---|---|---|---|
+| nav "Bắt đầu miễn phí" | (+60, +15) | `translate(10.8px, 4.2px)` | (60×.18, 15×.28) ✓ | `power2.out` · .4 s | `translate(0px, 0px)` · `gx/gy=0` | `elastic.out(1,.4)` · .6 s |
+| hero "Bắt đầu học" | (+65, +18) | `translate(11.7px, 5.04px)` | (65×.18, 18×.28) ✓ | `power2.out` · .4 s | `translate(0px, 0px)` · `gx/gy=0` | `elastic.out(1,.4)` · .6 s |
+| hero "Bắt đầu học" (offset âm) | (−70, −16) | `translate(-12.6px, -4.48px)` | (−70×.18, −16×.28) ✓ | `power2.out` · .4 s | `translate(0px, 0px)` · `gx/gy=0` | `elastic.out(1,.4)` · .6 s |
+
+- Nghỉ: cả 2 nút `transform: none`. Hút theo chuột **đúng hệ số tài liệu** (x×.18, y×.28), theo **cả hai chiều** (offset dương/âm). Biên độ nhỏ (~10–13 px ngang, ~4–5 px dọc) = "cảm giác như trước, biên độ nhỏ". Rời chuột **nảy về đúng 0** (elastic.out .6 s, `gsap.getProperty x/y = 0`).
+- **Console index (live): 0 lỗi.**
+
+### (b) Login — nút "Đăng nhập" (`.btn-block`)
+
+- Nghỉ `transform: none`. Offset (+70, +14) → `style.transform = translate(8.4px, 3.08px)` = **(70×.12, 14×.22) ✓** — đúng hệ số login. Rời chuột → `translate(0px, 0px)`, `gx/gy=0` (`elastic.out(1,.4)` .6 s).
+- Move: nguồn login **không đặt ease** (`gsap.to(b,{x,y,duration:.4})`) → dùng mặc định GSAP, **không đổi so với trước**. Biên độ dịu hơn index (nút to 440×52) — hợp lý.
+- **Console login (live): 0 lỗi.**
+
+### (c) Mobile 375 — chạm không nhảy
+
+Mô phỏng mobile thật: `innerWidth=375`, `navigator.maxTouchPoints=5`, UA Android (preset mobile bật cảm ứng).
+
+| Nút | Chạm (2× `pointermove` pointerType `touch`, kéo ngón) | `style.transform` | Đối chứng: `pointermove` pointerType `mouse` |
+|---|---|---|---|
+| nav "Bắt đầu miễn phí" | **0 tween x/y** tạo mới | rỗng (không nhảy) | tạo **1 tween** ✓ |
+| hero "Bắt đầu học" | **0 tween x/y** tạo mới | rỗng (không nhảy) | tạo **1 tween** ✓ |
+
+- `gsap.getTweensOf(btn)` **không có tween x/y** sau chạm → nút đứng yên khi ngón trượt qua. Guard `if (e.pointerType !== 'mouse') return;` chặn đúng.
+- **Đối chứng** bằng `pointerType:'mouse'` vẫn tạo tween → handler còn nối đủ, **chỉ lọc theo `pointerType`** chứ không phải bị vô hiệu.
+- **Console (index & login @375): 0 lỗi.**
+
+**Kết luận 09e: PASS cả 3 mục.** Bỏ gate `hover:hover`, chuyển sang `pointermove`/`pointerleave` lọc `pointerType==='mouse'` khôi phục đúng hiệu ứng nam châm trên máy có chuột (kể cả laptop cảm ứng): nút hút theo chuột đúng hệ số cũ (index .18/.28, login .12/.22), nảy về 0 bằng elastic.out .6 s; trên cảm ứng thật thì im lặng (0 tween, không nhảy); 0 lỗi console ở index/login, desktop lẫn mobile. Không phát sinh P1/P2.
+(Nit ngoài phạm vi — P3, không chặn: chiều cao chạm nút nav ~42 px @375, hơi dưới ngưỡng 44 px; nút hero 44, login 52 đạt.)

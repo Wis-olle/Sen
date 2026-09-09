@@ -154,9 +154,10 @@
   });
 
   /* ---------- Nút "nam châm" ---------- */
-  if (matchMedia('(hover:hover)').matches) $$('.btn').forEach(b => {
-    b.addEventListener('mousemove', e => { const r = b.getBoundingClientRect();
+  // không gate bằng matchMedia('(hover:hover)'): laptop màn cảm ứng báo hover:none dù đang dùng chuột → lọc theo pointerType từng sự kiện
+  $$('.btn').forEach(b => {
+    b.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = b.getBoundingClientRect();
       gsap.to(b, { x: (e.clientX - r.left - r.width / 2) * .18, y: (e.clientY - r.top - r.height / 2) * .28, duration: .4, ease: 'power2.out' }); });
-    b.addEventListener('mouseleave', () => gsap.to(b, { x: 0, y: 0, duration: .6, ease: 'elastic.out(1,.4)' }));
+    b.addEventListener('pointerleave', () => gsap.to(b, { x: 0, y: 0, duration: .6, ease: 'elastic.out(1,.4)' }));
   });
 })();
