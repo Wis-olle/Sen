@@ -16,7 +16,7 @@
   .is-static .msgs{scroll-behavior:auto}
   .empty-chat{margin:auto;text-align:center;max-width:520px;padding:10px 0 20px}
   .empty-chat :is(img,svg.inl){width:170px;margin:0 auto 4px}
-  .empty-chat h2{font-size:20px;font-weight:800;letter-spacing:-.015em;margin-bottom:6px}
+  .empty-chat h2{display:inline-block;font-size:20px;font-weight:800;letter-spacing:-.015em;margin-bottom:6px} /* inline-block: nét gạch chân vẽ tay ôm đúng chữ */
   .empty-chat p{font-size:14px;color:var(--muted);margin-bottom:16px}
   .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
   .chip-q{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:var(--cream);font-size:13.5px;font-weight:600;text-align:left;transition:background .2s}
@@ -91,7 +91,7 @@
     <header class="tb" id="tb"></header>
     <div class="content">
       <div class="ph">
-        <div><p class="eyebrow">Cơ sở dữ liệu · Chương 4 · 118 đoạn nguồn · 3 trí nhớ</p><p class="sub">Trả lời bám đúng tài liệu bạn tải, mọi ý có trích dẫn; nhớ lỗi bạn từng mắc. Ý ngoài tài liệu được đánh dấu riêng.</p></div>
+        <div><p class="eyebrow">Cơ sở dữ liệu · Chương 4</p></div>
         <div class="ph-actions"><button class="btn btn-white btn-sm" type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg>Lịch sử</button><button class="btn btn-ghost btn-sm" type="button" id="btnClear"><svg class="ic" aria-hidden="true"><use href="#i-rotate-ccw"/></svg>Hội thoại mới</button></div>
       </div>
 
@@ -100,7 +100,6 @@
           <div class="empty-chat" id="empty">
             <img class="spot" src="assets/spot/talk.svg" alt="" width="500" height="500" data-float />
             <h2 data-mark="underline">Hỏi gì về Chương 4?</h2>
-            <p>Mình chỉ dùng tài liệu bạn đã tải và ghi rõ từng đoạn nguồn. Thử một câu:</p>
             <div class="chips" id="chips">
               <button class="chip-q" type="button" data-q="a"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>Tại sao bảng SinhVien chưa đạt <em>3NF</em> dù đã 2NF?</button>
               <button class="chip-q" type="button" data-q="b"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><em>MaKhoa</em> là khóa dự tuyển thì sao?</button>
@@ -135,7 +134,7 @@
       <div class="mem-mini"><svg class="ic" aria-hidden="true"><use href="#i-brain"/></svg><div><b>Nghĩ 2NF là đủ cho 3NF</b><br><span class="kind kind--mis">nhầm lẫn</span> <span class="muted small">sai 2 lần quiz</span></div><label class="switch"><input type="checkbox" checked aria-label="Bật trí nhớ" /></label></div>
       <div class="mem-mini"><svg class="ic" aria-hidden="true"><use href="#i-brain"/></svg><div><b>Coi bắc cầu như FD thường</b><br><span class="kind kind--mis">nhầm lẫn</span> <span class="muted small">chẩn đoán 08/09</span></div><label class="switch"><input type="checkbox" checked aria-label="Bật trí nhớ" /></label></div>
       <div class="mem-mini"><svg class="ic" aria-hidden="true" style="color:var(--ok)"><use href="#i-lightbulb"/></svg><div><b>Hiểu nhanh qua bảng dữ liệu</b><br><span class="kind kind--eff">cách hiểu tốt</span> <span class="muted small">đánh giá 08/09</span></div><label class="switch"><input type="checkbox" checked aria-label="Bật trí nhớ" /></label></div>
-      <p class="small muted" style="margin-top:8px">Tắt nếu bạn đã hết nhầm — hệ thống cũng tự tắt sau 3 lần đúng liên tiếp.</p>
+      <p class="small muted" style="margin-top:8px">Tự tắt sau 3 lần đúng liên tiếp.</p>
     </div>
   </aside>
 </div>

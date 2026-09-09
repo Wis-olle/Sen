@@ -70,7 +70,7 @@
   if (tb) tb.innerHTML = `<button class="ibtn tb-burger" type="button" aria-label="Mở menu">${ic('menu')}</button>
     <h1>${body.dataset.title || 'Sen'}</h1><span class="sp"></span>
     <div class="search" role="search" data-soon>${ic('search')}Tìm khái niệm, tài liệu…</div>
-    ${role === 'admin' ? `<span class="tag tag--ink">${ic('shield-check')}Quản trị</span>` : `<button class="ctx" type="button" data-soon title="Ngữ cảnh đang chọn">${ic('book-open')}CSDL <small>· Chương 4</small>${ic('chevron-down', 'ic chev')}</button>`}
+    ${role === 'admin' ? `<span class="tag tag--ink">${ic('shield-check')}Quản trị</span>` : ''}
     <button class="ibtn tb-bell" type="button" aria-label="Thông báo, 2 chưa đọc" data-soon>${ic('bell')}<span class="pip">2</span></button>
     <div class="me-wrap" style="position:relative"><button class="me" type="button" aria-haspopup="menu" aria-expanded="false"><span class="av ${USER.av}">${USER.ini}</span><span class="nm">${USER.short}</span>${ic('chevron-down', 'ic chev')}</button>
       <div class="menu" role="menu"><a href="#" data-soon>${ic('user-round')}Hồ sơ</a><a href="#" data-soon>${ic('bell')}Thông báo</a><a href="#" data-soon>${ic('shield-check')}Dữ liệu của tôi</a><hr><a href="login.html">${ic('log-out')}Đăng xuất</a></div></div>`;

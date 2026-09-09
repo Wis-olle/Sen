@@ -51,11 +51,6 @@
   .lib-item b{display:block;font-size:13.5px;line-height:1.3}
   .lib-item small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
   .lib-item .btn{margin-left:auto;flex:none}
-  .steps4{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-  .steps4 li{display:flex;gap:12px;align-items:center;font-size:13px;color:var(--ink-2)}
-  .steps4 .tile{width:38px;height:38px;border-radius:12px}
-  .steps4 .tile :is(img,svg.inl){width:22px;height:22px}
-  .steps4 b{display:block;color:var(--ink);font-size:13.5px}
   @media (max-width:1100px){.docs{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media (max-width:700px){.docs{grid-template-columns:1fr}.proc{grid-template-columns:1fr}.proc .who{flex-wrap:wrap}.proc .who>div{flex:1 1 170px;min-width:0}.proc .who .end{width:100%;margin-left:0!important}}
 </style>
@@ -68,7 +63,7 @@
     <div class="content">
 
       <div class="ph">
-        <div><p class="eyebrow">Tài liệu riêng tư của bạn · Học kỳ 20261</p><p class="sub">Hệ thống đọc theo từng trang để mọi trích dẫn trong bài học có số trang. Chỉ mình bạn thấy tài liệu của mình.</p></div>
+        <div><p class="eyebrow">Tài liệu riêng tư của bạn · Học kỳ 20261</p></div>
         <div class="ph-actions">
           <button class="btn btn-white btn-sm" type="button" data-soon title="Mở qua extension"><svg class="ic" aria-hidden="true"><use href="#i-library-big"/></svg>Nhập từ thư viện số</button>
           <button class="btn btn-dark btn-sm" type="button" id="btnUpload">Tải lên<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></button>
@@ -77,8 +72,8 @@
 
       <div class="strip" data-reveal>
         <div class="stile"><span class="lbl">Tài liệu</span><span class="val"><span data-count="4" id="cntAll">4</span><small>2 môn</small></span><span class="sub">3 tải lên · 1 thư viện số</span></div>
-        <div class="stile" style="background:var(--tint-mint)"><span class="lbl">Đã lập chỉ mục</span><span class="val"><span data-count="334">334</span><small>đoạn</small></span><span class="sub">90 trang · cắt 300–500 từ</span></div>
-        <div class="stile" style="background:var(--tint-sky)"><span class="lbl">Khái niệm rút được</span><span class="val"><span data-count="14">14</span><small>2 bản đồ</small></span><span class="sub">1 tài liệu đang dựng bản đồ</span></div>
+        <div class="stile" style="background:var(--tint-mint)"><span class="lbl">Đã lập chỉ mục</span><span class="val"><span data-count="334">334</span><small>đoạn</small></span><span class="sub">90 trang</span></div>
+        <div class="stile" style="background:var(--tint-sky)"><span class="lbl">Khái niệm rút được</span><span class="val"><span data-count="14">14</span><small>2 bản đồ</small></span></div>
       </div>
 
       <section class="grid" style="align-items:stretch" aria-label="Tài liệu">
@@ -104,12 +99,12 @@
         </label>
       </section>
 
-      <div class="sec-h" style="margin-top:22px"><h2 data-mark="underline">Tài liệu đã tải</h2><span class="tag tag--soft">2 môn</span><span class="tag tag--soft" id="cntDb">3 tài liệu</span></div>
+      <div class="sec-h" style="margin-top:22px"><h2 data-mark="underline">Tài liệu đã tải</h2><span class="tag tag--soft" id="cntDb">3 tài liệu</span></div>
       <div class="docs" id="docsDb" data-reveal>
         <article class="card doc">
           <div class="cover" style="background:var(--tint-amber)"><span class="kind">PDF</span><span class="tag tag--green st-tag"><svg class="ic" aria-hidden="true"><use href="#i-waypoints"/></svg>8 khái niệm</span><img src="assets/ico/book.svg" alt="" /></div>
           <div class="body"><h3>Chương 4 — Chuẩn hóa cơ sở dữ liệu</h3><div class="s">Tải lên · Cơ sở dữ liệu · 05/09 · 32 trang · 118 đoạn</div>
-            <div class="foot"><div class="stepper stepper--compact" aria-label="Hoàn tất 4/4"><div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i></div><div class="st-line is-done"></div><div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i></div><div class="st-line is-done"></div><div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i></div><div class="st-line is-done"></div><div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i></div></div><a class="btn btn-dark btn-xs" href="app-map.html" style="margin-left:auto">Mở bản đồ</a></div>
+            <div class="foot"><a class="btn btn-dark btn-xs" href="app-map.html" style="margin-left:auto">Mở bản đồ</a></div>
           </div>
         </article>
         <article class="card doc is-error">
@@ -122,7 +117,7 @@
         <article class="card doc">
           <div class="cover" style="background:var(--tint-sky)"><span class="kind">WEB</span><span class="tag tag--green st-tag"><svg class="ic" aria-hidden="true"><use href="#i-waypoints"/></svg>6 khái niệm</span><img src="assets/ico/globe.svg" alt="" /></div>
           <div class="body"><h3>Chương 3 — Tầng giao vận (TCP/UDP)</h3><div class="s">Link · Mạng máy tính · 01/09 · 64 đoạn</div>
-            <div class="foot"><div class="stepper stepper--compact" aria-label="Hoàn tất 4/4"><div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i></div><div class="st-line is-done"></div><div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i></div><div class="st-line is-done"></div><div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i></div><div class="st-line is-done"></div><div class="st is-done"><i><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></i></div></div><a class="btn btn-white btn-xs" href="#" data-soon style="margin-left:auto">Mở bản đồ</a></div>
+            <div class="foot"><a class="btn btn-white btn-xs" href="#" data-soon style="margin-left:auto">Mở bản đồ</a></div>
           </div>
         </article>
       </div>
@@ -138,13 +133,6 @@
       <p class="small muted">Bài giảng công khai khớp môn của bạn trên thuvien.utt.edu.vn.</p>
     </div>
     <div class="rh" data-reveal>
-      <h2>Bốn bước xử lý</h2>
-      <ol class="steps4" data-pop-row>
-        <li><span class="tile" style="background:var(--tint-amber)"><img src="assets/ico/document.svg" alt="" /></span><div><b>Đã tải</b>Lưu bản gốc, tính dung lượng.</div></li>
-        <li><span class="tile" style="background:var(--tint-peach)"><img src="assets/ico/doc-search.svg" alt="" /></span><div><b>Đã trích xuất</b>Đọc chữ theo trang để trích dẫn có số trang.</div></li>
-        <li><span class="tile" style="background:var(--tint-sky)"><img src="assets/ico/sticky-note.svg" alt="" /></span><div><b>Đã lập chỉ mục</b>Cắt đoạn 300–500 từ, chồng lấn 50 từ.</div></li>
-        <li><span class="tile" style="background:var(--tint-mint)"><img src="assets/ico/check-bold.svg" alt="" /></span><div><b>Đã có bản đồ</b>AI rút khái niệm — bạn sửa được, người sửa luôn thắng.</div></li>
-      </ol>
     </div>
   </aside>
 </div>

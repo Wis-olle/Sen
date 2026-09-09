@@ -90,7 +90,7 @@
     <header class="tb" id="tb"></header>
     <div class="content">
       <div class="ph">
-        <div><p class="eyebrow">Kế hoạch tuần · phiên bản <span id="phVer">2</span> · thi CSDL còn 11 ngày</p><p class="sub">Xếp vào giờ rảnh (tối 20–22h, cuối tuần), không đè giờ lên lớp. Tự tính lại khi bạn trễ, làm sai quiz hay đổi ngày thi.</p></div>
+        <div><p class="eyebrow">Kế hoạch tuần · phiên bản <span id="phVer">2</span> · thi CSDL còn 11 ngày</p><p class="sub">Tự tính lại khi bạn trễ, làm sai quiz hay đổi ngày thi.</p></div>
         <div class="ph-actions">
           <div class="seg" role="tablist" aria-label="Chọn tuần"><button type="button" role="tab" class="is-on" data-week="0" aria-selected="true">Tuần này</button><button type="button" role="tab" data-week="1" aria-selected="false">Tuần thi</button></div>
           <a class="btn btn-dark btn-sm" href="app-lesson.html">Học mục hôm nay<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
@@ -101,7 +101,6 @@
         <div class="stile"><span class="lbl">Buổi học tuần này</span><span class="val"><span id="stItems">5</span><small>mục</small></span><span class="sub">mỗi mục 30′ · việc lớn 45–60′</span></div>
         <div class="stile" style="background:var(--tint-mint)"><span class="lbl">Tổng thời gian</span><span class="val"><span id="stMin">180</span><small>phút</small></span><span class="sub">tối 20:00 · sáng Chủ nhật</span></div>
         <div class="stile" style="background:var(--tint-sky)"><span class="lbl">Đã xong</span><span class="val"><span id="stDone">1</span><small>/ <span id="stTot">5</span></small></span><span class="sub">Phụ thuộc hàm · hôm qua</span></div>
-        <div class="stile" style="background:var(--tint-peach)"><span class="lbl">Tới ngày thi</span><span class="val"><span data-count="11" data-mark="circle">11</span><small>ngày</small></span><span class="sub">Thứ Bảy 20/09 · A2-301</span></div>
       </div>
 
       <article class="card cal-card" data-reveal>
@@ -137,13 +136,6 @@
       <img class="plan-fig" src="assets/doodles/strolling-blue.svg" alt="" width="800" height="600" data-float />
       <div class="card-h" style="margin-bottom:10px"><h2><svg class="ic" aria-hidden="true" style="color:var(--ink)"><use href="#i-calendar-sync"/></svg>Đổi lịch, thêm deadline</h2></div>
       <div class="field"><label for="exam">Ngày thi Cơ sở dữ liệu</label><div class="row-in"><input class="in" type="date" id="exam" value="2026-09-20" /><button class="btn btn-dark btn-sm" type="button" id="btnExam">Tính lại</button></div></div>
-      <div class="field"><label for="dl">Dán tin nhắn deadline (Zalo, email…)</label><textarea class="in" id="dl" rows="3" placeholder="VD: Cả lớp nộp bài tập lớn CSDL trước 23:59 thứ Ba 15/9"></textarea>
-        <div class="row-in" style="justify-content:flex-end"><button class="btn btn-white btn-xs" type="button" id="btnSample">Dùng mẫu</button><button class="btn btn-dark btn-xs" type="button" id="btnExtract"><svg class="ic" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Trích xuất</button></div></div>
-      <div class="extract" id="extract" aria-live="polite">
-        <div><h4>Văn bản gốc</h4><p class="raw" id="exRaw"></p></div>
-        <div><h4>AI rút ra — bạn xác nhận</h4><div class="ai"><span>Việc: <b>Bài tập lớn CSDL</b></span><span>Hạn: <b>15/09/2026 · 23:59</b></span><span>Ước lượng: <b>45 phút</b> chuẩn bị</span></div></div>
-        <div class="acts"><button class="btn btn-white btn-xs" type="button" id="btnExCancel">Sửa</button><button class="btn btn-dark btn-xs" type="button" id="btnExOk"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Xác nhận &amp; tính lại</button></div>
-      </div>
     </div>
   </aside>
 </div>
@@ -211,15 +203,6 @@
     recompute(`Thi ${dd} (còn ${days} ngày): ${days < 11 ? 'gộp 2NF vào tối 11/09 và đưa 3NF lên sáng 13/09' : 'giữ nhịp 30 phút/tối, thêm một buổi ôn tổng hợp trước ngày thi'}.`,
       [['calendar', `Ngày thi đổi sang ${dd}`, `Tính lại vì đổi ngày thi (${dd})`], ['move-right', days < 11 ? 'Dồn 2NF → tối 11/09, 3NF → sáng 13/09' : 'Thêm buổi ôn tổng hợp tối trước ngày thi']],
       () => { if (days < 11) { ITEMS.find(i => i.k.startsWith('Dạng chuẩn 2')).d = 3; ITEMS.find(i => i.k.startsWith('Dạng chuẩn 3')).d = 5; } else ITEMS.push({ w: 1, d: 4, s: 2, k: 'Ôn tổng hợp chương 4', a: 'Ôn tổng hợp', min: 30, st: 'todo', t: '20:00' }); });
-  });
-  const SAMPLE = 'Cả lớp nộp bài tập lớn CSDL trước 23:59 thứ Ba 15/9 nhé, nộp muộn trừ 1 điểm';
-  $('#btnSample').addEventListener('click', () => { $('#dl').value = SAMPLE; $('#dl').focus(); });
-  $('#btnExtract').addEventListener('click', () => { const v = $('#dl').value.trim() || SAMPLE; $('#dl').value = v; $('#exRaw').textContent = '“' + v + '”'; $('#extract').classList.add('show'); if (!rm) gsap.from('#extract', { y: 8, opacity: 0, duration: .4, ease: 'power2.out' }); });
-  $('#btnExCancel').addEventListener('click', () => { $('#extract').classList.remove('show'); $('#dl').focus(); });
-  $('#btnExOk').addEventListener('click', () => { $('#extract').classList.remove('show'); $('#dl').value = '';
-    recompute('Chèn 45 phút chuẩn bị bài tập lớn vào tối 11/09 vì hạn nộp 15/09; giữ 3NF sáng Chủ nhật.',
-      [['flag', 'Deadline mới: Bài tập lớn CSDL · 15/09 23:59', 'Tính lại vì có deadline bài tập lớn (15/09)'], ['plus', 'Thêm mục “Chuẩn bị bài tập lớn” 45′ tối 11/09']],
-      () => { ITEMS.push({ w: 0, d: 3, s: 2, k: 'Chuẩn bị bài tập lớn', a: 'Bài tập lớn', min: 45, st: 'todo', t: '20:00' }); ITEMS.push({ w: 1, d: 0, s: 2, k: 'Nộp bài tập lớn', a: 'Nộp BTL', min: 0, st: 'dead', t: '23:59' }); });
   });
 })();
 </script>
