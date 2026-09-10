@@ -13,9 +13,11 @@ cd Sen
 
 Chỉ cần trình duyệt (Chrome/Edge mới). Không có bước build.
 
-**Cách 1 — mở file trực tiếp:** mở `ui-v2/index.html` (nhấp đúp) là chạy được.
+**Cách 1 — nhấp đúp `CHAY WEB.bat`** (Windows): tự chạy server và mở trình duyệt. Đóng cửa sổ đen để tắt.
 
-**Cách 2 — server tĩnh (khuyên dùng, đủ mọi hiệu ứng):** cần Node.js ≥ 18, chạy từ thư mục gốc repo:
+**Cách 2 — mở file trực tiếp:** mở `ui-v2/index.html` (nhấp đúp). Cách này thiếu vài hiệu ứng vì trình duyệt chặn đọc file cạnh bên.
+
+**Cách 3 — tự chạy server:** cần Node.js ≥ 18, chạy từ thư mục gốc repo:
 
 ```bash
 npx --yes serve ui-v2 -l 5174
