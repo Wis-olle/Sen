@@ -1,0 +1,26 @@
+{
+  "name": "sen-server",
+  "private": true,
+  "type": "module",
+  "description": "Sen — API Node (Hono + Prisma + SQLite) phục vụ ui-v2 và gọi DeepTutor",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/index.ts",
+    "start": "node --env-file-if-exists=.env src/index.ts",
+    "db:push": "prisma db push",
+    "db:seed": "node --env-file-if-exists=.env prisma/seed.ts",
+    "db:reset": "node -e \"require('fs').rmSync('dev.db',{force:true})\" && prisma db push && node --env-file-if-exists=.env prisma/seed.ts",
+    "build": "prisma generate && prisma db push && node --env-file-if-exists=.env prisma/seed.ts",
+    "test": "node --test src/domain/domain.test.ts src/auth.test.ts src/flow.test.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "@prisma/adapter-better-sqlite3": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "better-sqlite3": "^13.0.3",
+    "hono": "^4.13.7"
+  },
+  "devDependencies": {
+    "prisma": "^7.10.0"
+  }
+}

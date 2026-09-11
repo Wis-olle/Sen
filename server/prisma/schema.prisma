@@ -1,0 +1,313 @@
+// Sen — mô hình dữ liệu rút gọn theo 02-ke-hoach-demo.md §4, đủ cho luồng demo
+// đăng nhập → chọn môn → chẩn đoán → bài học. SQLite không có enum: các cột "kiểu" là String,
+// giá trị hợp lệ ghi trong chú thích. StudyPlan/PlanItem/TutorMessage thêm ở lát sau.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         String // student | admin
+  status       String    @default("active") // active | locked
+  createdAt    DateTime  @default(now())
+  student      Student?
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Student {
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName        String
+  studentCode     String       @unique
+  major           String
+  cohort          String
+  goal            String
+  freeSlots       Json // { mon: ["19:00-21:00"], ... }
+  preferredFormat String // reading | example | exercise
+  sessionMinutes  Int          @default(30)
+  enrollments     Enrollment[]
+  materials       Material[]
+  masteries       Mastery[]
+  memories        Memory[]
+  lessons         Lesson[]
+  diagnostics     Diagnostic[]
+  attempts        Attempt[]
+  aiCalls         AiCall[]
+  plans           StudyPlan[]
+  jobs            Job[]
+}
+
+// Kế hoạch tuần, mỗi lần tính lại là một version mới (planner.ts, hàm thuần)
+model StudyPlan {
+  id        String     @id @default(cuid())
+  studentId String
+  courseId  String
+  student   Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  version   Int
+  weekStart DateTime
+  reason    String
+  items     PlanItem[]
+  createdAt DateTime   @default(now())
+
+  @@unique([studentId, courseId, version])
+}
+
+model PlanItem {
+  id        String    @id @default(cuid())
+  planId    String
+  plan      StudyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  conceptId String
+  concept   Concept   @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  date      DateTime
+  minutes   Int
+  status    String    @default("todo") // todo | doing | done
+  lessonId  String?
+  ord       Int
+}
+
+// Việc nền chạy trong tiến trình, UI poll GET /api/jobs/:id mỗi 2 giây
+// ponytail: không hàng đợi; nâng lên BullMQ/worker khi có nhiều người dùng đồng thời
+model Job {
+  id        String    @id @default(cuid())
+  studentId String?
+  student   Student?  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  task      String // lesson.generate | diagnostic.generate
+  status    String    @default("queued") // queued | running | done | error
+  step      String?
+  progress  Int       @default(0)
+  payload   Json?
+  result    Json? // { lessonId } | { diagnosticId }
+  error     Json? // { code, message }
+  retryable Boolean   @default(true)
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  name        String
+  lecturer    String?
+  term        String?
+  enrollments Enrollment[]
+  materials   Material[]
+  concepts    Concept[]
+  diagnostics Diagnostic[]
+  plans       StudyPlan[]
+}
+
+model Enrollment {
+  studentId String
+  courseId  String
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  examDate  DateTime?
+  examRoom  String?
+  grade     Float?
+
+  @@id([studentId, courseId])
+}
+
+model Material {
+  id         String    @id @default(cuid())
+  studentId  String
+  courseId   String
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course     Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title      String
+  kind       String // pdf | md | txt
+  path       String
+  status     String    @default("uploaded") // uploaded | extracted | indexed | mapped | failed
+  error      String?
+  externalId String? // id knowledge base phía DeepTutor
+  createdAt  DateTime  @default(now())
+  chunks     Chunk[]
+  concepts   Concept[]
+}
+
+model Chunk {
+  id         String         @id @default(cuid())
+  materialId String
+  material   Material       @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  code       String // mã trích dẫn hiện trên UI: D1, D2, ...
+  ord        Int
+  page       Int
+  title      String? // tiêu đề đoạn, hiện ở rail nguồn
+  text       String
+  concepts   ConceptChunk[]
+
+  @@unique([materialId, ord])
+  @@unique([materialId, code])
+}
+
+model Concept {
+  id          String          @id @default(cuid())
+  courseId    String
+  course      Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  materialId  String?
+  material    Material?       @relation(fields: [materialId], references: [id], onDelete: SetNull)
+  name        String
+  description String
+  chapter     String?
+  ord         Int
+  source      String          @default("ai") // ai | human — người sửa luôn thắng
+  prereqs     ConceptPrereq[] @relation("concept")
+  dependents  ConceptPrereq[] @relation("prereq")
+  chunks      ConceptChunk[]
+  masteries   Mastery[]
+  lessons     Lesson[]
+  quizItems   QuizItem[]
+  memories    Memory[]
+  planItems   PlanItem[]
+}
+
+model ConceptPrereq {
+  conceptId String
+  prereqId  String
+  concept   Concept @relation("concept", fields: [conceptId], references: [id], onDelete: Cascade)
+  prereq    Concept @relation("prereq", fields: [prereqId], references: [id], onDelete: Cascade)
+
+  @@id([conceptId, prereqId])
+}
+
+model ConceptChunk {
+  conceptId String
+  chunkId   String
+  concept   Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  chunk     Chunk   @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@id([conceptId, chunkId])
+}
+
+model Mastery {
+  studentId      String
+  conceptId      String
+  student        Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  concept        Concept   @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  score          Float     @default(0) // 0..100
+  stability      Float     @default(30) // ngày, cho suy giảm exp(-days/stability); CONFIG.init.stability
+  lastReviewedAt DateTime?
+  correct        Int       @default(0)
+  wrong          Int       @default(0)
+  streakWrong    Int       @default(0) // sai liên tiếp → phạt gấp đôi lần thứ hai
+  streakCorrect  Int       @default(0) // đúng 3 lần liên tiếp → tắt Memory misconception
+
+  @@id([studentId, conceptId])
+}
+
+model Memory {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  conceptId String?
+  concept   Concept? @relation(fields: [conceptId], references: [id], onDelete: SetNull)
+  kind      String // misconception | effective_explanation | preference
+  text      String
+  evidence  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// Bộ câu chẩn đoán đầu vào của một sinh viên cho một môn
+model Diagnostic {
+  id          String     @id @default(cuid())
+  studentId   String
+  courseId    String
+  student     Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course      Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status      String     @default("pending") // pending | ready | submitted | failed
+  jobId       String? // Job đang sinh đề, khi status = pending
+  demoAnswers Json? // chỉ tài khoản demo: mảng optionIndex cho nút "Điền nhanh"
+  items       QuizItem[]
+  createdAt   DateTime   @default(now())
+  submittedAt DateTime?
+}
+
+// Bài học đóng luôn vai trò "job": tạo với status=pending, UI poll GET /api/lessons/:id tới khi ready|failed
+model Lesson {
+  id            String     @id @default(cuid())
+  studentId     String
+  conceptId     String
+  student       Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  concept       Concept    @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  status        String     @default("pending") // pending | ready | failed
+  jobId         String? // Job đang sinh bài, khi status = pending
+  error         String?
+  content       Json? // { chapterLabel, estimatedMinutes, sections, grounding } — trích dẫn chỉ ghi mã đoạn
+  citations     Json? // [{ code, page, snippet }]
+  promptVersion String?
+  model         String?
+  costUsd       Float      @default(0)
+  rating        String? // easy | tooEasy | tooHard | wrong
+  items         QuizItem[]
+  createdAt     DateTime   @default(now())
+}
+
+model QuizItem {
+  id           String      @id @default(cuid())
+  conceptId    String
+  concept      Concept     @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  lessonId     String?
+  lesson       Lesson?     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  diagnosticId String?
+  diagnostic   Diagnostic? @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
+  ord          Int         @default(0)
+  kind         String // mcq | truefalse | fill | short
+  question     String // HTML hạn chế: <b>, <code>
+  options      Json? // ["A", "B", "C", "D"]
+  answer       String // mcq: chỉ số phương án, dạng chuỗi
+  explanation  String? // hiện khi đúng
+  explanationWrong String? // hiện khi sai
+  misconception    String? // sai câu này thì ghi Memory(kind=misconception) với nội dung này
+  sources      Json? // ["D3", "D4"] — mã Chunk làm trích dẫn
+  difficulty   Int         @default(2) // 1..3
+  attempts     Attempt[]
+}
+
+model Attempt {
+  id         String   @id @default(cuid())
+  quizItemId String
+  studentId  String
+  quizItem   QuizItem @relation(fields: [quizItemId], references: [id], onDelete: Cascade)
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answer     String
+  correct    Boolean
+  seconds    Int?
+  at         DateTime @default(now())
+}
+
+model AiCall {
+  id              String   @id @default(cuid())
+  studentId       String?
+  student         Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  task            String // concept_map | diagnostic | lesson | tutor | ...
+  provider        String // deeptutor | gemini
+  model           String
+  promptVersion   String?
+  inputTokens     Int      @default(0)
+  outputTokens    Int      @default(0)
+  cacheReadTokens Int      @default(0)
+  costUsd         Float    @default(0)
+  durationMs      Int?
+  ok              Boolean  @default(true)
+  error           String?
+  at              DateTime @default(now())
+}
