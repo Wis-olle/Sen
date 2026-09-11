@@ -49,8 +49,9 @@
   // thẻ doodle đáy sidebar — đổi theo màn để không lặp hình
   const PROMO = {
     tutor: { img: 'assets/spot/coach.svg', t: 'Hỏi trợ giảng', p: 'Trả lời bám tài liệu, nhớ lỗi bạn từng mắc.', a: 'Mở trợ giảng', h: 'app-tutor.html' },
-    lesson: { img: 'assets/spot/learning.svg', t: 'Bài học hôm nay', p: 'Phụ thuộc bắc cầu · 30 phút, soạn riêng cho An.', a: 'Học ngay', h: 'app-lesson.html' },
-    plan: { img: 'assets/spot/strategy.svg', t: 'Lộ trình tuần', p: '5 buổi tới 20/09, tự tính lại khi bạn trễ.', a: 'Xem lộ trình', h: 'app-plan.html' },
+    // chữ trung tính, không gắn môn/tên mẫu: app-lesson.html mở trần sẽ tự tới bài kế tiếp trong kế hoạch (REVIEW-33)
+    lesson: { img: 'assets/spot/learning.svg', t: 'Bài học hôm nay', p: 'Bài kế tiếp trong kế hoạch, soạn riêng theo hồ sơ của bạn.', a: 'Học ngay', h: 'app-lesson.html' },
+    plan: { img: 'assets/spot/strategy.svg', t: 'Lộ trình tuần', p: 'Tự tính lại khi bạn trễ hoặc sai câu kiểm tra.', a: 'Xem lộ trình', h: 'app-plan.html' },
     admin: { img: 'assets/spot/savings.svg', t: 'Hạn mức hôm nay', p: 'Đã dùng 1,84 / 5 USD · 37%.', a: 'Xem chi phí', h: 'admin-costs.html' },
   };
   const promoKey = body.dataset.promo || (role === 'admin' ? 'admin' : page === 'tutor' ? 'lesson' : page === 'lesson' ? 'plan' : 'tutor');
@@ -84,6 +85,29 @@
     requestAnimationFrame(() => { toastEl.classList.add('show'); toastT = setTimeout(() => toastEl.classList.remove('show'), 2800); });
   };
   window.SEN = { toast, rm, ic, warm, placeGhost: (el, d) => placeGhost(el, d) };
+
+  /* ---------- điểm động duy nhất của shell: GET /api/me (hợp đồng §3.3) ----------
+     Shell dựng bằng giá trị mặc định trước, /api/me về thì ghi đè textContent của phần tử lá.
+     Không chuyển màn khi 401 ở đây — các màn ngoài luồng demo vẫn xem được dữ liệu mẫu; việc
+     chuyển login.html do chính lời gọi API của từng màn lo. */
+  SEN.me = fetch('/api/me', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).catch(() => null);
+  SEN.me.then(m => {
+    const s = m && (m.student || m);
+    if (!s || !s.fullName) return;
+    const short = s.fullName.trim().split(/\s+/).pop(), ini = (s.initial || short[0] || '').toUpperCase();
+    const set = (sel, v) => { const el = $(sel); if (el && v) el.textContent = v; };
+    set('.sb-user b', s.fullName);
+    set('.sb-user small', [s.studentCode, s.cohort].filter(Boolean).join(' · '));
+    set('.me .nm', short);
+    $$('.sb-user .av, .me .av').forEach(a => { a.textContent = ini; });
+  });
+
+  /* Đăng xuất: POST /api/auth/logout rồi mới sang login.html (hợp đồng §3.2) */
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href="login.html"]'); if (!a) return;
+    e.preventDefault();
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin', keepalive: true }).catch(() => {}).then(() => { location.href = 'login.html'; });
+  });
 
   /* ---------- popover trích dẫn: .cite[data-q] ---------- */
   let pop, popFor = null;
@@ -162,11 +186,16 @@
   // "lắp ráp" nội dung con
   above.concat(accAbove).forEach((c, i) => { const kids = $$('[data-pop]', c); if (kids.length) tl.from(kids, { scale: .75, opacity: 0, transformOrigin: '50% 50%', duration: .55, stagger: .06, ease: 'back.out(1.7)' }, .8 + i * .06); });
   $$('[data-pop-row]').forEach((c, i) => { const rows = $$(':scope > *', c); if (rows.length && (unsized || inRail(c) || c.getBoundingClientRect().top < vh)) tl.from(rows, { x: -10, opacity: 0, duration: .45, stagger: .05, ease: 'power2.out' }, .85 + i * .06); });
-  $$('[data-draw]').forEach(svg => {
+  // REVIEW-32 P2 #11: khối do API dựng SAU lượt quét này (mũi tên .chain của bài thật) không bao giờ được vẽ
+  // → lộ ra hàm quét lại theo gốc; SEN_MOTION.rescan(root) gọi nó. Lượt đầu đi đúng nhánh cũ (tl chưa chạy xong).
+  const drawIn = (r = document) => $$('[data-draw]', r).forEach(svg => {
+    if (svg._drawn) return; svg._drawn = 1;
     const ls = $$('line, path, polyline', svg).filter(p => !p.closest('[data-pop]')); prepDraw(ls);
     const v = { strokeDashoffset: 0, duration: .9, stagger: .06, ease: 'power2.out' };
-    if (unsized || inRail(svg) || svg.getBoundingClientRect().top < vh * .92 || !window.ScrollTrigger) tl.to(ls, v, .9); else gsap.to(ls, { ...v, scrollTrigger: { trigger: svg, start: 'top 88%', once: true } });
+    if (unsized || inRail(svg) || svg.getBoundingClientRect().top < vh * .92 || !window.ScrollTrigger) tl.progress() < 1 ? tl.to(ls, v, .9) : gsap.to(ls, v);
+    else gsap.to(ls, { ...v, scrollTrigger: { trigger: svg, start: 'top 88%', once: true } });
   });
+  window.SEN.drawIn = drawIn; drawIn();
 
   /* ---------- số đếm (0,6–0,9 s), thanh & vòng ---------- */
   $$('[data-count]').forEach(el => {

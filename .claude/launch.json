@@ -2,6 +2,18 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "server", "run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "deeptutor",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "server\\scripts\\deeptutor.cmd"],
+      "port": 8001
+    },
+    {
       "name": "ui",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["--yes", "serve", "ui", "-l", "5173"],

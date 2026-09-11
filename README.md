@@ -9,9 +9,30 @@ git clone https://github.com/Wis-olle/Sen.git
 cd Sen
 ```
 
-## Chạy web (`ui-v2`)
+## Chạy web có backend (`server/` + `ui-v2`)
 
-Chỉ cần trình duyệt (Chrome/Edge mới). Không có bước build.
+Cần Node.js ≥ 24 (chạy thẳng `.ts`, không cần build). Backend Node (Hono + Prisma + SQLite) phục vụ luôn `ui-v2` và API `/api/*` ở cổng 3000.
+
+```bash
+cd server
+npm install
+cp .env.example .env
+npx prisma db push
+npm run db:seed
+npm run dev
+```
+
+Mở http://localhost:3000 → đăng nhập bằng chip demo (mật khẩu `demo1234`): `an@sv.utt.edu.vn` (chưa làm chẩn đoán, luồng sống), `binh@sv.utt.edu.vn` (đã làm, hồ sơ đối lập), `admin@utt.edu.vn`. Luồng demo đầu: đăng nhập → chọn môn Lập trình C → 10 câu chẩn đoán → bài học "Vòng lặp" (8 phần, chip trích dẫn, 3 câu kiểm tra, kế hoạch tính lại). Hợp đồng API và dữ liệu seed: `11-hop-dong-du-lieu-demo.md`; ba thuật toán thuần ở `server/src/domain/` (mastery, planner, grounding). Kiểm thử: `npm test` (15 test, DB tạm, dưới 5 giây). Seed dùng mốc ngày tương đối, và An phải ở trạng thái "chưa làm chẩn đoán", nên ngay trước buổi demo chạy `npm run db:reset` (xóa `dev.db`, tạo lại, seed) khi server đang tắt.
+
+**Sinh bài học bằng AI** đi qua DeepTutor (fork Python, cổng 8001; khảo sát ở `09-khao-sat-deeptutor-api.md`). Cài một lần: `git clone https://github.com/Wis-olle/DeepTutor.git "E:\AI Agents\DeepTutor"`, trong đó `uv venv --python 3.14 && uv pip install -e .`; chạy bằng `server\scripts\deeptutor.cmd` (hoặc cấu hình `deeptutor` trong `.claude/launch.json`), rồi mở http://localhost:8001 › Settings › Models để thêm khóa Gemini. Khi chưa có khóa, API vẫn trả lỗi sạch `AI_UPSTREAM_ERROR` và hai bài seed dùng được. `GET /api/health` báo trạng thái DeepTutor.
+
+## Deploy thử lên link thật (Render, miễn phí)
+
+Repo có sẵn `render.yaml`. Làm một lần: tạo tài khoản tại render.com bằng GitHub → **New → Blueprint** → chọn repo `Wis-olle/Sen` và nhánh cần deploy → **Apply**. Render tự cài, sinh Prisma client, tạo SQLite và seed (lệnh `npm run build` trong `server/`), rồi chạy `npm start`. Link dạng `https://sen-demo.onrender.com`. Gói free ngủ sau 15 phút không ai vào, lần mở đầu chờ khoảng 30–60 giây. Mỗi lần deploy lại là DB seed lại từ đầu, nên trước buổi demo bấm **Manual Deploy** để An về trạng thái chưa chẩn đoán. DeepTutor không deploy kèm: bấm vào khái niệm chưa có bài seed sẽ thấy thông báo hệ thống soạn bài tạm nghỉ.
+
+## Chạy web tĩnh không backend (`ui-v2`)
+
+Chỉ cần trình duyệt (Chrome/Edge mới). Không có bước build. Dữ liệu là mẫu cứng trong HTML.
 
 **Cách 1 — mở file trực tiếp:** mở `ui-v2/index.html` (nhấp đúp) là chạy được.
 
