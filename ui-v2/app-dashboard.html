@@ -18,6 +18,15 @@
   .t-hot .big small{color:var(--ink-2);font-size:12px;margin-left:3px}
   .list .tile.p{background:var(--tint-peach)}.list .tile.a{background:var(--tint-amber)}.list .tile.s{background:var(--tint-sky)}.list .tile.m{background:var(--tint-mint)}
   @media (max-width:900px){.trio{grid-template-columns:1fr}}
+  /* REVIEW-32 P1: ít môn (Bình 1 môn) → 2 thẻ bị ẩn nhưng lưới vẫn cứng 3 cột, thẻ đơn 249px lọt thỏm giữa 520px trắng.
+     Chỉ đổi khi có thẻ ẩn nên bố cục 3 môn (đã duyệt 31 vòng) không suy suyển. */
+  @media (min-width:901px){#courseGrid:has(.tcard[hidden]){grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}}
+  /* REVIEW-32 P1 #6: hai khối chỉ đúng khi đã chẩn đoán → hidden sẵn, JS bật khi /api/courses xác nhận (trước đây vẽ ra rồi xoá ở t≈98ms, sụp 470px).
+     .alert/.sec-h có display:flex, table có display:table nên riêng thuộc tính hidden không ẩn nổi. */
+  #planBand[hidden],#weakHead[hidden],#weakTbl[hidden]{display:none}
+  /* REVIEW-32 P2 #22: statusKind 'running' (đang trích xuất / dựng bản đồ) → pill có vòng xoay thay vì đứng im */
+  .tcard .foot .pillmini .spin{width:11px;height:11px;border-radius:50%;border:2px solid var(--cream-deep);border-top-color:var(--amber-deep);animation:spin 1s linear infinite;flex:none}
+  .is-static .tcard .foot .pillmini .spin{animation:none}
   @media (max-width:700px){.list .mbar,.list th:nth-child(2),.list td:nth-child(2),.list th:nth-child(5),.list td:nth-child(5){display:none}.list .tile{width:38px;height:38px}}
 </style>
 </head>
@@ -34,10 +43,10 @@
         <div class="ph-actions"><a class="btn btn-dark btn-sm" href="app-lesson.html">Học bài tiếp theo<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a></div>
       </div>
 
-      <div class="alert" role="status"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><p><b>Kế hoạch vừa tính lại (v2):</b> dồn về Phụ thuộc hàm và 3NF vì cả hai đang dưới 35/100.</p><a class="link-arrow" href="app-plan.html">Xem lộ trình <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+      <div class="alert" id="planBand" role="status" hidden><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><p><b>Kế hoạch vừa tính lại (v2):</b> dồn về Phụ thuộc hàm và 3NF vì cả hai đang dưới 35/100.</p><a class="link-arrow" href="app-plan.html">Xem lộ trình <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
 
-      <div class="sec-h"><h2>Hôm nay của <span class="pill" data-mark="underline">An</span></h2><a class="link-arrow" href="app-plan.html">Cả tuần <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
-      <div class="trio">
+      <div class="sec-h"><h2 id="secCourses">Hôm nay của <span class="pill" data-mark="underline">An</span></h2><a class="link-arrow" href="app-plan.html">Cả tuần <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+      <div class="trio" id="courseGrid">
         <a class="tcard t-amber" href="app-lesson.html" data-reveal>
           <div class="art"><img class="spot" src="assets/spot/learning.svg" alt="" width="500" height="500" /></div>
           <h3>Bài học · Phụ thuộc bắc cầu</h3><small>30 phút · tối 20:00 · soạn riêng cho bạn</small>
@@ -55,8 +64,8 @@
         </a>
       </div>
 
-      <div class="sec-h"><h2>Khái niệm còn yếu</h2><span class="tag tag--soft">7/8 dưới 60</span><a class="link-arrow" href="app-map.html">Mở bản đồ <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
-      <table class="list" data-reveal>
+      <div class="sec-h" id="weakHead" hidden><h2>Khái niệm còn yếu</h2><span class="tag tag--soft">7/8 dưới 60</span><a class="link-arrow" href="app-map.html">Mở bản đồ <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+      <table class="list" id="weakTbl" data-reveal hidden>
         <thead><tr><th>Khái niệm</th><th>Cần trước</th><th>Mức</th><th>Bậc</th><th>Lịch</th><th></th></tr></thead>
         <tbody data-pop-row>
           <tr class="r"><td><span class="nm"><span class="tile p"><img src="assets/ico/nodes.svg" alt="" /></span><span>Dạng chuẩn Boyce–Codd<small>BCNF · chưa học</small></span></span></td><td>3NF</td><td><div class="mbar m-1"><i style="--p:10"></i></div></td><td><span class="lvl lvl-1">Rất yếu</span></td><td class="n">18/09</td><td><a class="btn btn-ghost btn-xs" href="app-lesson.html">Học</a></td></tr>
@@ -88,9 +97,70 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="api.js"></script>
 <script src="icons.js"></script>
 <script src="shell.js"></script>
 <script src="motion.js"></script>
 <script src="motion-assets.js"></script>
+<script>
+/* Bước 2 — chọn môn: GET /api/me + GET /api/courses đổ vào 3 thẻ .tcard (hợp đồng §3.3, §3.4).
+   Nội dung cứng trong HTML là khung hiện ngay; API về thì ghi đè phần tử lá. */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const ARROW = '<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>';
+  const dmy = d => d ? d.split('-').reverse().slice(0, 2).join('/') : '';
+  // .alert/.tcard/.sec-h có display:flex trong app.css → riêng thuộc tính hidden không đủ để ẩn
+  const hide = el => { if (el) { el.hidden = true; el.style.display = 'none'; } };
+  const show = el => { if (el) { el.hidden = false; el.style.display = ''; } };
+
+  SEN.me.then(m => {
+    const s = m && (m.student || m); if (!s || !s.fullName) return;
+    const pill = $('#secCourses .pill');
+    if (pill && pill.firstChild) pill.firstChild.textContent = s.fullName.trim().split(/\s+/).pop();
+    const prof = $('.prof small');
+    if (prof) prof.textContent = [s.major, s.cohort, s.goal && 'mục tiêu: ' + s.goal].filter(Boolean).join(' · ');
+  });
+
+  const grid = $('#courseGrid'), cards = $$('.tcard', grid);
+  SEN_API.api('/api/courses').then(({ courses = [] }) => {
+    const h2 = $('#secCourses'); if (h2 && h2.firstChild) h2.firstChild.textContent = 'Môn học của ';
+    cards.forEach((card, i) => {
+      const c = courses[i];
+      if (!c) return hide(card);
+      card.href = c.next && c.next.href || 'app-library.html';
+      card.dataset.course = c.id;
+      $('h3', card).textContent = c.name;
+      $(':scope > small', card).textContent = [c.code, c.lecturer, c.examDate && 'thi ' + dmy(c.examDate)].filter(Boolean).join(' · ');
+      // statusKind 'running' = việc nền đang chạy → vòng xoay, không để pill tĩnh kể chuyện đang chạy (REVIEW-32 P2 #22)
+      $('.foot', card).innerHTML = `<span class="pillmini">${c.statusKind === 'running' ? '<span class="spin" aria-hidden="true"></span>' : ''}${SEN_API.esc(c.statusLabel || '')}</span><span class="go">${ARROW}</span>`;
+      const art = $('.art', card), cur = $('[src]', art), big = $('.big', art);
+      // thay cả .big: phần tử [data-count] cũ còn tween đếm của shell.js, gỡ khỏi DOM thì nó ghi vào chỗ không ai thấy
+      if (big) big.innerHTML = c.daysToExam == null ? '' : `<span>${c.daysToExam}</span><small>ngày</small>`;
+      if (cur && c.art && cur.getAttribute('src') !== c.art) { const im = new Image(); im.src = c.art; im.alt = ''; im.className = 'spot'; cur.replaceWith(im); }
+    });
+    if (!courses.length) {
+      const c0 = cards[0]; c0.hidden = false; c0.style.display = ''; c0.href = 'app-library.html';
+      $('h3', c0).textContent = 'Chưa có môn — tải tài liệu để bắt đầu';
+      $('small', c0).textContent = 'Tải giáo trình lên, hệ thống dựng bản đồ khái niệm.';
+      $('.foot', c0).innerHTML = `<span class="go">${ARROW}</span>`;
+    }
+    // băng kế hoạch: hidden sẵn trong HTML, chỉ bật khi có môn đã chẩn đoán, chữ lấy từ kế hoạch thật (REVIEW-32 P1 #6)
+    const planned = courses.find(c => c.diagnosticDone && c.plan);
+    if (planned) {
+      const band = $('#planBand'), p = $('p', band);
+      if (p) p.innerHTML = `<b>${SEN_API.esc(planned.name)} · kế hoạch tuần v${planned.plan.version}:</b> ${SEN_API.esc(planned.plan.reason)} · ${planned.plan.doneCount}/${planned.plan.itemCount} buổi đã xong.`;
+      show(band);
+    }
+    // ponytail: bảng "Khái niệm còn yếu" vẫn là mẫu CSDL → giữ ẩn tới khi nối GET /api/courses/{id}/mastery, không hiện dữ liệu sai môn
+    if (window.SEN_MOTION) SEN_MOTION.rescan(grid);   // minh hoạ .spot vừa thay phải được nội tuyến để còn tự vẽ + thở (P2 #10)
+  }).catch(e => SEN.toast(e.message, 'triangle-alert'));
+
+  // chuyển màn mang theo id môn: URL là nguồn sự thật, sessionStorage chỉ đỡ khi URL thiếu (hợp đồng §4.1)
+  grid.addEventListener('click', e => {
+    const a = e.target.closest('.tcard');
+    if (a && a.dataset.course) try { sessionStorage.setItem('sen.courseId', a.dataset.course); } catch (_) {}
+  });
+})();
+</script>
 </body>
 </html>

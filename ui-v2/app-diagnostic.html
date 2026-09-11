@@ -42,6 +42,9 @@
   /* rail */
   .think{display:grid;place-items:center;text-align:center;gap:6px;padding:8px 6px 4px}
   .think :is(img,svg.inl){width:150px}
+  /* REVIEW-33: ẩn thẻ "Điền nhanh (demo)" ở màn kết quả (P2 #17) để lại rail là một hộp trắng RỖNG 300×46 góc phải.
+     Bỏ mặt thẻ đi nhưng GIỮ cột (ẩn hẳn .rail thì .main nở 776→1076 px, lưới ô kết quả nhảy lại giữa chừng). */
+  .rail:has(.think[style*="display: none"]){background:none;padding:0}   /* khớp đúng chuỗi trình duyệt ghi ra; [style*="none"] trúng cả "transform: none" GSAP để lại */
   .think b{font-size:15px}
   .think p{font-size:13px;color:var(--ink-2);line-height:1.5}
   /* kết quả */
@@ -123,6 +126,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="api.js"></script>
 <script src="icons.js"></script>
 <script src="shell.js"></script>
 <script src="motion.js"></script>
@@ -132,7 +136,7 @@
 (function () {
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const rm = SEN.rm;
-  const Q = [
+  let Q = [
     { k: 'Phụ thuộc hàm', t: 'Trong quan hệ <code>R(A, B, C)</code>, phụ thuộc hàm <code>A → B</code> có nghĩa là gì?', o: ['Mỗi giá trị của A tương ứng với đúng một giá trị của B', 'Mỗi giá trị của B tương ứng với đúng một giá trị của A', 'A và B không bao giờ có giá trị trùng nhau', 'A là khóa chính của R'], a: 0 },
     { k: 'Phụ thuộc hàm', t: 'Phụ thuộc hàm nào sau đây là <b>tầm thường</b>?', o: ['<code>A → B</code>', '<code>AB → A</code>', '<code>B → AB</code>', '<code>A → C</code>'], a: 1 },
     { k: 'Khóa & khóa dự tuyển', t: 'Khóa dự tuyển (candidate key) là…', o: ['Bất kỳ siêu khóa nào của quan hệ', 'Siêu khóa tối thiểu — bỏ bớt thuộc tính nào cũng mất tính xác định', 'Thuộc tính có giá trị không lặp trong dữ liệu hiện tại', 'Thuộc tính tham chiếu sang bảng khác'], a: 1 },
@@ -144,12 +148,13 @@
     { k: 'Dạng chuẩn 3 (3NF)', t: 'Quan hệ <code>SV(MaSV, MaKhoa, TenKhoa)</code> với <code>MaSV → MaKhoa → TenKhoa</code> đạt dạng chuẩn cao nhất nào?', o: ['1NF', '2NF', '3NF', 'BCNF'], a: 1 },
     { k: 'Dạng chuẩn Boyce–Codd (BCNF)', t: 'BCNF khác 3NF ở điểm nào?', o: ['Cho phép phụ thuộc bắc cầu', 'Không yêu cầu 1NF', 'Mọi phụ thuộc hàm không tầm thường đều có vế trái là siêu khóa', 'Chỉ áp dụng khi quan hệ có một khóa'], a: 2 },
   ];
-  const DEMO = [0, 1, 1, 0, 0, 0, 0, 0, 2, 1];
-  const MASTERY = [['Phụ thuộc hàm', 30], ['Khóa & khóa dự tuyển', 40], ['Phụ thuộc hàm đầy đủ', 25], ['Phụ thuộc bắc cầu', 20], ['Dạng chuẩn 1 (1NF)', 55], ['Dạng chuẩn 2 (2NF)', 35], ['Dạng chuẩn 3 (3NF)', 15], ['Dạng chuẩn Boyce–Codd (BCNF)', 10]];
+  let DEMO = [0, 1, 1, 0, 0, 0, 0, 0, 2, 1];
+  let MASTERY = [['Phụ thuộc hàm', 30], ['Khóa & khóa dự tuyển', 40], ['Phụ thuộc hàm đầy đủ', 25], ['Phụ thuộc bắc cầu', 20], ['Dạng chuẩn 1 (1NF)', 55], ['Dạng chuẩn 2 (2NF)', 35], ['Dạng chuẩn 3 (3NF)', 15], ['Dạng chuẩn Boyce–Codd (BCNF)', 10]];
   const lvl = m => m < 20 ? 1 : m < 40 ? 2 : m < 60 ? 3 : m < 80 ? 4 : 5, LBL = ['', 'Rất yếu', 'Yếu', 'Cần ôn', 'Khá', 'Vững'];
   const ans = Array(Q.length).fill(null); let cur = 0;
   const sq = $('#sq'), opts = $('#opts');
-  sq.innerHTML = Q.map((_, i) => `<button type="button" data-i="${i}" aria-label="Câu ${i + 1}">${i + 1}</button>`).join('');
+  const drawSq = () => { sq.innerHTML = Q.map((_, i) => `<button type="button" data-i="${i}" aria-label="Câu ${i + 1}">${i + 1}</button>`).join(''); };
+  drawSq();
   function render(dir) {
     const q = Q[cur];
     $('#qNum').textContent = cur + 1; $('#qConcept').innerHTML = SEN.ic('waypoints') + q.k; $('#qText').innerHTML = q.t;
@@ -172,27 +177,80 @@
   document.addEventListener('keydown', e => { if ($('#result').style.display === 'block') return; const i = 'abcd1234'.indexOf(e.key.toLowerCase()); if (i >= 0 && !e.target.matches('input,textarea')) $$('.opt')[i % 4].click(); if (e.key === 'Enter' && !$('#btnNext').disabled && !e.target.matches('button')) $('#btnNext').click(); });
   $('#btnDemo').addEventListener('click', () => { DEMO.forEach((a, i) => ans[i] = a); cur = Q.length - 1; render(1); SEN.toast('Đã điền 10 câu theo mẫu trả lời của An — bấm Nộp bài', 'wand-sparkles'); });
   let secs = 12 * 60; setInterval(() => { if (document.hidden || secs <= 0 || $('#result').style.display === 'block') return; secs--; $('#clock').textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`; }, 1000);
-  function submit() {
-    const correct = ans.filter((a, i) => a === Q[i].a).length;
-    $('#mgrid').innerHTML = MASTERY.map(([n, m]) => `<div class="mtile m-${lvl(m)}" data-pop><span class="nm">${n}</span><span class="sc"><span data-m="${m}">${rm ? m : 0}</span><small>/100</small><span class="lvl lvl-${lvl(m)}">${LBL[lvl(m)]}</span></span></div>`).join('');
+  async function submit() {
+    if (!DG) return showResult(null);                       // ?done hoặc thiếu ?course → dữ liệu tĩnh, đường thoát hiểm
+    // REVIEW-32 P2 #16: gọi AI thật thì chờ lâu — nút phải nói nó đang bận, như nút đăng nhập
+    const nb = $('#btnNext'), lbl = nb.innerHTML; nb.disabled = true; nb.textContent = 'Đang chấm…';
+    try {
+      showResult(await SEN_API.api(`/api/diagnostic/${encodeURIComponent(DG.id)}/submit`, { method: 'POST', body: { answers: Q.map((q, i) => ({ quizItemId: q.id, optionIndex: ans[i] })) } }));
+    } catch (e) {
+      if (e.code === 'ALREADY_SUBMITTED' && e.body && e.body.result) return showResult(e.body.result);
+      nb.disabled = false; nb.innerHTML = lbl; SEN.toast(e.message, 'triangle-alert');
+    }
+  }
+  let DG = null;
+  const dmy = d => d ? String(d).split('-').reverse().slice(0, 2).join('/') : '';
+  let PLAN = 'Kế hoạch tuần v1 đã sẵn sàng · 7 mục tới 20/09';
+  /* now = dựng thẳng: mở lại màn ĐÃ nộp từ trước. Không diễn lại hoạt ảnh "cất bài quiz đi → hiện kết quả"
+     vì việc nộp không xảy ra trong phiên này (REVIEW-32 P1 #9). Hoạt ảnh chỉ chạy khi vừa bấm Nộp bài thật. */
+  function showResult(R, now) {
+    const st = rm || now;
+    if (R) {
+      if (Array.isArray(R.mastery) && R.mastery.length) MASTERY = R.mastery.map(x => [x.name, x.score, x.level, x.levelLabel]);
+      if (R.summary) $('.res-head h2').textContent = R.summary;
+      if (R.detail) $('.res-head p').textContent = R.detail;
+      if (R.weakNote) { const i = R.weakNote.indexOf('. ');
+        $('.res-weak div').innerHTML = i > 0 ? `<b>${SEN_API.esc(R.weakNote.slice(0, i + 1))}</b> ${SEN_API.esc(R.weakNote.slice(i + 2))}` : SEN_API.esc(R.weakNote); }
+      if (R.plan) PLAN = `Kế hoạch tuần v${R.plan.version} đã sẵn sàng · ${R.plan.itemCount} mục tới ${dmy(R.plan.examDate)}`;
+      if (R.nextLesson && R.nextLesson.href) { const b = $('#btnPlan'); b.href = R.nextLesson.href; if (b.firstChild) b.firstChild.textContent = 'Học bài đầu tiên'; }
+    }
+    const correct = R ? R.correct : ans.filter((a, i) => a === Q[i].a).length, total = R && R.total || Q.length;
+    const tot = $('#resScore').nextSibling; if (tot) tot.textContent = '/' + total;
+    $('#mgrid').innerHTML = MASTERY.map(([n, m, lv = lvl(m), lb = LBL[lv]]) => `<div class="mtile m-${lv}" data-pop><span class="nm">${SEN_API.esc(n)}</span><span class="sc"><span data-m="${m}">${st ? m : 0}</span><small>/100</small><span class="lvl lvl-${lv}">${SEN_API.esc(lb)}</span></span></div>`).join('');
     $('#resScore').textContent = correct;
     const quiz = $('#quiz'), band = $('#band'), res = $('#result');
-    document.dispatchEvent(new CustomEvent('sen:submit')); // motion-assets: thinker pop
+    if (!now) document.dispatchEvent(new CustomEvent('sen:submit')); // motion-assets: thinker pop
     const show = () => { quiz.style.display = 'none'; band.style.display = 'none'; res.style.display = 'block'; $('.timer').style.display = 'none';
-      if (rm) { $('#resArc').style.strokeDashoffset = 263.9 * (1 - correct / 10); $('#planState').innerHTML = SEN.ic('check') + 'Kế hoạch tuần v1 đã sẵn sàng'; $('#btnPlan').focus({ preventScroll: true }); return; }
+      const think = $('.rail .think'); if (think) think.style.display = 'none';  // REVIEW-32 P2 #17: "Điền nhanh (demo)" vô nghĩa ở màn kết quả
+      if (st) { $('#resArc').style.strokeDashoffset = 263.9 * (1 - correct / total); $('#planState').innerHTML = SEN.ic('check') + PLAN; $('#btnPlan').focus({ preventScroll: true }); return; }
       const tl = gsap.timeline();
       tl.from(res, { y: 20, opacity: 0, duration: .6, ease: 'power3.out' })
-        .to('#resArc', { strokeDashoffset: 263.9 * (1 - correct / 10), duration: 1, ease: 'power3.out' }, .2)
+        .to('#resArc', { strokeDashoffset: 263.9 * (1 - correct / total), duration: 1, ease: 'power3.out' }, .2)
         .from('.mtile', { y: 18, opacity: 0, scale: .92, transformOrigin: '50% 50%', duration: .55, stagger: .07, ease: 'back.out(1.6)' }, .3)
         .from('.res-weak, .res-acts', { y: 12, opacity: 0, duration: .5, stagger: .1 }, 1);
       $$('.mtile [data-m]').forEach((el, i) => { const o = { v: 0 }; tl.to(o, { v: +el.dataset.m, duration: .9, ease: 'power3.out', onUpdate: () => el.textContent = Math.round(o.v) }, .45 + i * .07); });
-      tl.add(() => { $('#planState').innerHTML = SEN.ic('check') + 'Kế hoạch tuần v1 đã sẵn sàng · 7 mục tới 20/09'; gsap.from('#planState', { x: -8, opacity: 0, duration: .4 }); SEN.toast('Kế hoạch tuần v1 đã lập từ kết quả chẩn đoán', 'route'); }, 2.2);
+      tl.add(() => { $('#planState').innerHTML = SEN.ic('check') + PLAN; gsap.from('#planState', { x: -8, opacity: 0, duration: .4 }); SEN.toast('Kế hoạch tuần đã lập từ kết quả chẩn đoán', 'route'); }, 2.2);
       $('#btnPlan').focus({ preventScroll: true });
     };
-    if (rm) show(); else gsap.to([quiz, band], { y: -12, opacity: 0, duration: .35, ease: 'power2.in', onComplete: show });
+    if (st) show(); else gsap.to([quiz, band], { y: -12, opacity: 0, duration: .35, ease: 'power2.in', onComplete: show });
   }
   render(0);
   if (/[?&]done/.test(location.search)) { DEMO.forEach((a, i) => ans[i] = a); cur = Q.length - 1; render(0); submit(); }
+
+  /* ---- GET /api/courses/{id}/diagnostic (hợp đồng §3.6): ?done giữ nguyên dữ liệu tĩnh ---- */
+  const url = c => `/api/courses/${encodeURIComponent(c)}/diagnostic`;
+  async function load(c) {
+    let d;
+    try {
+      d = await SEN_API.api(url(c));
+      if (d.jobId) { await SEN_API.poll(d.jobId); d = await SEN_API.api(url(c)); }   // 202: đang sinh đề
+    } catch (e) { return SEN.toast(e.message, 'triangle-alert'); }
+    DG = d;
+    if (Array.isArray(d.items) && d.items.length) {
+      Q = d.items.map(it => ({ id: it.id, k: it.conceptName, t: SEN_API.safe(it.questionHtml), o: (it.options || []).map(SEN_API.safe) }));
+      ans.length = Q.length; ans.fill(null); cur = 0; drawSq(); render(0);
+    }
+    if (Array.isArray(d.demoAnswers)) DEMO = d.demoAnswers;
+    if (d.timeLimitMin) secs = d.timeLimitMin * 60;
+    if (d.courseName) $('.ph .eyebrow').textContent = ['Chẩn đoán đầu vào', d.courseName, d.chapterLabel].filter(Boolean).join(' · ');
+    const b = $$('.ph .sub b');
+    if (b[0] && d.itemCount) { b[0].textContent = d.itemCount; $('.big small').textContent = '/' + d.itemCount; }
+    if (b[1] && d.timeLimitMin) b[1].textContent = d.timeLimitMin;
+    if (d.status === 'submitted' && d.result) showResult(d.result, true);
+  }
+  let course = SEN_API.param('course');
+  try { course = course || sessionStorage.getItem('sen.courseId'); } catch (_) {}
+  if (course && !/[?&]done/.test(location.search)) load(course);
 })();
 </script>
 </body>

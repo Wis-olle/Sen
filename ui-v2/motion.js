@@ -188,6 +188,9 @@
   if (on('e5')) document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a) return; const t = $(a.getAttribute('href')); if (!t) return;
     const h = $('.sec-h', t) || t; setTimeout(() => G.fromTo(h, { backgroundColor: 'rgba(248,195,101,.45)' }, { backgroundColor: 'rgba(248,195,101,0)', duration: .9, ease: 'power2.out', clearProps: 'backgroundColor' }), 500); });
 
-  /* ---------- F3: số mục bài học pop khi cuộn tới ---------- */
-  if (on('f3')) $$('.sec-h .n').forEach(n => { if (inView(n)) return; G.from(n, { scale: .55, rotation: -14, duration: .45, ease: 'back.out(1.8)', transformOrigin: '50% 50%', scrollTrigger: window.ScrollTrigger ? { trigger: n, start: 'top 86%', once: true } : undefined }); });
+  /* ---------- F3: số mục bài học pop khi cuộn tới ----------
+     Bài học ẩn lúc chờ API → mọi .n đo được top 0, tưởng là trong tầm nhìn nên bị bỏ qua hết.
+     Cho quét lại theo gốc (SEN_MOTION.rescan gọi sau khi bài hiện) — REVIEW-32 P2 #11. */
+  const popNums = (r = document) => $$('.sec-h .n', r).forEach(n => { if (n._pop || inView(n)) return; n._pop = 1; G.from(n, { scale: .55, rotation: -14, duration: .45, ease: 'back.out(1.8)', transformOrigin: '50% 50%', scrollTrigger: window.ScrollTrigger ? { trigger: n, start: 'top 86%', once: true } : undefined }); });
+  if (on('f3')) { window.SEN.popNums = popNums; popNums(); }
 })();

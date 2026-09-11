@@ -5,6 +5,15 @@
    Nạp SAU motion.js. Khóa họ bật/tắt chung bảng thử ?lab. ?static / reduced-motion / fetch lỗi (file://) → giữ nguyên <img>. */
 (function () {
   const SEN = window.SEN || {}, G = window.gsap;
+  /* REVIEW-32 P2 #10/#11: wiring thay <img> và dựng lại khối SAU khi các lớp chuyển động đã quét xong
+     → minh hoạ mất "nét tự vẽ + thở", ScrollTrigger trỏ vào node đã gỡ. rescan(root) chỉ chạy lại đúng mã init cũ. */
+  let inlineIn = () => {};
+  window.SEN_MOTION = { rescan(root) {
+    if (window.ScrollTrigger) ScrollTrigger.getAll().forEach(t => { if (t.trigger && !t.trigger.isConnected) t.kill(); });
+    if (SEN.drawIn) SEN.drawIn(root || document);
+    if (SEN.popNums) SEN.popNums(root || document);
+    inlineIn(root);
+  } };
   if (!G || SEN.rm || !SEN.mOn) return;
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const on = SEN.mOn, warm = !!SEN.warm, inView = SEN.inView || (el => el.getBoundingClientRect().top < innerHeight * .92);
@@ -19,10 +28,15 @@
   let smallSeq = 0; // thứ tự đọc của icon nhỏ đang trong tầm nhìn → tự vẽ so le
 
   /* ---------- nội tuyến ---------- */
-  const imgs = $$('img[src*="/spot/"], img[src*="/doodles/"], img[src*="/ico/"]').filter(i => !i.closest('.prof .av') && !i.hasAttribute('data-noinline'));
   // tab ẩn (Browser pane, tab nền) không cấp rAF → chờ có thời hạn để vòng nội tuyến không đứng
   const nextFrame = () => new Promise(r => { let done = false; const f = () => { if (!done) { done = true; r(); } }; requestAnimationFrame(f); setTimeout(f, 60); });
-  (async () => { for (let idx = 0; idx < imgs.length; idx++) { const img = imgs[idx]; try { const txt = await load(img.getAttribute('src')); inline(img, idx, txt); } catch (e) { (window.__inlErr = window.__inlErr || []).push(String(e && e.stack || e)); /* file:// hoặc lỗi mạng → giữ <img>; lỗi khác xem window.__inlErr */ } await nextFrame(); } })();
+  let idx0 = 0; // chỉ số so le chạy tiếp qua các lượt quét
+  async function scan(root) {
+    const imgs = $$('img[src*="/spot/"], img[src*="/doodles/"], img[src*="/ico/"]', root || document).filter(i => !i.closest('.prof .av') && !i.hasAttribute('data-noinline'));
+    for (let i = 0; i < imgs.length; i++) { const img = imgs[i]; try { const txt = await load(img.getAttribute('src')); inline(img, idx0 + i, txt); } catch (e) { (window.__inlErr = window.__inlErr || []).push(String(e && e.stack || e)); /* file:// hoặc lỗi mạng → giữ <img>; lỗi khác xem window.__inlErr */ } await nextFrame(); }
+    idx0 += imgs.length;
+  }
+  inlineIn = scan; scan();
   function inline(img, idx, txt) {
     if (!img.isConnected) return;
     const doc = new DOMParser().parseFromString(txt, 'image/svg+xml'), svg = doc.documentElement;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bài học: Phụ thuộc bắc cầu — Sen</title>
+<title>Bài học — Sen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
@@ -46,11 +46,18 @@
   .tbl th{background:var(--cream);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 12px;font-weight:700}
   .tbl td{padding:9px 12px;border-top:1px solid var(--line-2);font-family:var(--num);font-weight:500}
   .tbl td.dup{background:#fff1d6;position:relative}
+  /* REVIEW-32 P1: bài API gửi highlightLabel riêng ("biên"/"dừng"); nhãn cứng "lặp" chỉ còn cho bảng mẫu CSDL */
+  .tbl td.dup[data-dup]::after{content:attr(data-dup)}
   .tbl td.dup::after{content:"lặp";position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--sans);font-size:10px;font-weight:700;color:var(--warn-ink)}
   .tbl caption{caption-side:bottom;text-align:left;font-size:12.5px;color:var(--ink-2);padding:8px 2px 0}
   /* lỗi bạn từng mắc: KHỐI THAN (điểm nhấn của màn) */
   .mistakes{padding:20px 22px 22px}
   .mistakes .sec-h .n{background:var(--amber)}
+  /* REVIEW-32 P2: bài thiếu phần (Bình) — mục lục dùng counter nên tự đánh lại 1..6, viên số trong thân thì cứng 1..8 → lệch. Cho viên số cũng đếm theo phần đang hiện. */
+  .lesson{counter-reset:sec}
+  .lesson .sec:not([hidden]){counter-increment:sec}
+  .lesson .sec-h .n{font-size:0}
+  .lesson .sec-h .n::before{content:counter(sec);font-size:13px}
   .mistakes .fig{position:absolute;right:16px;top:-30px;width:150px;pointer-events:none}
   .mistakes>.prose{padding-right:150px}
   .outside{padding:14px 16px;border-radius:14px;background:var(--white);border:1px dashed var(--line);margin-top:6px}
@@ -61,6 +68,11 @@
   .qi{padding:16px 18px;border-radius:16px;background:var(--white);border:1.5px solid var(--amber-soft)}
   .qi .qq{font-weight:700;font-size:15.5px;line-height:1.45;margin-bottom:12px;display:flex;gap:10px}
   .qi .qq .k{font-family:var(--num);color:var(--muted);flex:none}
+  /* REVIEW-33: câu hỏi/phương án do API trả về là CẢ DÒNG LỆNH (<code> 520–700 px). Gặp .lesson code{white-space:nowrap}
+     ở trên, mà .qz/.opts là lưới (min-width:auto) nên .qi không co được → trang tràn ngang 401 px ở 390 px.
+     Chỉ trong khối kiểm tra mới cho code xuống dòng: ưu tiên ngắt ở dấu cách (pre-wrap), token dài quá mới ngắt giữa. */
+  .qi code{white-space:pre-wrap;overflow-wrap:anywhere}
+  .qi .qq>span,.qi .opt>span{min-width:0}
   .qi .opts{display:grid;gap:8px}
   .qi .opt{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line-2);text-align:left;font-size:14.5px;line-height:1.35;transition:border-color .2s,background .2s}
   .qi .opt:hover{border-color:var(--amber-soft);background:#fffdf8}
@@ -96,11 +108,26 @@
   .srcs .s span{color:var(--muted)}
   .ask{display:flex;gap:8px;margin-top:10px}
   .ask .in{flex:1;height:40px;font-size:13.5px}
-  @media (max-width:900px){.goal,.finish{grid-template-columns:1fr}.goal :is(img,svg.inl),.finish :is(img,svg.inl){display:none}.mistakes .fig{display:none}.chain .note{margin-left:0;width:100%}}
+  /* khối chờ khi sinh bài (hợp đồng §2.4c) */
+  #lessonWait{display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:center;padding:16px 18px;margin-bottom:18px}
+  #lessonWait[hidden],#lwRetry[hidden]{display:none}
+  /* REVIEW-32 P1 #8: lúc chờ/lỗi không để bối cảnh bài mẫu đứng quanh (viên mức 20/100, nút "Làm kiểm tra" trỏ vào
+     section đang ẩn, mục lục 8 phần, 4 nguồn CSDL). display:flex/grid nên riêng thuộc tính hidden không ẩn nổi. */
+  .lh-meta[hidden],.ph-actions[hidden],.rail .rh[hidden]{display:none}
+  /* .lesson trùng tên với thẻ bài học của landing (style.css: display:flex) → thuộc tính hidden một mình không ẩn nổi */
+  .lesson[hidden]{display:none}
+  #lessonWait img{width:110px}
+  #lessonWait .mbar{margin:10px 0 2px;max-width:320px}
+  /* REVIEW-32 P1: lỗi thì thanh tiến trình bị đẩy lên 100% — đầy thanh cạnh chữ "Chưa giao được bài" đọc thành "xong" */
+  #lessonWait:has(#lwRetry:not([hidden])) .mbar{display:none}
+  .spin{display:inline-block;vertical-align:-2px;width:13px;height:13px;margin-right:7px;border-radius:50%;border:2.5px solid var(--cream-deep);border-top-color:var(--amber-deep);animation:spin 1s linear infinite}
+  .is-static .spin{animation:none}
+  /* REVIEW-32 P2: #lessonWait giữ nguyên 2 cột trên mobile — hình 110px nuốt 1/3 thẻ, câu lỗi gãy 6 dòng. Theo đúng luật của .goal/.finish. */
+  @media (max-width:900px){.goal,.finish{grid-template-columns:1fr}.goal :is(img,svg.inl),.finish :is(img,svg.inl){display:none}.mistakes .fig{display:none}.chain .note{margin-left:0;width:100%}#lessonWait{grid-template-columns:1fr}#lessonWait img{display:none}}
   @media (max-width:600px){.tbl{font-size:12.5px}.tbl td,.tbl th{padding:7px 8px}}
 </style>
 </head>
-<body data-page="lesson" data-role="student" data-title="Phụ thuộc bắc cầu" data-promo="plan">
+<body data-page="lesson" data-role="student" data-title="Bài học" data-promo="plan">
 <div class="readbar" id="readbar" aria-hidden="true"></div>
 <div class="app">
   <aside class="sb" id="sb"></aside>
@@ -108,12 +135,24 @@
     <header class="tb" id="tb"></header>
     <div class="content">
       <div class="ph">
-        <div><p class="eyebrow">Bài học hôm nay · CSDL · Chương 4 · mục 2/7 tuần này</p>
-          <div class="lh-meta"><span class="mp" id="mpTop"><span class="ring" id="ringTop" style="--p:20"></span><span id="scTop">20</span><small>/100</small><span class="lvl lvl-2" id="lvlTop">Yếu</span></span><span class="tag tag--soft" title="Mọi ý chính gắn mã đoạn nguồn; bài đã qua kiểm tra bám nguồn"><svg class="ic" aria-hidden="true"><use href="#i-badge-check"/></svg>Bám nguồn · 5 trích dẫn</span></div></div>
-        <div class="ph-actions"><a class="btn btn-white btn-sm" href="app-tutor.html"><svg class="ic" aria-hidden="true"><use href="#i-message-circle"/></svg>Hỏi trợ giảng</a><a class="btn btn-dark btn-sm" href="#kiem-tra">Làm kiểm tra<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+        <div><p class="eyebrow">Bài học hôm nay</p>
+          <div class="lh-meta" hidden><span class="mp" id="mpTop"><span class="ring" id="ringTop" style="--p:20"></span><span id="scTop">20</span><small>/100</small><span class="lvl lvl-2" id="lvlTop">Yếu</span></span><span class="tag tag--soft" title="Mọi ý chính gắn mã đoạn nguồn; bài đã qua kiểm tra bám nguồn"><svg class="ic" aria-hidden="true"><use href="#i-badge-check"/></svg>Bám nguồn · 5 trích dẫn</span></div></div>
+        <div class="ph-actions" hidden><a class="btn btn-white btn-sm" href="app-tutor.html"><svg class="ic" aria-hidden="true"><use href="#i-message-circle"/></svg>Hỏi trợ giảng</a><a class="btn btn-dark btn-sm" href="#kiem-tra">Làm kiểm tra<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
       </div>
 
-      <article class="lesson">
+      <!-- REVIEW-32 P1 #7: khối chờ là trạng thái MỞ MÀN, bài mẫu `hidden` sẵn — script cuối trang chạy sau khi
+           trình duyệt đã vẽ, nên bật/tắt bằng JS vẫn lộ ~31 ms bài CSDL "Phụ thuộc bắc cầu". boot() quyết định tiếp. -->
+      <div class="card card--white" id="lessonWait" aria-live="polite">
+        <img class="spot" src="assets/spot/thinker.svg" alt="" width="500" height="500" data-noinline />
+        <div>
+          <b id="lwTitle">Đang soạn bài học riêng cho bạn</b>
+          <p class="small muted" id="lwStep"><span class="spin" aria-hidden="true"></span>Đang tìm đoạn nguồn…</p>
+          <div class="mbar m-2"><i id="lwBar" style="--p:4"></i></div>
+          <button class="btn btn-dark btn-sm" type="button" id="lwRetry" hidden style="margin-top:10px">Thử lại</button>
+        </div>
+      </div>
+
+      <article class="lesson" hidden>
         <section class="sec" id="s1" data-reveal>
           <div class="sec-h"><span class="n">1</span><h2 data-mark="underline">Sau bài này bạn làm được gì</h2></div>
           <div class="goal">
@@ -211,14 +250,14 @@
   </main>
 
   <aside class="rail" aria-label="Mục lục và nguồn">
-    <div class="rh" data-reveal>
+    <div class="rh" data-reveal hidden>
       <h2>Trong bài<span class="tag tag--soft">8 phần</span></h2>
       <ol class="toc" id="toc">
         <li><a href="#s1">Mục tiêu</a></li><li><a href="#s2">Ôn tiên quyết</a></li><li><a href="#s3">Giải thích</a></li><li><a href="#s4">Ví dụ theo ngành</a></li>
         <li><a href="#s5">Lỗi bạn từng mắc</a></li><li><a href="#s6">Mở rộng</a></li><li><a href="#kiem-tra">Kiểm tra 3 câu</a></li><li><a href="#s8">Đánh giá</a></li>
       </ol>
     </div>
-    <div class="rh" data-reveal>
+    <div class="rh" data-reveal hidden>
       <h2>Nguồn trong bài</h2>
       <div class="srcs">
         <div class="s"><button class="cite" type="button" data-src="D1" data-page="12" data-q="Phụ thuộc hàm X → Y trên lược đồ R: với mọi bộ t1, t2 của r(R), nếu t1[X] = t2[X] thì t1[Y] = t2[Y].">[D1] tr. 12</button><span>Định nghĩa phụ thuộc hàm</span></div>
@@ -234,6 +273,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="api.js"></script>
 <script src="icons.js"></script>
 <script src="shell.js"></script>
 <script src="motion.js"></script>
@@ -243,46 +283,191 @@
 (function () {
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const rm = SEN.rm;
-  const bar = $('#readbar'), lesson = $('.lesson'), toc = $$('#toc a'), secs = $$('.sec');
+  const bar = $('#readbar'), lesson = $('.lesson');
+  let toc = $$('#toc a'), secs = $$('.sec');
+  const resync = () => { toc = $$('#toc a'); secs = $$('.sec:not([hidden])'); };
   const onScroll = () => { const r = lesson.getBoundingClientRect(), total = r.height - innerHeight * .6, p = Math.min(1, Math.max(0, (-r.top + 80) / total)); bar.style.transform = `scaleX(${p})`;
     let cur = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < innerHeight * .4) cur = i; }); toc.forEach((a, i) => a.classList.toggle('is-on', i === cur)); };
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
   toc.forEach(a => a.addEventListener('click', e => { e.preventDefault(); $(a.getAttribute('href')).scrollIntoView({ behavior: rm ? 'auto' : 'smooth', block: 'start' }); }));
-  const QZ = [
+  let QZ = [
     { q: 'Trong bảng SinhVien ở phần 4, thuộc tính nào phụ thuộc bắc cầu vào <code>MaSV</code>?', o: ['HoTen', 'MaKhoa', 'TenKhoa', 'Không có'], a: 2, ok: '<code>MaSV → MaKhoa → TenKhoa</code>, và MaKhoa không phải khóa.', no: 'HoTen và MaKhoa phụ thuộc <b>trực tiếp</b> vào MaSV; chỉ TenKhoa đi qua trung gian MaKhoa.', src: ['D4', '14', 'Thuộc tính Z phụ thuộc bắc cầu vào X nếu tồn tại Y sao cho X → Y, Y → Z, Y không xác định X và Y không phải là khóa.'] },
     { q: 'Nếu <code>MaKhoa</code> cũng là khóa dự tuyển của bảng thì <code>TenKhoa</code> có còn phụ thuộc bắc cầu vào <code>MaSV</code> không?', o: ['Có, vì vẫn có chuỗi MaSV → MaKhoa → TenKhoa', 'Không, vì trung gian là khóa thì không tính', 'Chỉ khi TenKhoa duy nhất', 'Không xác định được'], a: 1, ok: 'Đây chính là chỗ bạn từng nhầm: trung gian là khóa thì không phải bắc cầu.', no: 'Đây là chỗ bạn từng nhầm: điều kiện “Y không phải khóa” là bắt buộc. Nếu MaKhoa là khóa dự tuyển thì không có phụ thuộc bắc cầu.', src: ['D4', '14', 'Nếu Y là siêu khóa của R thì X → Y → Z không tạo thành phụ thuộc bắc cầu theo nghĩa của 3NF.'] },
     { q: 'Cách tách nào loại bỏ phụ thuộc bắc cầu trong bảng SinhVien?', o: ['SinhVien(MaSV, HoTen) và Khoa(MaKhoa, TenKhoa)', 'SinhVien(MaSV, HoTen, MaKhoa) và Khoa(MaKhoa, TenKhoa)', 'SinhVien(MaSV, TenKhoa) và Khoa(MaKhoa, HoTen)', 'Không cần tách, chỉ cần thêm chỉ mục'], a: 1, ok: 'SinhVien giữ MaKhoa làm khóa ngoại; TenKhoa về bảng Khoa — bảng đạt 3NF.', no: 'SinhVien phải giữ <code>MaKhoa</code> để còn nối được sang Khoa; TenKhoa chuyển sang Khoa.', src: ['D7', '17', 'Một quan hệ đạt 3NF khi đạt 2NF và không có thuộc tính không khóa nào phụ thuộc bắc cầu vào khóa chính.'] },
   ];
-  const qz = $('#qz'); let answered = 0, right = 0;
-  qz.innerHTML = QZ.map((q, i) => `<div class="qi" data-i="${i}"><div class="qq"><span class="k">${i + 1}.</span><span>${q.q}</span></div><div class="opts">${q.o.map((o, j) => `<button class="opt" type="button" data-j="${j}"><span class="k">${'ABCD'[j]}</span><span>${o}</span></button>`).join('')}</div><div class="fb"></div></div>`).join('');
+  const qz = $('#qz'), PICK = []; let answered = 0, right = 0;
+  const drawQz = () => { answered = 0; right = 0; PICK.length = 0; $('#qzCount').textContent = '0/' + QZ.length; qz.innerHTML = QZ.map((q, i) => `<div class="qi" data-i="${i}"><div class="qq"><span class="k">${i + 1}.</span><span>${q.q}</span></div><div class="opts">${q.o.map((o, j) => `<button class="opt" type="button" data-j="${j}"><span class="k">${'ABCD'[j]}</span><span>${o}</span></button>`).join('')}</div><div class="fb"></div></div>`).join(''); };
+  drawQz();
   qz.addEventListener('click', e => {
     const b = e.target.closest('.opt'); if (!b) return; const qi = b.closest('.qi'); if (qi.classList.contains('is-locked')) return;
     const i = +qi.dataset.i, j = +b.dataset.j, q = QZ[i], ok = j === q.a; qi.classList.add('is-locked');
     b.classList.add(ok ? 'is-right' : 'is-wrong'); if (!ok) $$('.opt', qi)[q.a].classList.add('is-right');
-    const fb = $('.fb', qi); fb.className = 'fb show ' + (ok ? 'ok' : 'no'); fb.innerHTML = (ok ? '<b>✓ Đúng.</b> ' : '<b>✗ Chưa đúng.</b> ') + (ok ? q.ok : q.no) + ` <button class="cite" type="button" data-src="${q.src[0]}" data-page="${q.src[1]}" data-q="${q.src[2]}">[${q.src[0]}] tr. ${q.src[1]}</button>`;
+    const fb = $('.fb', qi); fb.className = 'fb show ' + (ok ? 'ok' : 'no'); fb.innerHTML = (ok ? '<b>✓ Đúng.</b> ' : '<b>✗ Chưa đúng.</b> ') + (ok ? q.ok : q.no) + ' ' + chip(q.cite || { code: q.src[0], page: q.src[1], doc: 'Giáo trình Cơ sở dữ liệu · Chương 4', snippet: q.src[2] });
     if (!rm) { gsap.fromTo($('.k', b), { scale: .6 }, { scale: 1, duration: .45, ease: 'back.out(2.5)' }); gsap.from(fb, { y: 6, opacity: 0, duration: .35, ease: 'power2.out' }); }
-    answered++; if (ok) right++; $('#qzCount').textContent = answered + '/3';
+    PICK[i] = j; answered++; if (ok) right++; $('#qzCount').textContent = answered + '/' + QZ.length;
     if (answered === QZ.length) setTimeout(finish, 500);
   });
-  function finish() {
-    const from = 20, to = 20 + right * 6 - (3 - right) * 2, done = $('#qzDone');
-    $('#qzScore').textContent = right; $('#qzFrom').textContent = from; $('#qzTo').textContent = to;
-    $('#qzReason').textContent = right === 3 ? 'gộp phiên ôn bắc cầu vào tối 11/09 vì bạn đã nắm chắc trung gian là khóa.' : 'thêm 5 câu ôn bắc cầu vào tối 11/09 vì bạn còn sai câu về trung gian là khóa.';
+  async function finish() {
+    /* POST /api/lessons/{id}/answers một lần khi đủ 3 câu (hợp đồng §3.12); không có bài từ API thì chấm tại chỗ như cũ */
+    let R = null;
+    if (LESSON) {
+      try { R = await A.api(`/api/lessons/${encodeURIComponent(LESSON.id)}/answers`, { method: 'POST', body: { answers: QZ.map((q, i) => ({ quizItemId: q.id, optionIndex: PICK[i] })) } }); }
+      catch (e) { if (e.code === 'ALREADY_SUBMITTED' && e.body && e.body.result) R = e.body.result; else SEN.toast(e.message, 'triangle-alert'); }
+    }
+    const M = R && R.mastery, P = R && R.plan, done = $('#qzDone');
+    const from = M ? M.from : 20, to = M ? M.to : 20 + right * 6 - (3 - right) * 2;
+    const concept = LESSON && LESSON.conceptName || 'Phụ thuộc bắc cầu';
+    const sum = P && P.summary || 'Bạn vẫn dưới ngưỡng 60 nên phiên ôn 3NF sáng Chủ nhật được giữ nguyên;';
+    const reason = P && P.reason || (right === 3 ? 'gộp phiên ôn bắc cầu vào tối 11/09 vì bạn đã nắm chắc trung gian là khóa.' : 'thêm 5 câu ôn bắc cầu vào tối 11/09 vì bạn còn sai câu về trung gian là khóa.');
+    $('#qzScore').textContent = R ? R.correct : right;
+    $('#qzDone p').innerHTML = `<b>Mức thành thạo ${A.esc(concept)}: <span id="qzFrom">${from}</span> → <span id="qzTo">${to}</span>.</b> ${A.esc(sum)} Kế hoạch tính lại thành <b>v${P ? P.version : 3}</b>: <span id="qzReason">${A.esc(reason)}</span>`;
     done.classList.add('show');
     document.dispatchEvent(new CustomEvent('sen:finish', { detail: { el: $('#qzScore') } })); // motion.js D3: ăn mừng một lần
-    const lv = to < 20 ? 1 : to < 40 ? 2 : to < 60 ? 3 : 4, LBL = ['', 'Rất yếu', 'Yếu', 'Cần ôn', 'Khá'];
-    const apply = () => { $('#lvlTop').textContent = LBL[lv]; $('#lvlTop').className = 'lvl lvl-' + lv; };
-    if (rm) { $('#scTop').textContent = to; $('#ringTop').style.setProperty('--p', to); apply(); return; }
+    const LBL = ['', 'Rất yếu', 'Yếu', 'Cần ôn', 'Khá'], lv = M && M.level || (to < 20 ? 1 : to < 40 ? 2 : to < 60 ? 3 : 4);
+    const label = M && M.levelLabel || LBL[lv], msg = R && R.toast || 'Kế hoạch đã tính lại — phiên bản 3 (thêm ôn bắc cầu 11/09)';
+    const apply = () => { $('#lvlTop').textContent = label; $('#lvlTop').className = 'lvl lvl-' + lv; };
+    if (rm) { $('#scTop').textContent = to; $('#ringTop').style.setProperty('--p', to); apply(); SEN.toast(msg, 'route'); return; }
     const o = { v: from };
     gsap.timeline().from(done, { y: 14, opacity: 0, duration: .5, ease: 'power3.out' })
       .to(o, { v: to, duration: .9, ease: 'power3.out', onUpdate: () => $('#scTop').textContent = Math.round(o.v) }, .3)
       .to('#ringTop', { '--p': to, duration: .9, ease: 'power3.out' }, .3)
       .fromTo('#mpTop', { scale: 1 }, { scale: 1.08, duration: .25, yoyo: true, repeat: 1, ease: 'sine.inOut', onComplete: apply }, .3)
-      .add(() => SEN.toast('Kế hoạch đã tính lại — phiên bản 3 (thêm ôn bắc cầu 11/09)', 'route'), 1.3);
+      .add(() => SEN.toast(msg, 'route'), 1.3);
   }
   const MSG = { easy: 'Đã ghi “dễ hiểu” — bài sau giữ kiểu ví dụ bảng dữ liệu', tooEasy: 'Đã ghi “quá dễ” — bài sau tăng độ khó và rút phần ôn', tooHard: 'Đã ghi “quá khó” — bài sau thêm ví dụ và chia nhỏ hơn', wrong: 'Đã đưa bài vào hàng đợi kiểm tra của quản trị' };
-  $$('.rate .btn').forEach(b => b.addEventListener('click', () => { $$('.rate .btn').forEach(x => x.classList.remove('is-on')); b.classList.add('is-on'); SEN.toast(MSG[b.dataset.rate], b.dataset.rate === 'wrong' ? 'flag' : 'check'); }));
-  if (!rm && window.ScrollTrigger) gsap.from('.tbl td.dup', { backgroundColor: '#ffffff', duration: .8, stagger: .2, ease: 'power2.out', scrollTrigger: { trigger: '.tbl', start: 'top 80%', once: true } });
+  $$('.rate .btn').forEach(b => b.addEventListener('click', async () => {
+    $$('.rate .btn').forEach(x => x.classList.remove('is-on')); b.classList.add('is-on');
+    let msg = MSG[b.dataset.rate];
+    if (LESSON) { try { msg = (await A.api(`/api/lessons/${encodeURIComponent(LESSON.id)}/rating`, { method: 'POST', body: { rating: b.dataset.rate } })).message || msg; } catch (e) { msg = e.message; } }
+    SEN.toast(msg, b.dataset.rate === 'wrong' ? 'flag' : 'check');
+  }));
+
+  /* ================= API bài học (hợp đồng §3.9–3.13) =================
+     Nội dung cứng trong HTML là bản mẫu hiện ngay; có ?lesson hoặc ?course&concept thì API ghi đè.
+     Chỉ dựng lại phần CON của mỗi <section data-reveal> — thay cả khối thì GSAP giữ nó ở opacity 0. */
+  const A = SEN_API;
+  let LESSON = null;
+  // đúng khuôn chip mà shell.js bắt để dựng popover; thiếu data-doc thì popover nói nhầm tên giáo trình
+  const chip = c => c ? `<button class="cite" type="button" data-src="${A.esc(c.code)}" data-page="${A.esc(c.page)}" data-doc="${A.esc(c.doc || '')}" data-q="${A.esc(c.snippet || '')}">[${A.esc(c.code)}] tr. ${A.esc(c.page)}</button>` : '';
+  // data-draw như mũi tên mẫu trong HTML: SEN_MOTION.rescan() mới vẽ được nét cho bài thật (REVIEW-32 P2 #11)
+  const ARROW = '<svg viewBox="0 0 34 14" data-draw aria-hidden="true"><path d="M1 7h30M26 2l5 5-5 5"/></svg>';
+  const ID = { goal: 's1', prereq: 's2', explain: 's3', example: 's4', mistakes: 's5', outside: 's6', quiz: 'kiem-tra', rate: 's8' };
+  const leaf = (el, v) => { if (!el || v == null || v === '') return; const t = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim()); t ? t.textContent = v : el.prepend(v); };
+
+  function block(b) {
+    switch (b.type) {
+      case 'para': return `<p>${A.safe(b.html)}${chip(b.cite)}</p>`;
+      case 'list': return `<ul>${(b.items || []).map(i => `<li><i></i><span>${A.safe(i)}</span></li>`).join('')}</ul>`;
+      case 'chain': return `<div class="chain" aria-label="Sơ đồ chuỗi">${(b.nodes || []).map((n, i) => `<span class="nd${i === b.keyIndex ? ' key' : ''}">${A.esc(n)}</span>`).join(`<span class="ar">${ARROW}</span>`)}${b.note ? `<span class="note">${A.esc(b.note)}</span>` : ''}</div>`;
+      case 'table': { const hl = new Set((b.highlightCells || []).map(c => c.join(':')));
+        return `<table class="tbl">${b.caption ? `<caption>${A.safe(b.caption)}${chip(b.cite)}</caption>` : ''}<thead><tr>${(b.headers || []).map(h => `<th>${A.esc(h)}</th>`).join('')}</tr></thead><tbody>${(b.rows || []).map((r, i) => `<tr>${r.map((c, j) => `<td${hl.has(i + ':' + j) ? ` class="dup" data-dup="${A.esc(b.highlightLabel || 'lặp')}"` : ''}>${A.esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`; }
+      case 'memory': { const eff = b.kind === 'effective_explanation';
+        return `<div class="mem${eff ? ' good' : ''}" data-pop>${SEN.ic(eff ? 'lightbulb' : 'brain')}<div><b>${A.safe(b.title)}<span class="kind kind--${eff ? 'eff' : 'mis'}">${A.esc(b.kindLabel || '')}</span></b><p>${A.safe(b.text)}</p><small>${A.esc(b.evidence || '')}</small></div></div>`; }
+      case 'callout': return `<div class="outside"><span class="lbl">${SEN.ic('circle-alert')}${A.esc(b.label || '')}</span><div class="prose"><p>${A.safe(b.html)}${chip(b.cite)}</p></div></div>`;
+      default: return '';
+    }
+  }
+
+  function render(L) {
+    LESSON = L;
+    if (L.conceptName) { document.title = `Bài học: ${L.conceptName} — Sen`; document.body.dataset.title = L.conceptName; leaf($('.tb h1'), L.conceptName); }
+    const pp = L.planPosition;
+    $('.ph .eyebrow').textContent = ['Bài học hôm nay', L.courseName, L.chapterLabel, pp && `mục ${pp.index}/${pp.total} tuần này`].filter(Boolean).join(' · ');
+    // dựng lại cả viên mức: phần tử .ring cũ còn tween --p của shell.js, gỡ khỏi DOM là hết bị ghi đè
+    if (L.mastery) $('#mpTop').innerHTML = `<span class="ring" id="ringTop" style="--p:${L.mastery.score}"></span><span id="scTop">${L.mastery.score}</span><small>/100</small><span class="lvl lvl-${L.mastery.level}" id="lvlTop">${A.esc(L.mastery.levelLabel)}</span>`;
+    if (L.grounding) leaf($('.lh-meta .tag--soft'), `Bám nguồn · ${L.grounding.citationCount} trích dẫn`);
+
+    const by = {}; (L.sections || []).forEach(s => { by[s.key] = s; });
+    Object.keys(ID).forEach(k => {
+      const sec = document.getElementById(ID[k]), s = by[k];
+      if (!sec) return;
+      if (!s) {
+        if (k === 'quiz' || k === 'rate') return;                       // hai phần này không đến từ sections
+        sec.hidden = true;                                              // phần vắng → ẩn + bỏ dòng mục lục
+        const a = $(`#toc a[href="#${ID[k]}"]`); if (a) a.closest('li').remove();
+        return;
+      }
+      leaf($('.sec-h h2', sec), s.title);
+      leaf($('.sec-h .tag--soft', sec), s.tag);
+      const bs = s.blocks || [];
+      if (k === 'goal') $('.goal .prose', sec).innerHTML = bs.map(block).join('');
+      else if (k === 'prereq' || k === 'explain') $('.prose', sec).innerHTML = bs.map(block).join('');
+      else if (k === 'example') $('.example', sec).innerHTML = bs.map(b => b.type === 'table' ? block(b) : `<div class="prose">${block(b)}</div>`).join('');
+      else if (k === 'mistakes') {
+        const card = $('.mistakes', sec);
+        $$('.mem', card).forEach(x => x.remove());
+        $('.prose', card).innerHTML = bs.filter(b => b.type !== 'memory').map(block).join('');
+        card.insertAdjacentHTML('beforeend', bs.filter(b => b.type === 'memory').map(block).join(''));
+      } else if (k === 'outside') { const h = bs.map(block).join(''); if (h) $('.outside', sec).outerHTML = h; }
+    });
+
+    if (Array.isArray(L.quiz) && L.quiz.length) {
+      QZ = L.quiz.map(q => ({ id: q.id, q: A.safe(q.questionHtml), o: (q.options || []).map(A.safe), a: q.answer, ok: A.safe(q.explanationOk), no: A.safe(q.explanationWrong), cite: q.cite }));
+      drawQz();
+      leaf($('#kiem-tra .sec-h h2'), `Kiểm tra ${QZ.length} câu`);
+    }
+    if (Array.isArray(L.sources) && L.sources.length) {
+      $('.srcs').innerHTML = L.sources.map(x => `<div class="s">${chip(x)}<span>${A.esc(x.title)}</span></div>`).join('');
+      if (L.sourceFooter) $('.srcs').nextElementSibling.textContent = L.sourceFooter;
+    }
+    if (L.nextItem) $('.next .small').innerHTML = `Tiếp theo: <b>${A.esc(L.nextItem.conceptName)}</b> · ${A.esc(L.nextItem.dateLabel || '')} · ${A.esc(L.nextItem.minutes)} phút`;
+    leaf($('.rh h2 .tag--soft'), $$('#toc a').length + ' phần');
+    resync(); onScroll();
+  }
+
+  /* ô nổi bật "sáng dần từ trắng" — chạy lại được cho bảng do API dựng (REVIEW-32 P2 #11) */
+  const glow = (r = document) => { if (rm || !window.ScrollTrigger) return;
+    $$('.tbl', r).forEach(t => { if (t._glow) return; t._glow = 1; const c = $$('td.dup', t);
+      if (c.length) gsap.from(c, { backgroundColor: '#ffffff', duration: .8, stagger: .2, ease: 'power2.out', scrollTrigger: { trigger: t, start: 'top 80%', once: true } }); }); };
+
+  /* ---- khối chờ khi sinh bài + lỗi bám nguồn (§3.10) ---- */
+  const W = $('#lessonWait'), lwStep = $('#lwStep'), lwBar = $('#lwBar'), lwTitle = $('#lwTitle'), lwRetry = $('#lwRetry');
+  let waited = 0;
+  const step = t => { lwStep.innerHTML = '<span class="spin" aria-hidden="true"></span>' + A.esc(t); };
+  /* REVIEW-32 P1 #8: chờ/lỗi mà giữ nguyên bối cảnh bài mẫu (viên mức 20/100, "Bám nguồn · 5 trích dẫn", nút "Làm kiểm tra"
+     trỏ vào section đang display:none, mục lục 8 phần, 4 nguồn CSDL) đọc thành "bài Phụ thuộc bắc cầu đang soạn/soạn hỏng". */
+  const wait = (on, t = 'Đang soạn bài học riêng cho bạn', h = 'Đang soạn bài…') => {
+    W.hidden = !on; lesson.hidden = on;
+    $$('.lh-meta, .ph-actions, .rail .rh').forEach(el => { el.hidden = on; });
+    if (on) { waited = performance.now(); lwRetry.hidden = true; lwTitle.textContent = t; document.title = h + ' — Sen'; leaf($('.tb h1'), h); } // render() ghi đè khi bài về
+    else if (!LESSON) { document.title = 'Bài học — Sen'; leaf($('.tb h1'), 'Bài học'); }   // rơi về bài mẫu (chưa đăng nhập / mất mạng): trả lại tiêu đề trung tính
+    if (!on && waited && !rm && window.gsap) {
+      // chờ lâu hơn hoạt ảnh vào (1,2 s) thì các .sec kẹt ở opacity 0 → ép về trạng thái cuối; chờ ngắn thì để chúng vào bình thường
+      if (performance.now() - waited > 1200) gsap.set('.sec', { opacity: 1, clearProps: 'transform' });
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    }
+  };
+  const waitErr = msg => { wait(true, 'Chưa giao được bài', 'Chưa giao được bài'); lwStep.textContent = msg; lwBar.style.setProperty('--p', 100); lwRetry.hidden = false; };
+  lwRetry.addEventListener('click', () => boot());
+
+  async function boot() {
+    const lessonId = A.param('lesson'), concept = A.param('concept');
+    let course = A.param('course'); try { course = course || sessionStorage.getItem('sen.courseId'); } catch (_) {}
+    const bare = !lessonId && !(course && concept);                     // mở trần (sidebar "Bài học hôm nay") → tới bài kế tiếp trong kế hoạch
+    wait(true, bare ? 'Đang mở bài kế tiếp…' : undefined, bare ? 'Đang mở bài…' : undefined); // hỏi API là che bài mẫu NGAY (REVIEW-32 P1 #7)
+    if (bare) {
+      step('Đang đọc kế hoạch tuần…');
+      try {
+        const { courses } = await A.api('/api/courses');
+        const c = (courses || []).find(x => x.next && x.next.action === 'lesson');
+        if (c) { location.replace(c.next.href); return; }
+      } catch (_) { /* chưa đăng nhập hoặc lỗi mạng → giữ bài mẫu tĩnh */ }
+      wait(false); glow(); return;
+    }
+    try {
+      let id = lessonId;
+      if (!id) {
+        const r = await A.api('/api/lessons', { method: 'POST', body: { courseId: course, conceptId: concept } });
+        id = r.lessonId;
+        if (r.jobId) { step('Đang tìm đoạn nguồn…'); id = (await A.poll(r.jobId, j => { step(j.step || 'Đang soạn…'); lwBar.style.setProperty('--p', j.progress || 0); })).lessonId || id; }
+      }
+      render(await A.api('/api/lessons/' + encodeURIComponent(id)));
+      wait(false);
+      // sau khi bài hiện lại mới quét: đo được vị trí thật nên mũi tên/bảng vẫn vẽ khi cuộn tới, và dọn ScrollTrigger trỏ vào node đã gỡ
+      glow(lesson); if (window.SEN_MOTION) SEN_MOTION.rescan(lesson);
+    } catch (e) { waitErr(e.message); }
+  }
+  boot();
 })();
 </script>
 </body>

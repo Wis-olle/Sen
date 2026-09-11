@@ -53,6 +53,9 @@
   .demo-chip .av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:800}
   .demo-chip .av.a{background:var(--blue)}.demo-chip .av.b{background:var(--green)}
   .demo-chip small{font-family:var(--num);font-weight:700;color:var(--muted)}
+  /* REVIEW-32 P2: nút khi chờ ("Đang đăng nhập…") vẫn đen nhánh + con trỏ bàn tay + hover đổi nền → không ai thấy nó đang bận */
+  .btn-dark[disabled]{background:var(--muted);box-shadow:none;pointer-events:none}
+  #loginErr{margin-top:12px;padding:10px 12px;border-radius:12px;background:#f6ddd3;color:#8a2f18;font-size:13.5px;line-height:1.45}
   .auth-foot{margin-top:22px;text-align:center;font-size:14px;color:var(--muted)}
   .auth-foot a{font-weight:600;color:var(--ink)}
   @media (max-width:900px){
@@ -124,6 +127,7 @@
       </div>
       <button class="btn btn-dark btn-block" type="submit">Đăng nhập
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></button>
+      <p id="loginErr" role="alert" hidden></p>
       <div class="divider">hoặc</div>
       <a class="btn btn-outline btn-block" href="#">Tiếp tục với tài khoản UTT</a>
     </form>
@@ -140,12 +144,29 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie_light.min.js"></script>
+<script src="api.js"></script>
 <script>
 (function () {
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const eye = $('.eye'), pw = $('#pw');
   eye.addEventListener('click', () => { const show = pw.type === 'password'; pw.type = show ? 'text' : 'password'; eye.setAttribute('aria-pressed', show); eye.setAttribute('aria-label', show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'); });
   $$('.demo-chip').forEach(b => b.addEventListener('click', () => { $('#email').value = b.dataset.email; pw.value = 'demo1234'; $('#email').focus(); }));
+  /* ---- POST /api/auth/login (hợp đồng §3.1): cookie phiên, lỗi hiện ngay dưới nút ---- */
+  const form = $('form'), sub = $('.btn-block[type=submit]'), err = $('#loginErr');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    err.hidden = true;
+    const label = sub.firstChild;
+    sub.disabled = true; label.textContent = 'Đang đăng nhập… ';
+    try {
+      const r = await SEN_API.api('/api/auth/login', { method: 'POST', body: { email: $('#email').value.trim(), password: pw.value, remember: $('.check input').checked } });
+      location.href = r.redirect || 'app-dashboard.html';
+    } catch (ex) {
+      err.textContent = ex.message; err.hidden = false;
+      sub.disabled = false; label.textContent = 'Đăng nhập';
+      (ex.code === 'INVALID_CREDENTIALS' ? pw : $('#email')).focus();
+    }
+  });
   const rm = matchMedia('(prefers-reduced-motion: reduce)').matches || /[?&]static/.test(location.search);
   if (rm) { document.documentElement.classList.add('is-static'); $$('img[data-static]').forEach(i => { i.src = i.dataset.static; }); }
   // nhân vật Lottie (vector) thay ảnh SVG tĩnh sau khi dựng xong khung đầu
