@@ -1,7 +1,7 @@
 # Render Blueprint — deploy demo Sen (Node + SQLite, phục vụ luôn ui-v2).
 # Cách dùng: render.com → New → Blueprint → chọn repo Wis-olle/Sen, nhánh này → Apply.
 # SQLite nằm trên đĩa tạm của dịch vụ: mỗi lần deploy lại là seed lại từ đầu (đúng ý cho demo).
-# DeepTutor (Python) không deploy kèm; phần sinh bài bằng AI sẽ báo "tạm nghỉ", bài seed vẫn đủ luồng demo.
+# Khóa Gemini nhập tay trong Render (Environment) — sync: false nên không nằm trong repo.
 services:
   - type: web
     name: sen-demo
@@ -16,9 +16,11 @@ services:
         value: 24.18.0
       - key: NODE_ENV
         value: production
+      - key: TZ # planner và lịch dùng giờ máy chủ
+        value: Asia/Ho_Chi_Minh
       - key: DATABASE_URL
         value: file:./dev.db
       - key: SEED_PASSWORD
         value: demo1234
-      - key: DEEPTUTOR_URL
-        value: http://127.0.0.1:8001
+      - key: GEMINI_API_KEY
+        sync: false

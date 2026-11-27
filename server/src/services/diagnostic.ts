@@ -4,7 +4,7 @@ import { CONFIG } from '../domain/config.ts';
 import { effectiveScore, initMastery, isWeak, masteryView, topoOrder, type Edge } from '../domain/mastery.ts';
 import { plan as makePlan, type FreeSlots } from '../domain/planner.ts';
 import { fail, fmtDM, isoDate, shortId } from '../http.ts';
-import { ensureDeepTutorReady } from '../ai/deeptutor.ts';
+import { generateDiagnosticItems } from '../ai/diagnostic.ts';
 import { startJob } from './jobs.ts';
 
 type StudentRow = { id: string; sessionMinutes: number; freeSlots: unknown };
@@ -39,11 +39,15 @@ export async function getDiagnostic(student: StudentRow, courseId: string, regen
   if (!d) {
     const created = await prisma.diagnostic.create({ data: { id: shortId('dg'), studentId: student.id, courseId, status: 'pending' } });
     const job = await startJob('diagnostic.generate', student.id, { diagnosticId: created.id }, async (step) => {
-      await step('Đang đọc bản đồ kiến thức', 15);
-      // ponytail: sinh đề bằng AI chưa nối (09-khao-sat-deeptutor-api.md Q4c: DeepTutor không có REST chẩn đoán trọn gói)
-      await ensureDeepTutorReady();
-      await prisma.diagnostic.update({ where: { id: created.id }, data: { status: 'failed' } });
-      throw fail(502, 'AI_UPSTREAM_ERROR', 'Sinh đề chẩn đoán bằng AI chưa nối; đề seed của tài khoản demo vẫn dùng được.');
+      await step('Đang soạn câu hỏi theo bản đồ kiến thức', 20);
+      try {
+        await generateDiagnosticItems(student.id, courseId, created.id);
+      } catch (e) {
+        await prisma.diagnostic.update({ where: { id: created.id }, data: { status: 'failed' } });
+        throw e;
+      }
+      await prisma.diagnostic.update({ where: { id: created.id }, data: { status: 'ready', jobId: null } });
+      return { diagnosticId: created.id };
     });
     await prisma.diagnostic.update({ where: { id: created.id }, data: { jobId: job.id } });
     return { status: 202 as const, body: { jobId: job.id, ...POLL } };

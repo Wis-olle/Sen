@@ -32,7 +32,20 @@ export const CONFIG = {
     horizonDays: 14, // khi chưa có ngày thi
     maxReviewsPerConcept: 1,
   },
+  ingest: {
+    maxPages: 80, // mỗi lần tải chỉ xử lý tối đa chừng này trang (giáo trình 591 trang → chọn khoảng trang)
+    maxBytes: 50e6,
+    chunkChars: 2000, // TXT/MD: khối cỡ một trang
+    minChunkChars: 200, // trang bìa, trang trắng, mục lục ngắn bị bỏ
+    mapSnippetChars: 600, // AI dựng bản đồ chỉ đọc đầu mỗi đoạn để prompt gọn
+    conceptsMin: 5,
+    conceptsMax: 14,
+  },
   ai: {
+    model: 'gemini-flash-latest', // bài học — viết dài, cần chất lượng (~60 s ở free tier); đổi bằng GEMINI_MODEL
+    fastModel: 'gemini-flash-lite-latest', // đề chẩn đoán, trợ giảng (~5 s); bản đồ dùng model chính vì lite xếp thứ tự kém; đổi bằng GEMINI_FAST_MODEL
+    price: { inPerM: 0.3, outPerM: 2.5 }, // USD / 1 triệu token, giá niêm yết Gemini Flash — chỉ để ước tính, free tier thực trả 0
+    maxChunksPerLesson: 8,
     dailyBudgetUsd: 5,
     groundingRetries: 1,
     lessonWordsPerMinuteMin: 10,

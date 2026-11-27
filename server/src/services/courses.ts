@@ -22,12 +22,12 @@ export async function listCourses(studentId: string, now = new Date()) {
 
   const rows = enrollments.map((e) => {
     const c = e.course;
-    const mats = materials.filter((m) => m.courseId === c.id);
+    const mats = materials.filter((m) => m.courseId === c.id && m.status !== 'failed'); // tài liệu hỏng không tính
     const conceptCount = c.concepts.length;
     const diagnosticDone = submitted.some((d) => d.courseId === c.id);
     const status = !mats.length ? 'empty'
       : !mats.some((m) => m.status === 'indexed' || m.status === 'mapped') ? 'processing'
-      : !conceptCount ? 'mapping'
+      : !conceptCount || !mats.some((m) => m.status === 'mapped') ? 'mapping'
       : diagnosticDone ? 'studying' : 'ready';
     const ms = masteries.filter((m) => m.concept.courseId === c.id);
     const masteryAvg = status === 'studying' && ms.length ? Math.round(ms.reduce((s, m) => s + effectiveScore(m, now), 0) / ms.length) : null;

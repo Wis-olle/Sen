@@ -104,3 +104,10 @@ test('sanitizeHtml: giữ <b>, <code>, <a href>; chặn script và href javascri
   assert.equal(sanitizeHtml('<a href="#">Ôn lại</a>'), '<a href="#">Ôn lại</a>');
   assert.equal(sanitizeHtml('<img src=x onerror=alert(1)>'), '&lt;img src=x onerror=alert(1)&gt;');
 });
+
+test('bóc mã đoạn bị chép vào câu chữ, giữ chữ thường', async () => {
+  const { stripCodeMentions } = await import('./grounding.ts');
+  assert.equal(stripCodeMentions('gạch dưới D4.', ['D4']), 'gạch dưới.');
+  assert.equal(stripCodeMentions('xem [D5], rồi tiếp', ['D5']), 'xem, rồi tiếp');
+  assert.equal(stripCodeMentions('D4 là mã thường ở đầu câu và D40 khác', ['D4']), 'D4 là mã thường ở đầu câu và D40 khác');
+});

@@ -6,7 +6,8 @@ import { prisma } from './db.ts';
 import { SESSION_COOKIE, createSession, destroySession, verifyPassword, type AuthEnv } from './auth.ts';
 import { HttpError, errorJson, initialOf, readJson } from './http.ts';
 import { api } from './routes/api.ts';
-import { deeptutorStatus } from './ai/deeptutor.ts';
+import { geminiConfigured, geminiModel } from './ai/gemini.ts';
+import { recoverInterruptedJobs } from './services/jobs.ts';
 
 export const app = new Hono<AuthEnv>();
 
@@ -18,7 +19,7 @@ app.onError((err, c) => {
 
 app.get('/api/health', async (c) => {
   await prisma.$queryRaw`select 1`;
-  return c.json({ ok: true, time: new Date().toISOString(), deeptutor: await deeptutorStatus() });
+  return c.json({ ok: true, time: new Date().toISOString(), ai: { provider: 'gemini', configured: geminiConfigured(), model: geminiModel(), fastModel: geminiModel(true) } });
 });
 
 // Hợp đồng §3.1: { student, redirect } + Set-Cookie
@@ -52,6 +53,12 @@ app.route('/api', api);
 
 app.notFound((c) => (c.req.path.startsWith('/api/') ? c.json({ error: { code: 'NOT_FOUND', message: 'Không có đường dẫn này' } }, 404) : c.text('Not found', 404)));
 
+// HTML/JS/CSS luôn hỏi lại máy chủ (304 nếu chưa đổi) — không thì trình duyệt giữ shell.js cũ sau mỗi lần deploy
+app.use('/*', async (c, next) => {
+  await next();
+  if (!c.req.path.startsWith('/api/') && !/\.(svg|png|jpe?g|webp|woff2?|json|lottie)$/i.test(c.req.path)) c.header('Cache-Control', 'no-cache');
+});
+
 // ui-v2 tĩnh: /app-dashboard → /app-dashboard.html như `npx serve`; đặt sau /api để không stat file thừa
 app.use('/*', serveStatic({
   root: '../ui-v2',
@@ -59,6 +66,8 @@ app.use('/*', serveStatic({
 }));
 
 if (import.meta.main) {
+  const n = await recoverInterruptedJobs();
+  if (n) console.log(`Đã đánh dấu ${n} việc nền dở dang là lỗi (máy chủ khởi động lại)`);
   const port = Number(process.env.PORT ?? 3000);
   serve({ fetch: app.fetch, port }, () => console.log(`Sen server: http://localhost:${port}`));
 }

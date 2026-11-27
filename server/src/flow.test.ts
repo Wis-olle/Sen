@@ -10,7 +10,7 @@ import { join } from 'node:path';
 const dbFile = join(tmpdir(), `sen-flow-${process.pid}.db`).replace(/\\/g, '/');
 process.env.DATABASE_URL = `file:${dbFile}`;
 process.env.SEED_PASSWORD = 'demo1234';
-process.env.DEEPTUTOR_URL = 'http://127.0.0.1:1'; // không có gì ở đây → nhánh "không nối được" phải trả lỗi sạch
+process.env.GEMINI_API_KEY = ''; // không gọi AI thật trong test → nhánh "chưa có khóa" phải trả lỗi sạch
 execSync('npx prisma db push', { env: process.env, stdio: 'ignore' });
 
 const { app } = await import('./index.ts');
@@ -46,7 +46,7 @@ test('luồng An: 4 bước đi thông, mọi số liệu đến từ CSDL và t
   assert.equal(courses.body.courses.length, 3);
   const [c1, c2, c3] = courses.body.courses;
   assert.deepEqual([c1.id, c1.status, c1.conceptCount, c1.next.action], ['c-lang', 'ready', 8, 'diagnostic']);
-  assert.deepEqual([c2.id, c2.status], ['c-math', 'mapping']);
+  assert.deepEqual([c2.id, c2.status], ['c-math', 'empty']);
   assert.deepEqual([c3.id, c3.status, c3.examDate], ['c-net', 'empty', null]);
 
   const dg = await call('/api/courses/c-lang/diagnostic', { cookie });
@@ -157,7 +157,7 @@ test('sinh bài mới khi chưa có AI → job kết thúc bằng lỗi sạch, 
   assert.equal(job.status, 'error');
   assert.equal(job.error.code, 'AI_UPSTREAM_ERROR');
   assert.doesNotMatch(job.error.message, /DeepTutor|localhost|Gemini/, 'câu cho sinh viên không mang hướng dẫn cấu hình');
-  assert.match(job.error.devHint, /DeepTutor/, 'hướng dẫn vận hành nằm ở devHint');
+  assert.match(job.error.devHint, /GEMINI_API_KEY/, 'hướng dẫn vận hành nằm ở devHint');
   const again = await call('/api/lessons', { cookie, body: { courseId: 'c-lang', conceptId: 'c8' } });
   assert.equal(again.status, 202, 'bài hỏng thì cho sinh lại');
   await waitJob(again.body.jobId); // chờ xong để không còn việc nền chạy sau khi xóa DB tạm
@@ -173,4 +173,100 @@ test('không đăng nhập → 401 UNAUTHENTICATED; admin không có hồ sơ �
   const me = await call('/api/me', { cookie });
   assert.equal(me.body.role, 'admin');
   assert.equal((await call('/api/courses', { cookie })).status, 403);
+});
+
+test('sinh bài: mã nguồn bịa → sinh lại kèm lỗi → đạt; lỗi từng mắc do hệ thống chèn', async () => {
+  const { generateLesson, normalizeDoc } = await import('./ai/lesson.ts');
+  const seen: Array<string[] | undefined> = [];
+  const words = Array(40).fill('chữ').join(' ');
+  const fake = {
+    name: 'fake',
+    async generateLesson(req: any, problems?: string[]) {
+      seen.push(problems);
+      const cite = problems ? req.codes?.[0] ?? req.chunks[0].code : 'D99';
+      const para = { type: 'para', html: words, cite };
+      const raw = {
+        chapterLabel: 'x', estimatedMinutes: 60,
+        sections: [{ key: 'goal', title: 'Mục tiêu', blocks: [{ type: 'list', items: ['a'] }] }, { key: 'prereq', title: 'Ôn', blocks: [para] },
+          { key: 'explain', title: 'Giải thích', blocks: Array(16).fill(para) }],
+        quiz: [{ question: 'q', options: ['a', 'b'], answer: 0, explanationOk: 'ok', explanationWrong: 'sai', cite, difficulty: 2 }],
+      };
+      return { doc: normalizeDoc(raw as any, req), model: 'fake', inputTokens: 1, outputTokens: 1, costUsd: 0 };
+    },
+  };
+  await prisma.memory.create({ data: { id: 'mem_fake', studentId: 'st_binh', conceptId: 'c3', kind: 'misconception', text: 'Nhầm = là so sánh' } });
+  await prisma.lesson.create({ data: { id: 'les_fake', studentId: 'st_binh', conceptId: 'c3', status: 'pending' } });
+  await generateLesson('les_fake', 'st_binh', async () => {}, fake);
+  assert.equal(seen.length, 2);
+  assert.match(seen[1]![0], /D99/, 'lần 2 nhận được lỗi của lần 1');
+  const les = await prisma.lesson.findUniqueOrThrow({ where: { id: 'les_fake' } });
+  assert.equal(les.status, 'ready');
+  const secs = (les.content as any).sections;
+  assert.ok(secs.find((s: any) => s.key === 'mistakes')?.blocks.some((b: any) => b.type === 'memory'), 'có misconception → khối memory');
+  assert.match(secs.find((s: any) => s.key === 'prereq').tag, /^bạn đang \{\{c\d\}\}\/100$/);
+});
+
+test('bản đồ, kế hoạch, trợ giảng, quản trị: số liệu đến từ CSDL', async () => {
+  const cookie = await login('binh@sv.utt.edu.vn');
+  const map = await call('/api/courses/c-lang/map', { cookie });
+  assert.equal(map.status, 200);
+  assert.equal(map.body.concepts.length, 8);
+  const c4 = map.body.concepts.find((c: any) => c.id === 'c4');
+  assert.deepEqual(c4.prereqs, ['c3']);
+  assert.ok(c4.assessed && c4.sources.some((s: any) => s.code === 'D4'));
+
+  const ren = await call('/api/concepts/c7', { cookie, method: 'PATCH', body: { name: 'Xâu ký tự' } });
+  assert.equal(ren.body.source, 'human');
+  assert.equal((await call('/api/concepts/c7', { cookie, method: 'PATCH', body: {} })).status, 400);
+
+  const plan = await call('/api/courses/c-lang/plan', { cookie });
+  assert.equal(plan.status, 200);
+  assert.ok(plan.body.version >= 1 && plan.body.reason);
+  assert.equal(plan.body.weeks.length, 2);
+  assert.ok(plan.body.items.every((i: any) => i.week >= 0 && i.week <= 1 && i.day >= 0 && i.day <= 6));
+  const future = new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10);
+  const ex = await call('/api/courses/c-lang/exam', { cookie, body: { examDate: future } });
+  assert.equal(ex.body.version, plan.body.version + 1);
+  const plan2 = await call('/api/courses/c-lang/plan', { cookie });
+  assert.match(plan2.body.reason, /^Ngày thi đổi sang/);
+  assert.equal(plan2.body.examDate, future);
+  assert.equal((await call('/api/courses/c-lang/exam', { cookie, body: { examDate: '2020-01-01' } })).status, 400);
+
+  const ctx = await call('/api/courses/c-lang/tutor', { cookie });
+  assert.equal(ctx.status, 200);
+  assert.ok(ctx.body.suggestions.length >= 2);
+  const mem = await prisma.memory.create({ data: { id: 'mem_t', studentId: 'st_binh', conceptId: 'c4', kind: 'misconception', text: 'x' } });
+  assert.equal((await call(`/api/memories/${mem.id}`, { cookie, method: 'PATCH', body: { active: false } })).body.active, false);
+  assert.equal((await call('/api/courses/c-lang/tutor', { cookie, body: { message: '' } })).status, 400);
+
+  assert.equal((await call('/api/concepts/c8', { cookie, method: 'DELETE' })).status, 200);
+  const map2 = await call('/api/courses/c-lang/map', { cookie });
+  assert.equal(map2.body.concepts.length, 7);
+
+  assert.equal((await call('/api/admin/costs', { cookie })).status, 403);
+  const admin = await login('admin@utt.edu.vn');
+  const costs = await call('/api/admin/costs?range=7d', { cookie: admin });
+  assert.equal(costs.status, 200);
+  assert.equal(costs.body.days.length, 7);
+  assert.ok(Array.isArray(costs.body.rows));
+});
+
+test('trợ giảng: tìm đoạn theo từ khóa câu hỏi', async () => {
+  const { rankChunks } = await import('./services/tutor.ts');
+  const chunks = [{ text: 'Câu lệnh for gồm ba thành phần', title: null }, { text: 'Con trỏ chứa địa chỉ', title: 'Con trỏ' }, { text: 'Mảng chỉ số từ 0', title: null }];
+  assert.equal(rankChunks('vòng for có mấy thành phần?', chunks)[0], chunks[0]);
+  assert.equal(rankChunks('con trỏ là gì', chunks)[0], chunks[1]);
+  assert.equal(rankChunks('là gì', chunks).length, 0);
+});
+
+test('chuẩn hoá bài AI: chữ đặt sai trường vẫn giữ, khối rỗng bị bỏ', async () => {
+  const { normalizeDoc } = await import('./ai/lesson.ts');
+  const req: any = { prereqs: [], memories: [] };
+  const doc = normalizeDoc({ sections: [{ key: 'explain', title: 'x', blocks: [
+    { type: 'para', items: ['chữ trong items'], cite: 'D1' }, { type: 'para', html: '', cite: 'D1' }, { type: 'table', headers: ['a'], rows: [] }, { type: 'list', html: 'một ý' },
+  ] }], quiz: [] } as any, req);
+  const b = doc.sections[0].blocks as any[];
+  assert.equal(b.length, 2);
+  assert.equal(b[0].html, 'chữ trong items');
+  assert.deepEqual(b[1].items, ['một ý']);
 });

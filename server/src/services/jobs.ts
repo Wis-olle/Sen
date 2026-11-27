@@ -21,6 +21,16 @@ export async function startJob(task: string, studentId: string | null, payload: 
   return job;
 }
 
+/** Việc nền sống trong tiến trình: khởi động lại là mất. Đánh dấu việc dở thành lỗi để UI cho "Thử lại" thay vì chờ mãi. */
+export async function recoverInterruptedJobs() {
+  const msg = 'Xử lý bị gián đoạn vì máy chủ khởi động lại, bấm Thử lại';
+  const jobs = await prisma.job.updateMany({ where: { status: { in: ['queued', 'running'] } }, data: { status: 'error', error: { code: 'INTERRUPTED', message: msg }, endedAt: new Date() } });
+  await prisma.material.updateMany({ where: { status: { in: ['uploaded', 'extracted', 'indexed'] } }, data: { status: 'failed', error: msg } });
+  await prisma.diagnostic.updateMany({ where: { status: 'pending' }, data: { status: 'failed' } });
+  await prisma.lesson.updateMany({ where: { status: 'pending' }, data: { status: 'failed', error: msg } });
+  return jobs.count;
+}
+
 export async function getJob(id: string, studentId: string | null) {
   const job = await prisma.job.findUnique({ where: { id } });
   if (!job || (job.studentId && job.studentId !== studentId)) return null;
