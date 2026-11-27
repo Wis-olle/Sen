@@ -1,6 +1,10 @@
 // Dữ liệu seed cho luồng demo (11-hop-dong-du-lieu-demo.md §5). Mọi id cố định để URL demo ổn định.
 // Trích dẫn trong bài học chỉ ghi MÃ đoạn (D4); API mở rộng thành {code, page, doc, snippet} từ bảng Chunk.
 import type { LessonDoc } from '../src/domain/grounding.ts';
+import { isoDate } from '../src/http.ts';
+
+// Ngày thi TƯƠNG ĐỐI theo lúc seed: ghi cứng thì hết hạn và kế hoạch ra 0 buổi
+const inDays = (n: number) => isoDate(new Date(Date.now() + n * 86_400_000));
 
 export const PASSWORD_DEFAULT = 'demo1234';
 
@@ -26,8 +30,8 @@ export const STUDENTS = [
 export const ADMIN = { id: 'us_admin', email: 'admin@utt.edu.vn' };
 
 export const COURSES = [
-  { id: 'c-lang', code: 'IT2101', name: 'Lập trình C', lecturer: 'ThS. Trần Văn Dũng', term: '20261', examDate: '2026-09-20', examRoom: 'A3-205' },
-  { id: 'c-math', code: 'MA1102', name: 'Toán rời rạc', lecturer: 'TS. Phạm Thị Lan', term: '20261', examDate: '2026-09-25', examRoom: 'B1-102' },
+  { id: 'c-lang', code: 'IT2101', name: 'Lập trình C', lecturer: 'ThS. Trần Văn Dũng', term: '20261', examDate: inDays(10), examRoom: 'A3-205' },
+  { id: 'c-math', code: 'MA1102', name: 'Toán rời rạc', lecturer: 'TS. Phạm Thị Lan', term: '20261', examDate: inDays(15), examRoom: 'B1-102' },
   { id: 'c-net', code: 'IT2205', name: 'Mạng máy tính', lecturer: 'TS. Lê Minh Hòa', term: '20261', examDate: null, examRoom: null },
 ];
 // An học 3 môn, Bình chỉ Lập trình C
@@ -37,7 +41,6 @@ export const MATERIAL_TITLE = 'Giáo trình Ngôn ngữ lập trình C';
 export const MATERIALS = [
   { id: 'm_clang', studentId: 'st_an', courseId: 'c-lang', title: MATERIAL_TITLE, kind: 'pdf', path: 'data/utt_1630_giao_trinh_C.pdf', status: 'mapped' },
   { id: 'm_clang_b', studentId: 'st_binh', courseId: 'c-lang', title: MATERIAL_TITLE, kind: 'pdf', path: 'data/utt_1630_giao_trinh_C.pdf', status: 'mapped' },
-  { id: 'm_math', studentId: 'st_an', courseId: 'c-math', title: 'Bài giảng Toán rời rạc — Chương 1–3', kind: 'pdf', path: 'data/toan-roi-rac.pdf', status: 'indexed' },
 ];
 
 export const CONCEPTS = [

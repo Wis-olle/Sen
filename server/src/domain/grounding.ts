@@ -81,6 +81,13 @@ export function sanitizeHtml(input: string): string {
   return escapeHtml(marked).replace(TOKEN, (_, i) => keep[Number(i)]);
 }
 
+/** Model hay chép mã đoạn vào câu chữ ("…gạch dưới D4.", "[D4]") dù đã có chip trích dẫn riêng → bóc đi. */
+export function stripCodeMentions(html: string, codes: Iterable<string>): string {
+  let out = html;
+  for (const code of codes) out = out.replace(new RegExp(`\\s*[\\[(]?\\b${code}\\b[\\])]?(?=\\s*[.,;:]|\\s*$)`, 'g'), '');
+  return out;
+}
+
 export function sanitizeDoc(doc: LessonDoc): LessonDoc {
   const s = sanitizeHtml;
   return {

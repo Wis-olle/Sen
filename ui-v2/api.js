@@ -1,4 +1,4 @@
-/* Sen — api.js: lớp gọi /api dùng chung cho 4 màn của luồng demo (hợp đồng 11-hop-dong-du-lieu-demo.md §3).
+/* Sen — api.js: lớp gọi /api dùng chung cho mọi màn app.
    Phiên = cookie HttpOnly cùng origin (cách A) → credentials:'same-origin', không lưu token.
    Lỗi = {error:{code,message}}, message tiếng Việt hiện thẳng. 401 → về login.html.
    Nạp TRƯỚC shell.js và script riêng của trang. */
@@ -9,13 +9,15 @@
     constructor(code, message, status, body) { super(message); this.name = 'ApiError'; this.code = code; this.status = status; this.body = body; }
   }
 
+  /* body: đối tượng → JSON; FormData (tải tệp) → gửi nguyên, trình duyệt tự đặt boundary */
   async function api(path, { method = 'GET', body } = {}) {
+    const form = typeof FormData !== 'undefined' && body instanceof FormData;
     let res;
     try {
       res = await fetch(path, {
         method, credentials: 'same-origin',
-        headers: body ? { 'Content-Type': 'application/json' } : undefined,
-        body: body ? JSON.stringify(body) : undefined,
+        headers: body && !form ? { 'Content-Type': 'application/json' } : undefined,
+        body: form ? body : body ? JSON.stringify(body) : undefined,
       });
     } catch (_) {
       throw new ApiError('NETWORK_ERROR', 'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.', 0, null);
@@ -30,7 +32,8 @@
     throw new ApiError(code, message, res.status, data);
   }
 
-  /* Vòng poll việc nền: 2 000 ms, nghỉ khi tab ẩn (gọi lại ngay khi hiện), trần 60 lần, dọn khi rời trang.
+  /* Vòng poll việc nền: 2 000 ms, nghỉ khi tab ẩn (gọi lại ngay khi hiện), trần 240 lần (8 phút: free tier Gemini soạn bài ~1–3 phút,
+     dựng bản đồ ~3–5 phút), dọn khi rời trang.
      ponytail: poll 2 s, đổi sang SSE nếu >20 người chờ đồng thời */
   function poll(jobId, onStep) {
     return new Promise((resolve, reject) => {
@@ -39,7 +42,7 @@
       const fail = err => { stop(); reject(err); };
       const tick = async () => {
         if (document.hidden) return;
-        if (++n > 60) return fail(new ApiError('TIMEOUT', 'Chờ quá lâu chưa có bài. Bấm “Thử lại”.', 0, null));
+        if (++n > 240) return fail(new ApiError('TIMEOUT', 'Chờ quá lâu chưa xong. Bấm “Thử lại”.', 0, null));
         let j;
         try { j = await api('/api/jobs/' + encodeURIComponent(jobId)); } catch (err) { return fail(err); }
         if (onStep) onStep(j);
@@ -73,7 +76,10 @@
     return t.innerHTML;
   }
 
-  window.SEN_API = { api, poll, param, safe, esc, ApiError };
+  /* Môn đang xem: ?course= trên URL, không có thì môn đang học (GET /api/me activeCourseId). Gọi sau khi shell.js đã nạp. */
+  const course = async () => param('course') || ((await (window.SEN && SEN.me)) || {}).activeCourseId || null;
+
+  window.SEN_API = { api, poll, param, safe, esc, ApiError, course };
 
   /* Tự kiểm (mở console): SEN_API.check() — im lặng nếu bộ lọc HTML còn đúng */
   window.SEN_API.check = () => {
