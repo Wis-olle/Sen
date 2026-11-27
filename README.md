@@ -57,9 +57,9 @@ npx --yes serve ui-v2 -l 5174
 
 Rồi mở http://localhost:5174. Không có Node thì dùng Python: `python -m http.server 5174 --directory ui-v2`.
 
-Trang vào: `/` landing → `/login.html` → `/app-dashboard.html` (xem luồng demo bên dưới). Tham số URL: `?static` tắt mọi animation để soi bố cục, `?lab` mở bảng thử chuyển động ở màn app, `?done` mở thẳng kết quả chẩn đoán (với `serve` có thể bỏ đuôi `.html`, ví dụ `/app-dashboard?static`). Trang lab: `/_lab-paw.html` (tay mèo vỗ nút), `/_lab-accent.html` (màu khối nhấn), `/_gallery-assets.html` (toàn bộ minh họa).
+Trang vào: `/` landing → `/login.html` → `/app-dashboard.html` (xem luồng demo bên dưới). Tham số URL: `?static` tắt mọi animation để soi bố cục, `?lab` mở bảng thử chuyển động ở màn app, `?done` mở thẳng kết quả chẩn đoán (với `serve` có thể bỏ đuôi `.html`, ví dụ `/app-dashboard?static`).
 
-Lớp chuyển động bổ sung (`ui-v2/motion.js`, theo `ui-v2/RESEARCH-motion.md`): 24 họ có khóa (nét vẽ tay tự vẽ, blob thở, doodle đung đưa, nút nhấn lún, số đếm lên, cạnh bản đồ chảy, tick đúng/rung sai, nổ doodle khi hoàn thành, chuyển trang mềm bằng View Transitions, viên than trượt trước khi đổi trang…). Thêm `?lab` vào URL bất kỳ màn app (ví dụ `/app-dashboard?lab`) để mở **bảng thử** bật/tắt từng họ; lựa chọn lưu trong trình duyệt (`localStorage` `sen.motion2`), nút "Mặc định" bật lại toàn bộ 24 họ (mặc định của web là bật hết). Lớp "minh hoạ sống" (`ui-v2/motion-assets.js`, theo `ui-v2/RESEARCH-asset-motion.md`): các minh hoạ SVG được nội tuyến để nét tự vẽ khi hiện, nhân vật doodle lắp ráp theo lớp, thở/gật thưa, nảy khi rê chuột và phản hồi theo sự kiện (xong bài, nộp bài, tải lên xong). Nhóm G trong bảng thử. `?static` tắt toàn bộ; `prefers-reduced-motion` của hệ điều hành cũng tắt, trừ khi bấm "Vẫn bật chuyển động" trong bảng thử. Landing: tay mèo thò ra vỗ nút "Bắt đầu miễn phí" khi rê chuột (`ui-v2/paw.js`, tham khảo nút Get started của rive.app; đặt hướng bằng `data-paw="left|right|top"`, xem ba hướng ở `ui-v2/_lab-paw.html`).
+Lớp chuyển động bổ sung (`ui-v2/motion.js`): 24 họ có khóa (nét vẽ tay tự vẽ, blob thở, doodle đung đưa, nút nhấn lún, số đếm lên, cạnh bản đồ chảy, tick đúng/rung sai, nổ doodle khi hoàn thành, chuyển trang mềm bằng View Transitions, viên than trượt trước khi đổi trang…). Thêm `?lab` vào URL bất kỳ màn app (ví dụ `/app-dashboard?lab`) để mở **bảng thử** bật/tắt từng họ; lựa chọn lưu trong trình duyệt (`localStorage` `sen.motion2`), nút "Mặc định" bật lại toàn bộ 24 họ (mặc định của web là bật hết). Lớp "minh hoạ sống" (`ui-v2/motion-assets.js`): các minh hoạ SVG được nội tuyến để nét tự vẽ khi hiện, nhân vật doodle lắp ráp theo lớp, thở/gật thưa, nảy khi rê chuột và phản hồi theo sự kiện (xong bài, nộp bài, tải lên xong). Nhóm G trong bảng thử. `?static` tắt toàn bộ; `prefers-reduced-motion` của hệ điều hành cũng tắt, trừ khi bấm "Vẫn bật chuyển động" trong bảng thử. Landing: tay mèo thò ra vỗ nút "Bắt đầu miễn phí" khi rê chuột (`ui-v2/paw.js`, tham khảo nút Get started của rive.app; đặt hướng bằng `data-paw="left|right|top"`).
 
 ## Luồng demo (có backend, dữ liệu thật)
 
@@ -79,12 +79,11 @@ Bình (`binh@…`) đã làm chẩn đoán từ "hôm qua": cùng bài "Vòng l�
 
 Chưa làm (để ngỏ): Thêm/Nối/Gộp nút trên bản đồ, nhập từ thư viện số (cần extension), thời khóa biểu "Lên lớp" (cần đọc cổng đào tạo), màn Luyện tập/Tiến độ/Quản trị người dùng.
 
-Khung app ("khung B", chọn ngày 09/09): sidebar hổ phách hẹp 232 px (6 mục chính + nhóm "Khác" + thẻ gợi ý có minh họa đổi theo trang) · panel trắng bo 28 px có thanh tiêu đề cùng hàng ô tìm kiếm · rail phải 300 px (hồ sơ, lịch, mục lục, ngữ cảnh…); màn quản trị không có rail. Mỗi màn đúng 1 khối nhấn (than hoặc hổ phách) và ≥3 hình thức trình bày (thẻ tint, bảng trần, dải số, sơ đồ, minh họa) theo `ui-v2/RESEARCH-bot-don-dieu.md`. Minh họa dùng 3 họ asset miễn ghi công (Open Doodles, Iconoodle spot blob, doodle icons) — xem `ui-v2/ASSETS.md` và trang xem trước `ui-v2/_gallery-assets.html`.
+Khung app ("khung B", chọn ngày 09/09): sidebar hổ phách hẹp 232 px (6 mục chính + nhóm "Khác" + thẻ gợi ý có minh họa đổi theo trang) · panel trắng bo 28 px có thanh tiêu đề cùng hàng ô tìm kiếm · rail phải 300 px (hồ sơ, lịch, mục lục, ngữ cảnh…); màn quản trị không có rail. Mỗi màn đúng 1 khối nhấn (than hoặc hổ phách) và ≥3 hình thức trình bày (thẻ tint, bảng trần, dải số, sơ đồ, minh họa). Minh họa dùng các họ asset miễn ghi công (Open Doodles, Iconoodle spot blob, doodle icons); `ui-v2/assets/` chỉ giữ những tệp các trang đang dùng.
 
 ## Cấu trúc
 
 | Thư mục / file | Nội dung |
 |---|---|
 | `ui-v2/` | Landing, đăng nhập và 8 màn app theo luồng demo (`app-*.html`, `admin-costs.html`; khung chung `app.css` + `shell.js` + `icons.js`); tài liệu thiết kế và biên bản review để ngoài repo |
-| `ui/` | Bản giao diện cũ (đơn sắc), giữ để tham khảo |
 | `server/` | Backend: `src/routes` (API), `src/services` (nghiệp vụ), `src/domain` (3 thuật toán thuần + cấu hình), `src/ai` (Gemini: bài học, bản đồ, đề chẩn đoán), `prisma/` (schema 20 bảng + seed) |
