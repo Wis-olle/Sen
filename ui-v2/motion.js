@@ -185,7 +185,7 @@
   if (on('e4')) { const me = $('.me'), menu = $('.menu'); if (me && menu) me.addEventListener('click', () => { if (menu.classList.contains('open')) G.fromTo(menu, { scale: .94, opacity: 0, y: -4 }, { scale: 1, opacity: 1, y: 0, duration: .2, ease: 'power2.out', transformOrigin: '100% 0', clearProps: 'transform' }); }); }
 
   /* ---------- E5: chớp sáng mục đích sau khi cuộn ---------- */
-  if (on('e5')) document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a) return; const t = $(a.getAttribute('href')); if (!t) return;
+  if (on('e5')) document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a || a.getAttribute('href').length < 2) return; const t = $(a.getAttribute('href')); if (!t) return; // href="#" (link chờ) → querySelector('#') ném lỗi
     const h = $('.sec-h', t) || t; setTimeout(() => G.fromTo(h, { backgroundColor: 'rgba(248,195,101,.45)' }, { backgroundColor: 'rgba(248,195,101,0)', duration: .9, ease: 'power2.out', clearProps: 'backgroundColor' }), 500); });
 
   /* ---------- F3: số mục bài học pop khi cuộn tới ----------

@@ -16,19 +16,32 @@ Cần Node.js ≥ 24 (chạy thẳng `.ts`, không cần build). Backend Node (H
 ```bash
 cd server
 npm install
-cp .env.example .env
+cp .env.example .env      # rồi dán khóa Gemini vào GEMINI_API_KEY (tạo ở aistudio.google.com)
 npx prisma db push
 npm run db:seed
 npm run dev
 ```
 
-Mở http://localhost:3000 → đăng nhập bằng chip demo (mật khẩu `demo1234`): `an@sv.utt.edu.vn` (chưa làm chẩn đoán, luồng sống), `binh@sv.utt.edu.vn` (đã làm, hồ sơ đối lập), `admin@utt.edu.vn`. Luồng demo đầu: đăng nhập → chọn môn Lập trình C → 10 câu chẩn đoán → bài học "Vòng lặp" (8 phần, chip trích dẫn, 3 câu kiểm tra, kế hoạch tính lại). Hợp đồng API và dữ liệu seed: `11-hop-dong-du-lieu-demo.md`; ba thuật toán thuần ở `server/src/domain/` (mastery, planner, grounding). Kiểm thử: `npm test` (15 test, DB tạm, dưới 5 giây). Seed dùng mốc ngày tương đối, và An phải ở trạng thái "chưa làm chẩn đoán", nên ngay trước buổi demo chạy `npm run db:reset` (xóa `dev.db`, tạo lại, seed) khi server đang tắt.
+Mở http://localhost:3000 → đăng nhập bằng chip demo (mật khẩu `demo1234`): `an@sv.utt.edu.vn` (chưa làm chẩn đoán, luồng sống), `binh@sv.utt.edu.vn` (đã làm, hồ sơ đối lập), `admin@utt.edu.vn`. Ba thuật toán thuần ở `server/src/domain/` (mastery, planner, grounding). Kiểm thử: `npm test` (DB tạm, không gọi AI). Seed dùng mốc ngày tương đối (ngày thi = hôm seed + 10/15 ngày), và An phải ở trạng thái "chưa làm chẩn đoán", nên ngay trước buổi demo chạy `npm run db:reset` khi server đang tắt.
 
-**Sinh bài học bằng AI** đi qua DeepTutor (fork Python, cổng 8001; khảo sát ở `09-khao-sat-deeptutor-api.md`). Cài một lần: `git clone https://github.com/Wis-olle/DeepTutor.git "E:\AI Agents\DeepTutor"`, trong đó `uv venv --python 3.14 && uv pip install -e .`; chạy bằng `server\scripts\deeptutor.cmd` (hoặc cấu hình `deeptutor` trong `.claude/launch.json`), rồi mở http://localhost:8001 › Settings › Models để thêm khóa Gemini. Khi chưa có khóa, API vẫn trả lỗi sạch `AI_UPSTREAM_ERROR` và hai bài seed dùng được. `GET /api/health` báo trạng thái DeepTutor.
+**AI (Gemini, gọi thẳng qua REST, khóa ở `server/.env`):**
+
+| Việc | Model mặc định | Thời gian ở free tier |
+|---|---|---|
+| Soạn bài học cá nhân hóa (8 phần, trích dẫn, 3 câu kiểm tra; qua cổng bám nguồn, sinh lại 1 lần kèm lỗi) | `gemini-flash-latest` (`GEMINI_MODEL`) | 1–3 phút |
+| Dựng bản đồ khái niệm từ tài liệu tải lên | `gemini-flash-latest` | 2–4 phút |
+| Sinh đề chẩn đoán cho môn mới | `gemini-flash-lite-latest` (`GEMINI_FAST_MODEL`) | ~5 giây |
+| Trợ giảng (trả lời có trích dẫn, dùng trí nhớ) | `gemini-flash-lite-latest` | 1–2 giây |
+
+Mỗi lời gọi ghi một dòng `AiCall` (token, chi phí ước tính theo giá niêm yết, lỗi) — xem ở `admin-costs.html`; hạn mức 5 USD/ngày chặn ở `CONFIG.ai.dailyBudgetUsd`. Chưa có khóa thì API trả lỗi sạch `AI_UPSTREAM_ERROR`, các bài seed vẫn học được. `GET /api/health` báo model đang dùng.
+
+**Tài liệu tải lên** (`app-library.html`): PDF có chữ / TXT / MD, tối đa 80 trang mỗi lần (giáo trình dài thì chọn khoảng trang). Máy chủ trích chữ bằng `pdfjs-dist` (sửa lỗi font ư→ƣ), mỗi trang một đoạn mã `D1…Dn`, rồi AI dựng khái niệm + tiên quyết; môn đã có bản đồ thì chỉ gắn đoạn mới. Tệp lưu ở `server/data/uploads/` (gitignore). Giáo trình Lập trình C bản mở: thư viện số UTT, handle 123456789/1630.
+
+**Lưu ý khi phát triển:** `npm run dev` chạy `node --watch` — sửa file trong `server/src` (và đôi khi cả việc đọc file trên Windows) làm máy chủ khởi động lại, việc AI đang chạy bị đánh dấu "gián đoạn" (UI có nút Thử lại). Khi demo dùng `npm start`.
 
 ## Deploy thử lên link thật (Render, miễn phí)
 
-Repo có sẵn `render.yaml`. Làm một lần: tạo tài khoản tại render.com bằng GitHub → **New → Blueprint** → chọn repo `Wis-olle/Sen` và nhánh cần deploy → **Apply**. Render tự cài, sinh Prisma client, tạo SQLite và seed (lệnh `npm run build` trong `server/`), rồi chạy `npm start`. Link dạng `https://sen-demo.onrender.com`. Gói free ngủ sau 15 phút không ai vào, lần mở đầu chờ khoảng 30–60 giây. Mỗi lần deploy lại là DB seed lại từ đầu, nên trước buổi demo bấm **Manual Deploy** để An về trạng thái chưa chẩn đoán. DeepTutor không deploy kèm: bấm vào khái niệm chưa có bài seed sẽ thấy thông báo hệ thống soạn bài tạm nghỉ.
+Repo có sẵn `render.yaml`. Làm một lần: tạo tài khoản tại render.com bằng GitHub → **New → Blueprint** → chọn repo `Wis-olle/Sen` và nhánh cần deploy → **Apply** → khi được hỏi, dán khóa vào biến `GEMINI_API_KEY` (không nằm trong repo). Render tự cài, sinh Prisma client, tạo SQLite và seed (lệnh `npm run build` trong `server/`), rồi chạy `npm start`. Link dạng `https://sen-demo.onrender.com`. Gói free ngủ sau 15 phút không ai vào (lần mở đầu chờ 30–60 giây) và đĩa là tạm: mỗi lần deploy hoặc ngủ dậy là DB seed lại từ đầu, tài liệu tải lên mất — đủ cho buổi demo, không dùng làm dữ liệu lâu dài.
 
 ## Chạy web tĩnh không backend (`ui-v2`)
 
@@ -48,19 +61,23 @@ Trang vào: `/` landing → `/login.html` → `/app-dashboard.html` (xem luồng
 
 Lớp chuyển động bổ sung (`ui-v2/motion.js`, theo `ui-v2/RESEARCH-motion.md`): 24 họ có khóa (nét vẽ tay tự vẽ, blob thở, doodle đung đưa, nút nhấn lún, số đếm lên, cạnh bản đồ chảy, tick đúng/rung sai, nổ doodle khi hoàn thành, chuyển trang mềm bằng View Transitions, viên than trượt trước khi đổi trang…). Thêm `?lab` vào URL bất kỳ màn app (ví dụ `/app-dashboard?lab`) để mở **bảng thử** bật/tắt từng họ; lựa chọn lưu trong trình duyệt (`localStorage` `sen.motion2`), nút "Mặc định" bật lại toàn bộ 24 họ (mặc định của web là bật hết). Lớp "minh hoạ sống" (`ui-v2/motion-assets.js`, theo `ui-v2/RESEARCH-asset-motion.md`): các minh hoạ SVG được nội tuyến để nét tự vẽ khi hiện, nhân vật doodle lắp ráp theo lớp, thở/gật thưa, nảy khi rê chuột và phản hồi theo sự kiện (xong bài, nộp bài, tải lên xong). Nhóm G trong bảng thử. `?static` tắt toàn bộ; `prefers-reduced-motion` của hệ điều hành cũng tắt, trừ khi bấm "Vẫn bật chuyển động" trong bảng thử. Landing: tay mèo thò ra vỗ nút "Bắt đầu miễn phí" khi rê chuột (`ui-v2/paw.js`, tham khảo nút Get started của rive.app; đặt hướng bằng `data-paw="left|right|top"`, xem ba hướng ở `ui-v2/_lab-paw.html`).
 
-## Luồng demo 5 phút (chỉ UI, dữ liệu mẫu An/Bình)
+## Luồng demo (có backend, dữ liệu thật)
 
 | Bước | Trang | Thao tác demo |
 |---|---|---|
-| 0 | `index.html` → `login.html` | Bấm tài khoản demo An → Đăng nhập |
-| 1 | `app-dashboard.html` | Trang chủ: việc hôm nay, sắp thi, khái niệm yếu |
-| 2 | `app-library.html` | Bấm **Tải lên** → thẻ mới chạy 4 bước → "Mở bản đồ" |
-| 3 | `app-map.html` | Bấm nút, bút chì đổi tên → "người sửa luôn thắng"; Xóa → hộp xác nhận |
-| 4 | `app-diagnostic.html` | "Điền nhanh theo hồ sơ An" → Nộp bài → lưới thành thạo (`?done` mở thẳng kết quả) |
-| 5 | `app-plan.html` | Lịch tuần; "Dùng mẫu" → Trích xuất → Xác nhận → kế hoạch v3 kèm lý do |
-| 6 | `app-lesson.html` | Bài học 8 phần; bấm chip `[D4] tr. 14`; trả lời 3 câu → mastery đổi |
-| 7 | `app-tutor.html` | Bấm câu gợi ý đầu → trả lời có trích dẫn + nhắc lỗi cũ |
-| 8 | `admin-costs.html` | Quản trị: chi phí, nhật ký AiCall, hai dòng bằng chứng cache |
+| 0 | `login.html` | Bấm tài khoản demo An → Đăng nhập |
+| 1 | `app-dashboard.html` | 3 môn của An, ngày thi, băng kế hoạch; sau chẩn đoán có bảng "Khái niệm còn yếu" và lịch tháng |
+| 2 | `app-diagnostic.html?course=c-lang` | "Điền nhanh theo hồ sơ An" → Nộp bài → lưới thành thạo 8 khái niệm, kế hoạch v1 |
+| 3 | `app-lesson.html` | "Học bài đầu tiên" → bài seed Câu lệnh điều kiện; khái niệm chưa có bài (vd Hàm) → AI soạn tại chỗ 1–3 phút; trả lời 3 câu → mastery và kế hoạch tính lại |
+| 4 | `app-plan.html` | Lịch 2 tuần theo khung giờ rảnh, lý do của planner, lịch sử phiên bản; đổi ngày thi → Tính lại |
+| 5 | `app-map.html` | Bản đồ tự xếp theo tiên quyết; bút chì đổi tên → "người sửa luôn thắng"; Xóa → tiên quyết được nối tắt |
+| 6 | `app-library.html` | Tải PDF (chọn môn + khoảng trang) → 4 bước chạy thật → "Mở bản đồ"; môn mới → làm chẩn đoán do AI soạn |
+| 7 | `app-tutor.html` | Hỏi bất kỳ → trả lời bám tài liệu, chip trích dẫn mở đoạn gốc, nhắc lỗi từng mắc |
+| 8 | `admin-costs.html` (admin) | Chi phí, token, nhật ký AiCall thật, lỗi 24 giờ, Xuất CSV |
+
+Bình (`binh@…`) đã làm chẩn đoán từ "hôm qua": cùng bài "Vòng lặp" nhưng dài 60 phút, không ôn tiên quyết, không có phần lỗi từng mắc — điểm khác biệt cá nhân hóa của đề tài.
+
+Chưa làm (để ngỏ): Thêm/Nối/Gộp nút trên bản đồ, nhập từ thư viện số (cần extension), thời khóa biểu "Lên lớp" (cần đọc cổng đào tạo), màn Luyện tập/Tiến độ/Quản trị người dùng.
 
 Khung app ("khung B", chọn ngày 09/09): sidebar hổ phách hẹp 232 px (6 mục chính + nhóm "Khác" + thẻ gợi ý có minh họa đổi theo trang) · panel trắng bo 28 px có thanh tiêu đề cùng hàng ô tìm kiếm · rail phải 300 px (hồ sơ, lịch, mục lục, ngữ cảnh…); màn quản trị không có rail. Mỗi màn đúng 1 khối nhấn (than hoặc hổ phách) và ≥3 hình thức trình bày (thẻ tint, bảng trần, dải số, sơ đồ, minh họa) theo `ui-v2/RESEARCH-bot-don-dieu.md`. Minh họa dùng 3 họ asset miễn ghi công (Open Doodles, Iconoodle spot blob, doodle icons) — xem `ui-v2/ASSETS.md` và trang xem trước `ui-v2/_gallery-assets.html`.
 
@@ -68,7 +85,6 @@ Khung app ("khung B", chọn ngày 09/09): sidebar hổ phách hẹp 232 px (6 m
 
 | Thư mục / file | Nội dung |
 |---|---|
-| `ui-v2/` | Landing, đăng nhập và 8 màn app theo luồng demo (`app-*.html`, `admin-costs.html`; khung chung `app.css` + `shell.js` + `icons.js`); `ASSETS.md` ghi nguồn và giấy phép asset; `DESIGN-app-shell.md` spec hình ảnh màn app; `RESEARCH-bot-don-dieu.md` chẩn đoán "đơn điệu" + 12 quy tắc bố cục; `REVIEW-*.md` là biên bản review từng phần (19–26 = bản khung B) |
+| `ui-v2/` | Landing, đăng nhập và 8 màn app theo luồng demo (`app-*.html`, `admin-costs.html`; khung chung `app.css` + `shell.js` + `icons.js`); tài liệu thiết kế và biên bản review để ngoài repo |
 | `ui/` | Bản giao diện cũ (đơn sắc), giữ để tham khảo |
-| `01`–`08-*.md` | Tài liệu phân tích: chức năng, kế hoạch demo, cấu trúc UI, khảo sát phong cách, công cụ chuyển động, asset động |
-| `Proposal_*.docx/.pdf` | Bản đề xuất đồ án |
+| `server/` | Backend: `src/routes` (API), `src/services` (nghiệp vụ), `src/domain` (3 thuật toán thuần + cấu hình), `src/ai` (Gemini: bài học, bản đồ, đề chẩn đoán), `prisma/` (schema 20 bảng + seed) |

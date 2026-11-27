@@ -61,7 +61,7 @@
 .tools button.danger:hover{color:var(--danger)}
 
 /* canvas PHẲNG, không lưới chấm (đặc trưng chính lấy từ shot) */
-.canvas{position:relative;margin:0 14px 14px;padding:16px 14px 20px;border-radius:20px;background:var(--map-canvas);overflow:hidden}
+.canvas{position:relative;margin:0 14px 14px;padding:16px 14px 20px;border-radius:20px;background:var(--map-canvas);overflow:hidden auto}
 .canvas svg:not(.inl){display:block;width:100%;height:auto;overflow:visible}
 .canvas-hint{position:absolute;left:16px;bottom:12px;font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.86);border-radius:999px;padding:5px 12px}
 .canvas-fig{position:absolute;left:18px;top:14px;width:74px;pointer-events:none;opacity:.9}
@@ -184,8 +184,8 @@
         <div class="mrow">
           <p class="sub">Mỗi nút là một khái niệm, tô theo mức thành thạo 0–100 — <b>người sửa luôn thắng</b>.</p>
           <div class="mact">
-            <button class="pick" type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-book-open"/></svg>Chương 4 · Chuẩn hóa<svg class="ic chev" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
-            <a class="btn btn-dark btn-sm" href="app-diagnostic.html">Làm bài chẩn đoán<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+            <button class="pick" type="button" data-soon><svg class="ic" aria-hidden="true"><use href="#i-book-open"/></svg><span id="pickLbl">Đang tải…</span><svg class="ic chev" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
+            <a class="btn btn-dark btn-sm" href="app-diagnostic.html" id="btnDiag">Làm bài chẩn đoán<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
           </div>
         </div>
         <div class="mrow">
@@ -207,7 +207,7 @@
 
       <article class="card graph-card" data-reveal>
         <div class="graph-bar">
-          <h2 class="gtitle">Chương 4 · Chuẩn hóa CSDL</h2>
+          <h2 class="gtitle">Đang tải bản đồ…</h2>
           <span class="sp"></span>
           <div class="tools" role="toolbar" aria-label="Sửa bản đồ">
             <button type="button" data-soon data-ic="plus">Thêm</button>
@@ -218,6 +218,7 @@
         </div>
         <div class="canvas" id="canvas">
           <svg id="graph" viewBox="0 0 850 440" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Đồ thị 8 khái niệm chương 4 với quan hệ tiên quyết"></svg>
+          <p class="empty" id="mapEmpty" hidden>Môn này chưa có bản đồ. <a href="app-library.html">Tải tài liệu</a> để hệ thống dựng các khái niệm.</p>
           <div class="canvas-hint">Bấm một nút để xem &amp; sửa · nét nối = cần học trước</div>
           <img class="canvas-fig spot" src="assets/spot/explore.svg" alt="" width="500" height="500" data-float />
         </div>
@@ -234,7 +235,7 @@
   <aside class="rail" aria-label="Khái niệm đang chọn" id="panel">
     <p class="eyebrow">Khái niệm đang chọn</p>
     <div class="sel-head">
-      <h2 id="selName">Dạng chuẩn 3 (3NF)</h2>
+      <h2 id="selName">…</h2>
       <button class="ibtn ibtn-sm" type="button" id="btnRename" aria-label="Đổi tên khái niệm" title="Đổi tên" data-ic="pencil"></button>
     </div>
     <div class="sel-meta">
@@ -265,30 +266,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
 <script src="icons.js"></script>
+<script src="api.js"></script>
 <script src="shell.js"></script>
 <script src="motion.js"></script>
 <script src="motion-assets.js"></script>
 <script>
-/* Đồ thị khái niệm — BẢN THỬ A. Dữ liệu giữ nguyên như app-map.html
-   (8 khái niệm chương 4, mức 0–100, tiên quyết, nguồn ai/human); chỉ thêm
-   q = [đúng, sai] và last = [số, đơn vị] để đổ vào lưới ô số liệu bên phải. */
+/* Bản đồ kiến thức: GET /api/courses/{id}/map → nút (mức 0–100, nguồn ai/human, đoạn nguồn) + cạnh tiên quyết.
+   Vị trí nút tự xếp theo tầng: tầng = độ dài chuỗi tiên quyết dài nhất. Đổi tên → PATCH, xóa → DELETE /api/concepts/{id}. */
 (function () {
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const rm = SEN.rm, NS = 'http://www.w3.org/2000/svg';
-  const C = {
-    k1: { n: 'Phụ thuộc hàm (FD)', a: 'Phụ thuộc hàm', x: 100, y: 210, m: 30, src: 'ai', q: [6, 2], last: [1, 'ngày'], d: 'X xác định Y (X→Y) khi hai bộ trùng nhau trên X thì trùng nhau trên Y. Đây là gốc của cả chương.', s: [['D1', 12]], h: 'Học hôm qua · đánh giá “dễ hiểu”' },
-    k2: { n: 'Khóa & khóa dự tuyển', a: 'Khóa dự tuyển', x: 318, y: 72, m: 40, src: 'human', q: [4, 3], last: [5, 'ngày'], d: 'Tập thuộc tính tối thiểu xác định mọi thuộc tính còn lại của quan hệ; có thể có nhiều khóa dự tuyển.', s: [['D2', 13]], h: 'Bạn đổi tên từ “Khóa chính” (08/09)' },
-    k3: { n: 'Phụ thuộc hàm đầy đủ', a: 'FD đầy đủ', x: 318, y: 210, m: 25, src: 'ai', q: [2, 4], last: [3, 'ngày'], d: 'Y phụ thuộc đầy đủ vào X khi Y không phụ thuộc vào bất kỳ tập con thực sự nào của X.', s: [['D3', 13]], h: 'Lịch học 10/09' },
-    k4: { n: 'Phụ thuộc bắc cầu', a: 'PT bắc cầu', x: 318, y: 348, m: 20, src: 'ai', q: [1, 5], last: [1, 'ngày'], d: 'Nếu X→Y và Y→Z với Y không phải khóa thì Z phụ thuộc bắc cầu vào X qua Y.', s: [['D4', 14]], h: 'Đang học · sai câu chẩn đoán' },
-    k5: { n: 'Dạng chuẩn 1 (1NF)', a: '1NF', x: 528, y: 72, m: 55, src: 'ai', q: [7, 3], last: [2, 'ngày'], d: 'Mọi thuộc tính đều nguyên tử; không có nhóm lặp hay thuộc tính đa trị.', s: [['D5', 15]], h: 'Sát ngưỡng 60' },
-    k6: { n: 'Dạng chuẩn 2 (2NF)', a: '2NF', x: 528, y: 210, m: 35, src: 'ai', q: [3, 4], last: [4, 'ngày'], d: 'Đạt 1NF và mọi thuộc tính không khóa phụ thuộc đầy đủ vào khóa chính.', s: [['D6', 16]], h: 'Lịch học 12/09' },
-    k7: { n: 'Dạng chuẩn 3 (3NF)', a: '3NF', x: 730, y: 282, m: 15, src: 'ai', q: [3, 5], last: [2, 'ngày'], d: 'Đạt 2NF và không có phụ thuộc bắc cầu của thuộc tính không khóa vào khóa chính.', s: [['D7', 17], ['D7', 18]], h: 'Sai 2 lần ở quiz 3NF · lịch học 14/09' },
-    k8: { n: 'Dạng chuẩn Boyce–Codd (BCNF)', a: 'BCNF', x: 730, y: 398, m: 10, src: 'ai', q: [0, 2], last: [0, 'lần'], d: 'Mọi phụ thuộc hàm không tầm thường X→Y đều có X là siêu khóa.', s: [['D8', 18]], h: 'Chưa học · lịch 18/09' },
-  };
-  let E = [['k1', 'k2'], ['k1', 'k3'], ['k1', 'k4'], ['k2', 'k5'], ['k3', 'k6'], ['k5', 'k6'], ['k4', 'k7'], ['k6', 'k7'], ['k7', 'k8']];
-  /* nhãn pill trên cạnh — chỉ 2 cái, đặt ở chỗ trống, mỗi cái nói một điều có thật */
-  const NOTE = { 'k1|k2': ['pencil', 'bạn đã sửa tên', ''], 'k4|k7': ['alert', 'hay nhầm với 3NF', 'warn'] };
-
+  const A = SEN_API;
+  let C = {}, E = [], course = null, map = null;
+  const NOTE = {}; /* nhãn pill trên cạnh: chưa có nguồn dữ liệu thật nên để trống */
   /* ---------- bộ icon động của màn bản đồ ----------
      Thân SVG lấy từ Material Line Icons (line-md) — Vjacheslav Trushkin, MIT,
      github.com/cyberalien/line-md. Đã BỎ thẻ <animate> SMIL (sprite <use> không
@@ -348,7 +338,7 @@
     const ay = A.y + H / 2, by = B.y - H / 2, my = (ay + by) / 2; return `M${A.x} ${ay} C${A.x} ${my}, ${B.x} ${my}, ${B.x} ${by - 5}`;
   };
 
-  let sel = 'k7', filt = 'all';
+  let sel = null, filt = 'all';
 
   function draw() {
     gE.innerHTML = ''; gL.innerHTML = ''; gN.innerHTML = '';
@@ -360,7 +350,7 @@
         + `<circle class="ico-bg" cx="32" cy="${H / 2}" r="15"/>`
         + `<g class="nico" transform="translate(24 ${H / 2 - 8}) scale(.66667)">${LM[ICO[L]]}</g>`
         + `<text class="lbl" x="56" y="${H / 2 - 3}">${short(c)}</text>`
-        + `<text class="sub" x="56" y="${H / 2 + 14}">mức ${c.m}/100 · ${LBL[L]}</text>`
+        + `<text class="sub" x="56" y="${H / 2 + 14}">${c.as === false ? 'chưa chẩn đoán' : `mức ${c.m}/100 · ${LBL[L]}`}</text>`
         + `<g class="human"><circle r="9"/><path d="M-3 3l5-5 1.3 1.3-5 5H-3z M1.2 -1.2l1.3 1.3"/></g></g>`;
       gN.appendChild(g);
       const tw = Math.max($('.lbl', g).getComputedTextLength(), $('.sub', g).getComputedTextLength());
@@ -416,6 +406,7 @@
     $$('.node', gN).forEach(g => g.classList.toggle('is-selected', g.dataset.id === id));
     $$('.eg', gE).forEach(g => g.classList.toggle('is-in', g.dataset.b === id));
     $('#selName').textContent = c.n; $('#selDesc').textContent = c.d;
+    $('#selLearn').href = `app-lesson.html?course=${encodeURIComponent(course)}&concept=${encodeURIComponent(id)}`;
     $('#selSrc').innerHTML = c.src === 'human' ? icoSvg('pencil') + 'Người sửa' : icoSvg('sparkles', 'ic spk') + 'AI sinh';
     $('#selSrc').className = 'src tag' + (c.src === 'human' ? ' tag--ink' : '');
     $('#selLvl').textContent = LBL[L]; $('#selLvl').className = 'lvl lvl-' + L;
@@ -482,6 +473,10 @@
     const done = save => {
       const v = inp.value.trim(); nameEl.textContent = save && v ? v : old;
       if (save && v && v !== old) {
+        const id = sel;
+        A.api('/api/concepts/' + encodeURIComponent(id), { method: 'PATCH', body: { name: v } }).catch(e => {
+          C[id].n = C[id].a = old; draw(); show(sel, false); SEN.toast(e.message, 'triangle-alert');
+        });
         C[sel].n = v; C[sel].a = v.length > 16 ? v.replace(/\s*\(.*\)$/, '').slice(0, 18) : v;
         C[sel].src = 'human'; C[sel].h = 'Bạn vừa đổi tên từ “' + old + '”';
         draw(); show(sel, false);
@@ -498,10 +493,12 @@
   dlg.addEventListener('close', () => {
     if (dlg.returnValue !== 'ok') return;
     const id = sel, g = $(`.node[data-id="${id}"]`, gN), es = $$('.eg', gE).filter(p => p.dataset.a === id || p.dataset.b === id);
-    const finish = () => { delete C[id]; E = E.filter(e => e[0] !== id && e[1] !== id); draw(); show(Object.keys(C)[0], true); SEN.toast('Đã xóa khái niệm (ghi source = human)', 'trash-2'); };
-    if (rm) return finish();
+    /* máy chủ nối tắt tiên quyết qua nút bị xóa → tải lại bản đồ thay vì tự lọc cạnh */
+    const finish = () => load().then(() => SEN.toast('Đã xóa khái niệm — chuỗi tiên quyết được nối tắt', 'trash-2'));
+    const req = A.api('/api/concepts/' + encodeURIComponent(id), { method: 'DELETE' }).catch(e => { SEN.toast(e.message, 'triangle-alert'); draw(); throw e; });
+    if (rm) return req.then(finish, () => {});
     gsap.to(es, { opacity: 0, duration: .28 });
-    gsap.to(g, { scale: .6, opacity: 0, transformOrigin: '50% 50%', duration: .36, ease: 'power2.in', onComplete: finish });
+    gsap.to(g, { scale: .6, opacity: 0, transformOrigin: '50% 50%', duration: .36, ease: 'power2.in', onComplete: () => req.then(finish, () => {}) });
   });
 
   /* nút có icon nội tuyến (thanh công cụ, đổi tên, xóa, CTA) — vẽ khi rê chuột, không chạy lúc tải */
@@ -512,8 +509,54 @@
   });
 
   /* ---------- khởi tạo (chờ font để đo bề rộng chữ chính xác) ---------- */
-  function boot() {
+  /* xếp tầng: cột = độ sâu tiên quyết, hàng chia đều trong cột; viewBox nới theo số cột/hàng */
+  function layout() {
+    const ids = Object.keys(C), depth = {};
+    const d = (id, seen = new Set()) => {
+      if (depth[id] !== undefined) return depth[id];
+      if (seen.has(id)) return 0;
+      seen.add(id);
+      return (depth[id] = Math.max(0, ...pre(id).filter(k => C[k]).map(k => d(k, seen) + 1)));
+    };
+    ids.forEach(id => d(id));
+    const cols = [];
+    ids.forEach(id => (cols[depth[id]] = cols[depth[id]] || []).push(id));
+    const GX = 230, GY = 96, PX = 110, PY = 60, rows = Math.max(1, ...cols.map(c => c.length));
+    const W = Math.max(850, PX * 2 + (cols.length - 1) * GX), Hh = Math.max(440, PY * 2 + (rows - 1) * GY);
+    const ox = (W - PX * 2 - (cols.length - 1) * GX) / 2;
+    cols.forEach((col, x) => col.forEach((id, i) => { C[id].x = PX + ox + x * GX; C[id].y = Hh / 2 + (i - (col.length - 1) / 2) * GY; }));
+    svg.setAttribute('viewBox', `0 0 ${W} ${Hh}`);
+    svg.style.minWidth = W > 850 ? Math.round(W * .8) + 'px' : ''; /* chuỗi dài: giữ chữ đọc được, khung cuộn ngang */
+  }
+  async function load() {
+    course = course || await A.course();
+    if (!course) { $('.gtitle').textContent = 'Chưa có môn học'; return; }
+    try { map = await A.api('/api/courses/' + encodeURIComponent(course) + '/map'); }
+    catch (e) { SEN.toast(e.message, 'triangle-alert'); return; }
+    C = {}; E = [];
+    map.concepts.forEach(k => {
+      C[k.id] = {
+        n: k.name, a: k.name.length > 26 ? k.name.slice(0, 25) + '…' : k.name, m: k.score, src: k.source,
+        q: [k.correct, k.wrong], last: k.lastReviewed ? [k.lastReviewed.value, k.lastReviewed.unit] : ['—', ''],
+        d: k.description, s: k.sources.map(x => [x.code, x.page]), h: k.note, as: k.assessed,
+      };
+      k.prereqs.forEach(p => E.push([p, k.id]));
+    });
+    $('.gtitle').textContent = `${map.courseName} · ${map.concepts.length} khái niệm`;
+    $('#pickLbl').textContent = map.courseName;
+    $('#graph').setAttribute('aria-label', `Đồ thị ${map.concepts.length} khái niệm môn ${map.courseName} với quan hệ tiên quyết`);
+    const dg = $('#btnDiag');
+    dg.href = 'app-diagnostic.html?course=' + encodeURIComponent(course);
+    dg.firstChild.textContent = map.diagnosticDone ? 'Xem kết quả chẩn đoán' : 'Làm bài chẩn đoán';
+    $('#mapEmpty').hidden = map.concepts.length > 0;
+    if (!map.concepts.length) { gE.innerHTML = gL.innerHTML = gN.innerHTML = ''; $('#ltbody').innerHTML = ''; return; }
+    layout();
+    if (!C[sel]) sel = map.concepts.slice().sort((a, b) => a.score - b.score)[0].id; // mở sẵn khái niệm yếu nhất
     draw(); show(sel, false);
+  }
+  async function boot() {
+    await load();
+    if (!sel) return;
     if (rm) return;
     const paths = $$('.eg .edge', gE);
     paths.forEach(p => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });

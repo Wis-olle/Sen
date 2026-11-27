@@ -25,14 +25,14 @@
   const NAV = {
     student: [
       { k: 'dashboard', l: 'Trang chủ', i: 'house', h: 'app-dashboard.html' },
-      { k: 'library', l: 'Kho học liệu', i: 'library-big', h: 'app-library.html', badge: 1 },
+      { k: 'library', l: 'Kho học liệu', i: 'library-big', h: 'app-library.html' },
       { k: 'map', l: 'Bản đồ kiến thức', i: 'waypoints', h: 'app-map.html' },
       { k: 'plan', l: 'Lộ trình', i: 'route', h: 'app-plan.html' },
       { k: 'lesson', l: 'Bài học hôm nay', i: 'book-open', h: 'app-lesson.html', dot: true },
       { k: 'tutor', l: 'Trợ giảng', i: 'message-circle', h: 'app-tutor.html' },
     ],
     studentMore: [
-      { k: 'practice', l: 'Luyện tập', i: 'puzzle', soon: true, badge: 5 },
+      { k: 'practice', l: 'Luyện tập', i: 'puzzle', soon: true },
       { k: 'progress', l: 'Tiến độ', i: 'chart-column', soon: true },
       { k: 'term', l: 'Học kỳ của tôi', i: 'calendar-sync', soon: true },
     ],
@@ -52,7 +52,7 @@
     // chữ trung tính, không gắn môn/tên mẫu: app-lesson.html mở trần sẽ tự tới bài kế tiếp trong kế hoạch (REVIEW-33)
     lesson: { img: 'assets/spot/learning.svg', t: 'Bài học hôm nay', p: 'Bài kế tiếp trong kế hoạch, soạn riêng theo hồ sơ của bạn.', a: 'Học ngay', h: 'app-lesson.html' },
     plan: { img: 'assets/spot/strategy.svg', t: 'Lộ trình tuần', p: 'Tự tính lại khi bạn trễ hoặc sai câu kiểm tra.', a: 'Xem lộ trình', h: 'app-plan.html' },
-    admin: { img: 'assets/spot/savings.svg', t: 'Hạn mức hôm nay', p: 'Đã dùng 1,84 / 5 USD · 37%.', a: 'Xem chi phí', h: 'admin-costs.html' },
+    admin: { img: 'assets/spot/savings.svg', t: 'Hạn mức hôm nay', p: 'Mọi lời gọi AI đều được ghi nhật ký và chặn theo hạn mức ngày.', a: 'Xem chi phí', h: 'admin-costs.html' },
   };
   const promoKey = body.dataset.promo || (role === 'admin' ? 'admin' : page === 'tutor' ? 'lesson' : page === 'lesson' ? 'plan' : 'tutor');
   const item = it => `<li><a href="${it.h || '#'}" class="${it.k === page ? 'is-active' : ''}"${it.soon ? ' data-soon' : ''}${it.k === page ? ' aria-current="page"' : ''} title="${it.l}">${ic(it.i)}<span class="lbl">${it.l}</span>${it.badge ? `<span class="badge">${it.badge}</span>` : it.dot ? '<span class="dot"></span>' : ''}</a></li>`;
@@ -120,7 +120,7 @@
     if (!pop) { pop = document.createElement('div'); pop.className = 'pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Đoạn nguồn');
       pop.innerHTML = `<div class="h">${ic('file-text')}<span class="src-name"></span> · <b class="pg"></b><button class="x" type="button" aria-label="Đóng">${ic('x')}</button></div><q></q><div class="f"><span class="muted">Mã đoạn <b class="num code"></b> · trích nguyên văn</span><a class="u-draw" href="#" data-soon>Mở tài liệu</a></div>`;
       body.appendChild(pop); pop.querySelector('.x').addEventListener('click', closePop); }
-    pop.querySelector('.src-name').textContent = c.dataset.doc || 'Giáo trình CSDL · Chương 4'; pop.querySelector('.pg').textContent = 'tr. ' + c.dataset.page; pop.querySelector('.code').textContent = c.dataset.src; pop.querySelector('q').textContent = c.dataset.q;
+    pop.querySelector('.src-name').textContent = c.dataset.doc || 'Tài liệu môn học'; pop.querySelector('.pg').textContent = 'tr. ' + c.dataset.page; pop.querySelector('.code').textContent = c.dataset.src; pop.querySelector('q').textContent = c.dataset.q;
     const r = c.getBoundingClientRect(), w = Math.min(320, innerWidth - 32); let left = r.left + scrollX - 12; if (left + w > scrollX + innerWidth - 16) left = scrollX + innerWidth - 16 - w;
     pop.style.left = left + 'px'; pop.style.top = (r.bottom + scrollY + 10) + 'px'; pop.style.transformOrigin = `${Math.max(16, r.left + scrollX - left + r.width / 2)}px 0`;
     pop.classList.add('show'); popFor = c;

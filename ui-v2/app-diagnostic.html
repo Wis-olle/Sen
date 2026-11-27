@@ -75,7 +75,7 @@
     <header class="tb" id="tb"></header>
     <div class="content">
       <div class="ph">
-        <div><p class="eyebrow">Chẩn đoán đầu vào · Cơ sở dữ liệu · Chương 4</p><p class="sub"><b>10</b> câu trải đều 8 khái niệm, khoảng <b>12</b> phút. Kết quả chỉ để khởi tạo mức thành thạo và lập kế hoạch — không tính điểm môn.</p></div>
+        <div><p class="eyebrow">Chẩn đoán đầu vào</p><p class="sub"><b>10</b> câu trải đều <span id="dgConcepts">8</span> khái niệm, khoảng <b>12</b> phút. Kết quả chỉ để khởi tạo mức thành thạo và lập kế hoạch — không tính điểm môn.</p></div>
         <div class="ph-actions"><span class="timer" aria-live="off"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg><span id="clock">12:00</span></span><button class="btn btn-ghost btn-sm" type="button" data-soon>Lưu &amp; thoát</button></div>
       </div>
 
@@ -229,12 +229,27 @@
 
   /* ---- GET /api/courses/{id}/diagnostic (hợp đồng §3.6): ?done giữ nguyên dữ liệu tĩnh ---- */
   const url = c => `/api/courses/${encodeURIComponent(c)}/diagnostic`;
+  /* Có môn (chế độ API): giấu câu mẫu trong HTML tới khi đề thật về; lỗi → báo lỗi + Thử lại, không rơi về câu mẫu */
+  const quizEls = [$('#band'), $('#quiz')];
+  function state(html) {
+    let st = $('#dgState');
+    if (!html) { if (st) st.remove(); quizEls.forEach(el => { if (el) el.style.display = ''; }); return; }
+    quizEls.forEach(el => { if (el) el.style.display = 'none'; });
+    if (!st) { st = document.createElement('article'); st.id = 'dgState'; st.className = 'card card--white'; st.setAttribute('role', 'status'); $('#quiz').after(st); }
+    st.innerHTML = html;
+  }
   async function load(c) {
     let d;
+    state('<p class="q-text" style="display:flex;align-items:center;gap:10px"><span class="spin" aria-hidden="true"></span>Đang chuẩn bị đề chẩn đoán…</p><p class="small muted">Môn mới tải tài liệu thì hệ thống soạn câu hỏi theo bản đồ kiến thức, thường dưới một phút.</p>');
     try {
       d = await SEN_API.api(url(c));
       if (d.jobId) { await SEN_API.poll(d.jobId); d = await SEN_API.api(url(c)); }   // 202: đang sinh đề
-    } catch (e) { return SEN.toast(e.message, 'triangle-alert'); }
+    } catch (e) {
+      state(`<p class="q-text">${SEN_API.esc(e.message)}</p><div class="q-nav"><span class="sp"></span><button class="btn btn-dark btn-sm" type="button" id="dgRetry">Thử lại</button></div>`);
+      $('#dgRetry').addEventListener('click', () => load(c));
+      return;
+    }
+    state(null);
     DG = d;
     if (Array.isArray(d.items) && d.items.length) {
       Q = d.items.map(it => ({ id: it.id, k: it.conceptName, t: SEN_API.safe(it.questionHtml), o: (it.options || []).map(SEN_API.safe) }));
@@ -246,6 +261,7 @@
     const b = $$('.ph .sub b');
     if (b[0] && d.itemCount) { b[0].textContent = d.itemCount; $('.big small').textContent = '/' + d.itemCount; }
     if (b[1] && d.timeLimitMin) b[1].textContent = d.timeLimitMin;
+    if (d.conceptCount) $('#dgConcepts').textContent = d.conceptCount;
     if (d.status === 'submitted' && d.result) showResult(d.result, true);
   }
   let course = SEN_API.param('course');

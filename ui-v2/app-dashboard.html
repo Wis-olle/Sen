@@ -38,42 +38,36 @@
     <div class="content">
 
       <div class="ph">
-        <div><p class="eyebrow">Thứ Tư, 09/09/2026 · Học kỳ 20261</p>
+        <div><p class="eyebrow" id="today"></p>
         </div>
         <div class="ph-actions"><a class="btn btn-dark btn-sm" href="app-lesson.html">Học bài tiếp theo<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a></div>
       </div>
 
-      <div class="alert" id="planBand" role="status" hidden><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><p><b>Kế hoạch vừa tính lại (v2):</b> dồn về Phụ thuộc hàm và 3NF vì cả hai đang dưới 35/100.</p><a class="link-arrow" href="app-plan.html">Xem lộ trình <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+      <div class="alert" id="planBand" role="status" hidden><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><p></p><a class="link-arrow" href="app-plan.html">Xem lộ trình <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
 
       <div class="sec-h"><h2 id="secCourses">Hôm nay của <span class="pill" data-mark="underline">An</span></h2><a class="link-arrow" href="app-plan.html">Cả tuần <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
       <div class="trio" id="courseGrid">
         <a class="tcard t-amber" href="app-lesson.html" data-reveal>
           <div class="art"><img class="spot" src="assets/spot/learning.svg" alt="" width="500" height="500" /></div>
-          <h3>Bài học · Phụ thuộc bắc cầu</h3><small>30 phút · tối 20:00 · soạn riêng cho bạn</small>
-          <div class="foot"><span class="pillmini"><span class="ring" style="--p:40"></span>Đang học 40%</span><span class="go"><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></div>
+          <h3>Đang tải môn học…</h3><small>&nbsp;</small>
+          <div class="foot"><span class="pillmini">&nbsp;</span><span class="go"><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></div>
         </a>
         <a class="tcard t-mint" href="app-lesson.html#kiem-tra" data-reveal>
           <div class="art"><img class="spot" src="assets/spot/timer.svg" alt="" width="500" height="500" /></div>
-          <h3>Ôn nhanh · Phụ thuộc hàm</h3><small>5 câu · 10 phút · vì hôm qua sai 1 câu</small>
+          <h3>&nbsp;</h3><small>&nbsp;</small>
           <div class="foot"><span class="go"><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></div>
         </a>
         <a class="tcard t-hot" href="app-plan.html" data-reveal>
-          <div class="art"><img src="assets/ico/alarm.svg" alt="" width="64" height="64" /><span class="big"><span data-count="11" data-mark="circle">11</span><small>ngày</small></span></div>
-          <h3>Sắp thi · Cơ sở dữ liệu</h3><small>Thứ Bảy 20/09 · A2-301 · sẵn sàng 29/100</small>
-          <div class="foot"><span class="pillmini">kế hoạch v2 · 7 mục</span><span class="go"><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></div>
+          <div class="art"><img src="assets/ico/alarm.svg" alt="" width="64" height="64" /><span class="big"></span></div>
+          <h3>&nbsp;</h3><small>&nbsp;</small>
+          <div class="foot"><span class="pillmini">&nbsp;</span><span class="go"><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></div>
         </a>
       </div>
 
-      <div class="sec-h" id="weakHead" hidden><h2>Khái niệm còn yếu</h2><span class="tag tag--soft">7/8 dưới 60</span><a class="link-arrow" href="app-map.html">Mở bản đồ <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+      <div class="sec-h" id="weakHead" hidden><h2>Khái niệm còn yếu</h2><span class="tag tag--soft" id="weakCount"></span><a class="link-arrow" href="app-map.html" id="weakMap">Mở bản đồ <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
       <table class="list" id="weakTbl" data-reveal hidden>
         <thead><tr><th>Khái niệm</th><th>Cần trước</th><th>Mức</th><th>Bậc</th><th>Lịch</th><th></th></tr></thead>
-        <tbody data-pop-row>
-          <tr class="r"><td><span class="nm"><span class="tile p"><img src="assets/ico/nodes.svg" alt="" /></span><span>Dạng chuẩn Boyce–Codd<small>BCNF · chưa học</small></span></span></td><td>3NF</td><td><div class="mbar m-1"><i style="--p:10"></i></div></td><td><span class="lvl lvl-1">Rất yếu</span></td><td class="n">18/09</td><td><a class="btn btn-ghost btn-xs" href="app-lesson.html">Học</a></td></tr>
-          <tr class="r"><td><span class="nm"><span class="tile p"><img src="assets/ico/network.svg" alt="" /></span><span>Dạng chuẩn 3<small>3NF · sai 2 lần</small></span></span></td><td>Bắc cầu, 2NF</td><td><div class="mbar m-1"><i style="--p:15"></i></div></td><td><span class="lvl lvl-1">Rất yếu</span></td><td class="n">14/09</td><td><a class="btn btn-ghost btn-xs" href="app-lesson.html">Học</a></td></tr>
-          <tr class="r"><td><span class="nm"><span class="tile a"><img src="assets/ico/arrow-wave.svg" alt="" /></span><span>Phụ thuộc bắc cầu<small>đang học 40%</small></span></span></td><td>Phụ thuộc hàm</td><td><div class="mbar m-2"><i style="--p:20"></i></div></td><td><span class="lvl lvl-2">Yếu</span></td><td class="n">Hôm nay</td><td><a class="btn btn-dark btn-xs" href="app-lesson.html">Học tiếp</a></td></tr>
-          <tr class="r"><td><span class="nm"><span class="tile s"><img src="assets/ico/check-box.svg" alt="" /></span><span>Phụ thuộc hàm đầy đủ<small>lịch 10/09</small></span></span></td><td>Phụ thuộc hàm</td><td><div class="mbar m-2"><i style="--p:25"></i></div></td><td><span class="lvl lvl-2">Yếu</span></td><td class="n">10/09</td><td><a class="btn btn-ghost btn-xs" href="app-lesson.html">Học</a></td></tr>
-          <tr class="r"><td><span class="nm"><span class="tile m"><img src="assets/ico/book.svg" alt="" /></span><span>Phụ thuộc hàm<small>học hôm qua · dễ hiểu</small></span></span></td><td>—</td><td><div class="mbar m-2"><i style="--p:30"></i></div></td><td><span class="lvl lvl-2">Yếu</span></td><td class="n">08/09</td><td><a class="btn btn-ghost btn-xs" href="app-lesson.html">Ôn</a></td></tr>
-        </tbody>
+        <tbody data-pop-row id="weakBody"></tbody>
       </table>
     </div>
   </main>
@@ -82,15 +76,8 @@
     <h2>Hồ sơ<button class="ibtn" type="button" aria-label="Sửa hồ sơ" data-soon><svg class="ic" aria-hidden="true"><use href="#i-pencil"/></svg></button></h2>
     <div class="prof" data-reveal><span class="av"><img src="assets/doodles/sitting-reading-blue.svg" alt="" width="800" height="600" /></span><small>CNTT · K64 · mục tiêu: qua môn</small></div>
     <div data-reveal>
-      <div class="cal-h">Tháng 9, 2026<span><button class="ibtn" type="button" aria-label="Tháng trước" data-soon><svg class="ic" aria-hidden="true"><use href="#i-chevron-left"/></svg></button><button class="ibtn" type="button" aria-label="Tháng sau" data-soon><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg></button></span></div>
-      <div class="cal" role="img" aria-label="Lịch tháng 9: hôm nay 9, các ngày có buổi học 8, 10, 12, 14, 16, 18, ngày thi 20">
-        <span class="h">T2</span><span class="h">T3</span><span class="h">T4</span><span class="h">T5</span><span class="h">T6</span><span class="h">T7</span><span class="h">CN</span>
-        <span class="o">31</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
-        <span>7</span><span class="p">8</span><span class="t">9</span><span class="p">10</span><span>11</span><span class="p">12</span><span>13</span>
-        <span class="p">14</span><span>15</span><span class="p">16</span><span>17</span><span class="p">18</span><span>19</span><span class="x">20</span>
-        <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span>
-        <span>28</span><span>29</span><span>30</span><span class="o">1</span><span class="o">2</span><span class="o">3</span><span class="o">4</span>
-      </div>
+      <div class="cal-h"><span id="calTitle"></span><span><button class="ibtn" type="button" aria-label="Tháng trước" data-soon><svg class="ic" aria-hidden="true"><use href="#i-chevron-left"/></svg></button><button class="ibtn" type="button" aria-label="Tháng sau" data-soon><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg></button></span></div>
+      <div class="cal" role="img" id="cal" aria-label="Lịch tháng"></div>
     </div>
   </aside>
 </div>
@@ -151,9 +138,58 @@
       if (p) p.innerHTML = `<b>${SEN_API.esc(planned.name)} · kế hoạch tuần v${planned.plan.version}:</b> ${SEN_API.esc(planned.plan.reason)} · ${planned.plan.doneCount}/${planned.plan.itemCount} buổi đã xong.`;
       show(band);
     }
-    // ponytail: bảng "Khái niệm còn yếu" vẫn là mẫu CSDL → giữ ẩn tới khi nối GET /api/courses/{id}/mastery, không hiện dữ liệu sai môn
+    // Khái niệm còn yếu + lịch tháng: môn đang học (đã chẩn đoán) → bản đồ (mức, tiên quyết) + kế hoạch (ngày học, ngày thi)
+    const focus = planned || courses.find(c => c.diagnosticDone);
+    if (focus) weak(focus);
+    else cal([], null);
     if (window.SEN_MOTION) SEN_MOTION.rescan(grid);   // minh hoạ .spot vừa thay phải được nội tuyến để còn tự vẽ + thở (P2 #10)
   }).catch(e => SEN.toast(e.message, 'triangle-alert'));
+
+  const now = new Date();
+  const WD = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  const p2 = n => String(n).padStart(2, '0');
+  const iso = d => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+  $('#today').textContent = `${WD[now.getDay()]}, ${p2(now.getDate())}/${p2(now.getMonth() + 1)}/${now.getFullYear()}`;
+  SEN.me.then(m => { if (m && m.term) $('#today').textContent += ' · Học kỳ ' + m.term; });
+
+  /* lịch tháng hiện tại: t = hôm nay, p = ngày có buổi học, x = ngày thi; ô mờ = tháng bên cạnh */
+  function cal(studyDates, examDate) {
+    const y = now.getFullYear(), mo = now.getMonth(), first = new Date(y, mo, 1), lead = (first.getDay() + 6) % 7;
+    const start = new Date(y, mo, 1 - lead), study = new Set(studyDates);
+    let cells = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(h => `<span class="h">${h}</span>`).join('');
+    const weeks = Math.ceil((lead + new Date(y, mo + 1, 0).getDate()) / 7);
+    for (let i = 0; i < weeks * 7; i++) {
+      const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i), k = iso(d);
+      const cls = d.getMonth() !== mo ? 'o' : k === examDate ? 'x' : k === iso(now) ? 't' : study.has(k) ? 'p' : '';
+      cells += `<span${cls ? ` class="${cls}"` : ''}>${d.getDate()}</span>`;
+    }
+    $('#cal').innerHTML = cells;
+    $('#calTitle').textContent = `Tháng ${mo + 1}, ${y}`;
+    const mine = [...study].filter(k => k.startsWith(`${y}-${p2(mo + 1)}`)).map(k => +k.slice(8));
+    $('#cal').setAttribute('aria-label', `Lịch tháng ${mo + 1}: hôm nay ${now.getDate()}${mine.length ? ', các ngày có buổi học ' + mine.join(', ') : ''}${examDate && examDate.startsWith(`${y}-${p2(mo + 1)}`) ? ', ngày thi ' + +examDate.slice(8) : ''}`);
+  }
+
+  const TILES = [['p', 'nodes.svg'], ['a', 'arrow-wave.svg'], ['s', 'check-box.svg'], ['m', 'book.svg'], ['p', 'network.svg']];
+  async function weak(course) {
+    let map, plan;
+    try { [map, plan] = await Promise.all([SEN_API.api(`/api/courses/${encodeURIComponent(course.id)}/map`), SEN_API.api(`/api/courses/${encodeURIComponent(course.id)}/plan`)]); }
+    catch (e) { return; }
+    cal(plan.items.filter(i => i.status !== 'done').map(i => i.date), plan.examDate);
+    const byId = Object.fromEntries(map.concepts.map(c => [c.id, c]));
+    const low = map.concepts.filter(c => c.score < 60).sort((a, b) => a.score - b.score).slice(0, 5);
+    if (!low.length) return;
+    const esc = SEN_API.esc;
+    $('#weakCount').textContent = `${map.concepts.filter(c => c.score < 60).length}/${map.concepts.length} dưới 60`;
+    $('#weakMap').href = 'app-map.html?course=' + encodeURIComponent(course.id);
+    $('#weakBody').innerHTML = low.map((c, i) => {
+      const [t, ico] = TILES[i % TILES.length];
+      const item = plan.items.find(x => x.conceptId === c.id && x.status !== 'done');
+      const pre = c.prereqs.map(id => byId[id] && byId[id].name).filter(Boolean).join(', ') || '—';
+      return `<tr class="r"><td><span class="nm"><span class="tile ${t}"><img src="assets/ico/${ico}" alt="" /></span><span>${esc(c.name)}<small>${esc(c.note)}</small></span></span></td><td>${esc(pre)}</td><td><div class="mbar m-${c.level}"><i style="--p:${c.score}"></i></div></td><td><span class="lvl lvl-${c.level}">${esc(c.levelLabel)}</span></td><td class="n">${item ? dmy(item.date) : '—'}</td><td><a class="btn btn-ghost btn-xs" href="app-lesson.html?course=${encodeURIComponent(course.id)}&concept=${encodeURIComponent(c.id)}">Học</a></td></tr>`;
+    }).join('');
+    show($('#weakHead')); show($('#weakTbl'));
+    if (window.SEN_MOTION) SEN_MOTION.rescan($('#weakTbl'));
+  }
 
   // chuyển màn mang theo id môn: URL là nguồn sự thật, sessionStorage chỉ đỡ khi URL thiếu (hợp đồng §4.1)
   grid.addEventListener('click', e => {

@@ -90,22 +90,22 @@
     <header class="tb" id="tb"></header>
     <div class="content">
       <div class="ph">
-        <div><p class="eyebrow">Kế hoạch tuần · phiên bản <span id="phVer">2</span> · thi CSDL còn 11 ngày</p><p class="sub">Tự tính lại khi bạn trễ, làm sai quiz hay đổi ngày thi.</p></div>
+        <div><p class="eyebrow">Kế hoạch tuần · phiên bản <span id="phVer">–</span><span id="phExam"></span></p><p class="sub">Tự tính lại khi bạn trễ, làm sai quiz hay đổi ngày thi.</p></div>
         <div class="ph-actions">
           <div class="seg" role="tablist" aria-label="Chọn tuần"><button type="button" role="tab" class="is-on" data-week="0" aria-selected="true">Tuần này</button><button type="button" role="tab" data-week="1" aria-selected="false">Tuần thi</button></div>
-          <a class="btn btn-dark btn-sm" href="app-lesson.html">Học mục hôm nay<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
+          <a class="btn btn-dark btn-sm" href="app-lesson.html" id="btnToday">Học mục tiếp theo<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6"/></svg></a>
         </div>
       </div>
 
       <div class="strip" data-reveal>
-        <div class="stile"><span class="lbl">Buổi học tuần này</span><span class="val"><span id="stItems">5</span><small>mục</small></span><span class="sub">mỗi mục 30′ · việc lớn 45–60′</span></div>
-        <div class="stile" style="background:var(--tint-mint)"><span class="lbl">Tổng thời gian</span><span class="val"><span id="stMin">180</span><small>phút</small></span><span class="sub">tối 20:00 · sáng Chủ nhật</span></div>
-        <div class="stile" style="background:var(--tint-sky)"><span class="lbl">Đã xong</span><span class="val"><span id="stDone">1</span><small>/ <span id="stTot">5</span></small></span><span class="sub">Phụ thuộc hàm · hôm qua</span></div>
+        <div class="stile"><span class="lbl">Buổi học tuần này</span><span class="val"><span id="stItems" data-nocount>0</span><small>mục</small></span><span class="sub" id="subItems"></span></div>
+        <div class="stile" style="background:var(--tint-mint)"><span class="lbl">Tổng thời gian</span><span class="val"><span id="stMin" data-nocount>0</span><small>phút</small></span><span class="sub" id="subMin"></span></div>
+        <div class="stile" style="background:var(--tint-sky)"><span class="lbl">Đã xong</span><span class="val"><span id="stDone" data-nocount>0</span><small>/ <span id="stTot">0</span></small></span><span class="sub" id="subDone"></span></div>
       </div>
 
       <article class="card cal-card" data-reveal>
         <div class="cal-bar">
-          <span class="tag tag--soft" id="weekLbl"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg>08 – 14/09/2026</span>
+          <span class="tag tag--soft" id="weekLbl"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg></span>
           <span class="sp"></span>
           <div class="cal-legend" style="padding:0">
             <span><i style="background:repeating-linear-gradient(-45deg,var(--cream) 0 3px,#f6ebd2 3px 6px)"></i>Lên lớp</span>
@@ -120,22 +120,16 @@
 
   <aside class="rail" aria-label="Lý do và điều chỉnh">
     <div class="card" id="reasonCard" data-reveal>
-      <div class="card-h"><h2><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>Lý do xếp lịch</h2><span class="tag tag--ink" id="verTag">v2</span></div>
-      <p class="reason" id="reason">“Dồn về Phụ thuộc hàm và 3NF vì thi sau 11 ngày và cả hai đang dưới 35/100.”</p>
-      <div class="delta" id="delta">
-        <span><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Thêm phiên ôn 3NF tối 16/09 sau khi bạn trả lời sai câu 3NF</span>
-        <span><svg class="ic" aria-hidden="true"><use href="#i-move-right"/></svg>Dời BCNF từ 17/09 sang 18/09 để giữ khoảng nghỉ 1 ngày</span>
-      </div>
-      <ul class="vers" id="vers">
-        <li class="ver is-cur"><i>2</i><div><b>Tính lại sau khi trả lời sai câu 3NF</b><small>09/09 · 20:14 · 7 mục cả kỳ</small></div></li>
-        <li class="ver"><i>1</i><div><b>Kế hoạch gốc sau bài chẩn đoán</b><small>08/09 · 21:02 · 6 mục cả kỳ</small></div></li>
-      </ul>
+      <div class="card-h"><h2><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>Lý do xếp lịch</h2><span class="tag tag--ink" id="verTag">v–</span></div>
+      <p class="reason" id="reason">Đang tải kế hoạch…</p>
+      <div class="delta" id="delta" hidden></div>
+      <ul class="vers" id="vers"></ul>
     </div>
 
     <div class="card card--amber" data-reveal>
       <img class="plan-fig" src="assets/doodles/strolling-blue.svg" alt="" width="800" height="600" data-float />
       <div class="card-h" style="margin-bottom:10px"><h2><svg class="ic" aria-hidden="true" style="color:var(--ink)"><use href="#i-calendar-sync"/></svg>Đổi lịch, thêm deadline</h2></div>
-      <div class="field"><label for="exam">Ngày thi Cơ sở dữ liệu</label><div class="row-in"><input class="in" type="date" id="exam" value="2026-09-20" /><button class="btn btn-dark btn-sm" type="button" id="btnExam">Tính lại</button></div></div>
+      <div class="field"><label for="exam" id="examLbl">Ngày thi</label><div class="row-in"><input class="in" type="date" id="exam" /><button class="btn btn-dark btn-sm" type="button" id="btnExam">Tính lại</button></div></div>
     </div>
   </aside>
 </div>
@@ -143,31 +137,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
 <script src="icons.js"></script>
+<script src="api.js"></script>
 <script src="shell.js"></script>
 <script src="motion.js"></script>
 <script src="motion-assets.js"></script>
 <script>
-/* Lịch tuần (05 §6.4, StudyPlan v2 của An) + tính lại kèm lý do (planner.ts). */
+/* Lịch 2 tuần từ GET /api/courses/{id}/plan (StudyPlan mới nhất + buổi đã học từ Attempt) + lý do của planner;
+   đổi ngày thi → POST /api/courses/{id}/exam → máy chủ tính phiên bản mới. */
 (function () {
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const rm = SEN.rm, DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'], SLOTS = ['Sáng', 'Chiều', 'Tối'];
-  const WEEKS = [
-    { lbl: '08 – 14/09/2026', dates: ['08/09', '09/09', '10/09', '11/09', '12/09', '13/09', '14/09'], today: 1, cls: { '0-0': 'CSDL · 7:00–9:30', '1-0': 'Mạng MT · 7:00–9:30', '2-1': 'Toán rời rạc · 13:00', '3-0': 'CSDL · 7:00–9:30', '4-1': 'Anh văn · 13:00' }, free: ['0-2', '1-2', '2-2', '3-2', '4-2', '5-0', '5-2', '6-0', '6-2'] },
-    { lbl: '15 – 21/09/2026', dates: ['15/09', '16/09', '17/09', '18/09', '19/09', '20/09', '21/09'], today: -1, cls: { '0-0': 'CSDL · 7:00–9:30', '1-0': 'Mạng MT · 7:00–9:30', '3-0': 'Ôn tập lớp · 7:00' }, free: ['0-2', '1-2', '2-2', '3-2', '4-2', '5-2', '6-0', '6-2'] },
-  ];
-  let ITEMS = [
-    { w: 0, d: 0, s: 2, k: 'Phụ thuộc hàm', a: 'Phụ thuộc hàm', min: 30, st: 'done', t: '20:00' },
-    { w: 0, d: 1, s: 2, k: 'Phụ thuộc bắc cầu', a: 'PT bắc cầu', min: 30, st: 'doing', t: '20:00', p: 40 },
-    { w: 0, d: 2, s: 2, k: 'Phụ thuộc hàm đầy đủ', a: 'FD đầy đủ', min: 30, st: 'todo', t: '20:00' },
-    { w: 0, d: 4, s: 2, k: 'Dạng chuẩn 2 (2NF)', a: '2NF', min: 30, st: 'todo', t: '20:00' },
-    { w: 0, d: 6, s: 0, k: 'Dạng chuẩn 3 (3NF)', a: '3NF', min: 60, st: 'todo', t: '8:00' },
-    { w: 1, d: 1, s: 2, k: '3NF — ôn lại', a: 'Ôn 3NF', min: 30, st: 'todo', t: '20:00' },
-    { w: 1, d: 3, s: 2, k: 'Dạng chuẩn Boyce–Codd (BCNF)', a: 'BCNF', min: 30, st: 'todo', t: '20:00' },
-    { w: 1, d: 5, s: 0, k: 'THI Cơ sở dữ liệu', min: 0, st: 'exam', t: '7:30 · A2-301' },
-  ];
-  let week = 0, ver = 2;
-  const pi = it => it.st === 'exam' ? `<div class="pi is-exam"><b>${it.k}</b><small>${SEN.ic('flag')}${it.t}</small></div>`
-    : `<a class="pi is-${it.st}" href="${it.st === 'dead' ? '#' : 'app-lesson.html'}"${it.st === 'dead' ? ' data-soon' : ''} title="${it.k}"><b>${it.a || it.k}</b><small>${it.st === 'done' ? SEN.ic('check') : it.st === 'doing' ? `<span class="ring" style="--p:${it.p}"></span>` : it.st === 'dead' ? SEN.ic('flag') : SEN.ic('clock')}${it.min ? it.min + '′ · ' : ''}${it.t}</small></a>`;
+  const A = SEN_API, esc = A.esc;
+  let WEEKS = [{ lbl: '', dates: Array(7).fill(''), today: -1, cls: {}, free: [] }, { lbl: '', dates: Array(7).fill(''), today: -1, cls: {}, free: [] }];
+  let ITEMS = [], course = null, P = null;
+  let week = 0, ver = 0;
+  const pi = it => it.st === 'exam' ? `<div class="pi is-exam"><b>${esc(it.k)}</b><small>${SEN.ic('flag')}${it.t}</small></div>`
+    : `<a class="pi is-${it.st}" href="${it.st === 'dead' ? '#' : it.href || 'app-lesson.html'}"${it.st === 'dead' ? ' data-soon' : ''} title="${esc(it.k)}"><b>${esc(it.a || it.k)}</b><small>${it.st === 'done' ? SEN.ic('check') : it.st === 'doing' ? `<span class="ring" style="--p:${it.p}"></span>` : it.st === 'dead' ? SEN.ic('flag') : SEN.ic('clock')}${it.min ? it.min + '′ · ' : ''}${it.t}</small></a>`;
   function render(animate) {
     const W = WEEKS[week], box = $('#week');
     box.innerHTML = `<div class="slots"><span></span>${SLOTS.map(s => `<span>${s}</span>`).join('')}</div>` + DAYS.map((d, i) => `<div class="day${i === W.today ? ' is-today' : ''}"><div class="dh"><span>${d}</span><b>${W.dates[i].slice(0, 2)}</b>${i === W.today ? '<span style="font-size:10px;color:var(--amber-deep)">hôm nay</span>' : ''}</div>${SLOTS.map((_, s) => { const key = `${i}-${s}`, c = W.cls[key];
@@ -177,32 +162,60 @@
     $('#weekLbl').innerHTML = SEN.ic('calendar') + W.lbl;
     if (animate && !rm) gsap.from($$('.day', box), { y: 14, opacity: 0, duration: .5, stagger: .05, ease: 'power2.out', overwrite: 'auto' });
   }
-  render(false);
-  $$('.seg [data-week]').forEach(b => b.addEventListener('click', () => { week = +b.dataset.week; $$('.seg button').forEach(x => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-selected', x === b); }); render(true); }));
-  function recompute(reason, deltas, mutate) {
-    ver++; mutate();
-    const card = $('#reasonCard');
-    const apply = () => {
-      $('#reason').textContent = '“' + reason + '”'; $('#verTag').textContent = 'v' + ver; $('#phVer').textContent = ver;
-      $('#delta').innerHTML = deltas.map(([ic, t]) => `<span>${SEN.ic(ic)}${t}</span>`).join('');
-      $$('#vers .ver').forEach(v => v.classList.remove('is-cur'));
-      $('#vers').insertAdjacentHTML('afterbegin', `<li class="ver is-cur"><i>${ver}</i><div><b>${deltas[0][2]}</b><small>vừa xong · ${ITEMS.filter(i => i.st !== 'exam' && i.st !== 'dead').length} mục cả kỳ</small></div></li>`);
-      render(true);
-      document.dispatchEvent(new CustomEvent('sen:data', { detail: { els: [$('#stItems'), $('#stMin'), $('#stDone')] } })); // motion.js C2: số đổi → nảy & đếm lại
-      if (!rm) { gsap.from('#reason, #delta > span', { y: 10, opacity: 0, duration: .45, stagger: .06, ease: 'power2.out' }); gsap.from('#vers .ver:first-child', { x: -10, opacity: 0, duration: .45, ease: 'power2.out' }); }
-      SEN.toast('Kế hoạch đã tính lại — phiên bản ' + ver, 'route');
-    };
-    if (rm) return apply();
-    gsap.to('#reason, #delta', { opacity: 0, duration: .25, onComplete: () => { gsap.set('#reason, #delta', { opacity: 1 }); apply(); } });
-    gsap.fromTo(card, { boxShadow: '0 0 0 0 rgba(248,195,101,0)' }, { boxShadow: '0 0 0 6px rgba(248,195,101,.5)', duration: .5, yoyo: true, repeat: 1 });
+  const fmtDM = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : '';
+  const short = n => n.length > 18 ? n.slice(0, 17) + '…' : n;
+  function apply(p) {
+    P = p; ver = p.version;
+    WEEKS = p.weeks.map(w => ({ lbl: w.label, dates: w.dates, today: w.today, cls: {}, free: w.free }));
+    ITEMS = p.items.map(it => ({ w: it.week, d: it.day, s: it.slot, k: it.conceptName, a: short(it.conceptName), min: it.minutes, st: it.status, t: it.time, href: it.href }));
+    if (p.exam) ITEMS.push({ w: p.exam.week, d: p.exam.day, s: 0, k: p.exam.label, st: 'exam', t: [fmtDM(p.exam.date), p.exam.room].filter(Boolean).join(' · ') });
+    $('#phVer').textContent = ver;
+    $('#phExam').textContent = p.daysToExam != null && p.daysToExam >= 0 ? ` · thi ${p.courseName} còn ${p.daysToExam} ngày` : ` · ${p.courseName}`;
+    $$('.seg [data-week]')[1].textContent = p.exam && p.exam.week === 1 ? 'Tuần thi' : 'Tuần sau';
+    $('#subItems').textContent = `mỗi buổi ${p.sessionMinutes}′`;
+    const times = [...new Set(p.items.filter(i => i.status !== 'done').map(i => i.time).filter(Boolean))].slice(0, 2);
+    $('#subMin').textContent = times.length ? 'khung ' + times.join(' · ') : 'chưa có buổi nào';
+    const lastDone = p.items.filter(i => i.status === 'done').pop();
+    $('#subDone').textContent = lastDone ? `${lastDone.conceptName} · ${fmtDM(lastDone.date)}` : 'chưa học buổi nào';
+    const next = p.items.find(i => i.status === 'todo');
+    const go = $('#btnToday'); if (next) go.href = next.href; go.hidden = !next;
+    $('#reason').textContent = p.reason ? '“' + p.reason + '”' : 'Chưa có kế hoạch — làm bài chẩn đoán để hệ thống xếp lịch.';
+    $('#verTag').textContent = 'v' + ver;
+    $('#delta').innerHTML = p.delta.map(d => `<span>${SEN.ic(d.icon)}${esc(d.text)}</span>`).join('');
+    $('#delta').hidden = !p.delta.length;
+    $('#vers').innerHTML = p.versions.slice(0, 5).map((v, i) => `<li class="ver${i ? '' : ' is-cur'}"><i>${v.version}</i><div><b>${esc(v.reason.length > 70 ? v.reason.slice(0, 68) + '…' : v.reason)}</b><small>${esc(v.label)} · ${v.itemCount} mục cả kỳ</small></div></li>`).join('');
+    $('#examLbl').textContent = 'Ngày thi ' + p.courseName;
+    $('#exam').value = p.examDate || '';
+    $('#exam').min = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
   }
-  $('#btnExam').addEventListener('click', () => {
-    const d = new Date($('#exam').value); if (isNaN(d)) return;
-    const dd = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
-    const days = Math.round((d - new Date(2026, 8, 9)) / 864e5);
-    recompute(`Thi ${dd} (còn ${days} ngày): ${days < 11 ? 'gộp 2NF vào tối 11/09 và đưa 3NF lên sáng 13/09' : 'giữ nhịp 30 phút/tối, thêm một buổi ôn tổng hợp trước ngày thi'}.`,
-      [['calendar', `Ngày thi đổi sang ${dd}`, `Tính lại vì đổi ngày thi (${dd})`], ['move-right', days < 11 ? 'Dồn 2NF → tối 11/09, 3NF → sáng 13/09' : 'Thêm buổi ôn tổng hợp tối trước ngày thi']],
-      () => { if (days < 11) { ITEMS.find(i => i.k.startsWith('Dạng chuẩn 2')).d = 3; ITEMS.find(i => i.k.startsWith('Dạng chuẩn 3')).d = 5; } else ITEMS.push({ w: 1, d: 4, s: 2, k: 'Ôn tổng hợp chương 4', a: 'Ôn tổng hợp', min: 30, st: 'todo', t: '20:00' }); });
+  async function load(animate) {
+    course = course || await A.course();
+    if (!course) return;
+    try { apply(await A.api('/api/courses/' + encodeURIComponent(course) + '/plan')); render(animate); }
+    catch (e) { SEN.toast(e.message, 'triangle-alert'); }
+  }
+  load(false);
+  $$('.seg [data-week]').forEach(b => b.addEventListener('click', () => { week = +b.dataset.week; $$('.seg button').forEach(x => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-selected', x === b); }); render(true); }));
+  /* đổi ngày thi: máy chủ tính phiên bản mới; thẻ lý do nháy viền, số liệu đếm lại (motion.js C2) */
+  $('#btnExam').addEventListener('click', async () => {
+    const v = $('#exam').value; if (!v || !course) return;
+    const b = $('#btnExam'); b.disabled = true;
+    try {
+      const r = await A.api('/api/courses/' + encodeURIComponent(course) + '/exam', { method: 'POST', body: { examDate: v } });
+      const card = $('#reasonCard');
+      const done = async () => {
+        await load(true);
+        document.dispatchEvent(new CustomEvent('sen:data', { detail: { els: [$('#stItems'), $('#stMin'), $('#stDone')] } }));
+        if (!rm) { gsap.from('#reason, #delta > span', { y: 10, opacity: 0, duration: .45, stagger: .06, ease: 'power2.out' }); gsap.from('#vers .ver:first-child', { x: -10, opacity: 0, duration: .45, ease: 'power2.out' }); }
+        SEN.toast(r.toast, 'route');
+      };
+      if (rm) await done();
+      else {
+        gsap.fromTo(card, { boxShadow: '0 0 0 0 rgba(248,195,101,0)' }, { boxShadow: '0 0 0 6px rgba(248,195,101,.5)', duration: .5, yoyo: true, repeat: 1 });
+        gsap.to('#reason, #delta', { opacity: 0, duration: .25, onComplete: () => { gsap.set('#reason, #delta', { opacity: 1 }); done(); } });
+      }
+    } catch (e) { SEN.toast(e.message, 'triangle-alert'); }
+    finally { b.disabled = false; }
   });
 })();
 </script>
