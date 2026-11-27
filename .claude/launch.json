@@ -13,18 +13,6 @@
       "port": 3000
     },
     {
-      "name": "ui",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "--yes",
-        "serve",
-        "ui",
-        "-l",
-        "5173"
-      ],
-      "port": 5173
-    },
-    {
       "name": "ui-v2",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
